@@ -30,6 +30,7 @@ server.on("connection", function(ws) {
     ws.on("close", function() {
         delete sockets[thisID];
     });
+    ++currentSocketID;
 });
 
 function Lobby(id) {
@@ -59,7 +60,7 @@ function handleCommand(command, socket) {
     } else if (command.type === "joinLobby") {
         for (var i = 0; i < lobbies.length; i++) {
             if (lobbies[i].id === command.requestedID) {
-                socket.DTData.lobbyID = newLobbyID;
+                socket.DTData.lobbyID = command.requestedID;
                 socket.send(JSON.stringify({
                     type: "joinLobby",
                     lobbyID: lobbies[i].id
@@ -72,8 +73,9 @@ function handleCommand(command, socket) {
         }));
     } else if (command.type === "drawDot") {
         for (var sckt in sockets) {
-            if (sckt.DTData.lobbyID === socket.DTData.lobbyID) {
-                sckt.send(JSON.stringify({
+            if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID) {
+                console.log(sockets[sckt].DTData.lobbyID);
+                sockets[sckt].send(JSON.stringify({
                     type: "drawDot",
                     x: command.x,
                     y: command.y

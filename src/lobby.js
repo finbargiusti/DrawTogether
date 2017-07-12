@@ -13,16 +13,16 @@ document.addEventListener("mousemove", function(event) {
 });
 
 function mouseXElement(element) {
-    return mouseX - element.getBoundingClientRect().left - scrollX;
+    return (mouseX - element.getBoundingClientRect().left) ;
 }
 
 function mouseYElement(element) {
-    return mouseY - element.getBoundingClientRect().top - scrollY;
+    return (mouseY - element.getBoundingClientRect().top) ;
 }
 
 canvas.addEventListener("mousedown", function() {
     let clickX = mouseXElement(canvas), clickY = mouseYElement(canvas);
-    
+
     socket.send(JSON.stringify({
         type: "drawDot",
         x: clickX,
@@ -75,7 +75,8 @@ function joinLobby() {
 
 function serverCommandHandler(event) {
     let data = JSON.parse(event.data);
-    
+
+    console.log(event.data)
     if (data.type === "drawDot") {
         ctx.beginPath();
         ctx.arc(data.x, data.y, 5, 0, Math.PI * 2);
