@@ -4,9 +4,31 @@
 }
 body {
   background-color:ghostwhite;
+  font-family:title;
 }
 h1 {
-    text-align: center;
-    font-family: title, sans-serif;
-    font-size: 11vh;
+  text-align: center;
+  font-family: title, sans-serif;
+  font-size: 11vh;
+  color: dimgray;
+}
+#createLobby {
+  font-family:title;
+  width:300px;
+  height:60px;
+  background-color:#2ECC40;
+  color:ghostwhite;
+  position: absolute;
+  font-size:30px;
+  left:50%;
+  top:50%;
+  transform: translateX(-50%) translateY(-50%);
+  transition: all 0.5s;
+}
+#createLobby:hover {
+  font-size:34px;
+  height:70px;
+  width:310px;
+  transform: translateX(-50%) translateY(-50%);
+  transition: all 0.5s;
 }
