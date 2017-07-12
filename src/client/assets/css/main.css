@@ -1,0 +1,12 @@
+@font-face {
+  font-family: title;
+  src: url(../fonts/roboto-bold.ttf);
+}
+body {
+  background-color:ghostwhite;
+}
+h1 {
+    text-align: center;
+    font-family: title, sans-serif;
+    font-size: 11vh;
+}
