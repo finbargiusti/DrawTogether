@@ -16,18 +16,19 @@ var lobbies = [];
 
 server.on("connection", function(ws) {
     console.log("New web socket connection established! Dankity.");
-    
+
     sockets[currentSocketID] = ws;
     var thisID = currentSocketID;
     ws.DTData = {};
-    
+
     ws.on("message", function(message) {
+        console.log(message)
         var command = JSON.parse(message);
-        handleCommand(command);
+        handleCommand(command, ws);
     });
-    
+
     ws.on("close", function() {
-        detele sockets[thisID];
+        delete sockets[thisID];
     });
 });
 
@@ -38,7 +39,7 @@ function Lobby(id) {
 function handleCommand(command, socket) {
     if (command.type === "createLobby") {
         var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
-        
+
         while (true) { // Checks if generated newLobbyID is duplicate
             for (var i = 0; i < lobbies.length; i++) {
                 if (lobbies[i].id === newLobbyID) {
@@ -48,14 +49,14 @@ function handleCommand(command, socket) {
             }
             break;
         }
-        
+
         lobbies.push(new Lobby(newLobbyID));
         socket.DTData.lobbyID = newLobbyID;
         socket.send(JSON.stringify({
             type: "joinLobby",
             lobbyID: newLobbyID
         }));
-    } else if (command.type === "connectToLobby") {
+    } else if (command.type === "joinLobby") {
         for (var i = 0; i < lobbies.length; i++) {
             if (lobbies[i].id === command.requestedID) {
                 socket.DTData.lobbyID = newLobbyID;
@@ -63,7 +64,11 @@ function handleCommand(command, socket) {
                     type: "joinLobby",
                     lobbyID: lobbies[i].id
                 }));
+                return;
             }
         }
+        socket.send(JSON.stringify({
+            type: "incorrectID"
+        }));
     }
 }

@@ -8,7 +8,7 @@ let ctx = canvas.getContext("2d");
 createLobbyBtn.addEventListener("click", function() {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
-        
+
         socket.send(JSON.stringify({
             type: "createLobby"
         }));
@@ -20,10 +20,10 @@ createLobbyBtn.addEventListener("click", function() {
 submitIDBtn.addEventListener("click", function() {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
-        
+
         socket.send(JSON.stringify({
             type: "joinLobby",
-            requestedID: Number(lobbyIDInput.value);
+            requestedID: Number(lobbyIDInput.value)
         }));
 
         socket.onmessage = lobbyJoinHandler;
@@ -47,16 +47,17 @@ function joinLobby() {
     controls.style.display = "none";
     canvas.style.display = "block";
 }
-    
+
 function lobbyJoinHandler(event) {
+    console.log(event.data)
     let data = JSON.parse(event.data);
-    
+
     if (data.type === "joinLobby") {
         joinLobby();
         lobbyID = data.lobbyID;
     } else if (data.type === "incorrectID") {
         alert("That lobby does not exist!");
     }
-    
+
     connectingToLobby = false;
 }
