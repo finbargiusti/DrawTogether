@@ -5,11 +5,30 @@ let lobbyIDInput = document.getElementById("lobbyId");
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-let mouseX = 0, mouseY = 0;
+let mouseX = 0, mouseY = 0, mousePressed = false;
+let lastPosition = {
+    x: 0,
+    y: 0
+};
 
 document.addEventListener("mousemove", function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
+    
+    if (mousePressed) {
+        let thisPosition = {
+            x: mouseXElement(canvas),
+            y: mouseYElement(canvas)
+        };
+        
+        socket.send(JSON.stringify({
+            type: "drawLine",
+            from: lastPosition,
+            to: thisPosition
+        }));
+    }
+    
+    lastPosition.x = mouseXElement(canvas), lastPosition.y = mouseYElement(canvas);
 });
 
 function mouseXElement(element) {
@@ -20,14 +39,17 @@ function mouseYElement(element) {
     return (mouseY - element.getBoundingClientRect().top) ;
 }
 
-canvas.addEventListener("mousedown", function() {
-    let clickX = mouseXElement(canvas), clickY = mouseYElement(canvas);
+document.addEventListener("mousedown", function() {
+    mousePressed = true;
 
-    socket.send(JSON.stringify({
+    /*socket.send(JSON.stringify({
         type: "drawDot",
         x: clickX,
         y: clickY
-    }));
+    }));*/
+});
+document.addEventListener("mouseup", function() {
+    mousePressed = false;
 });
 
 createLobbyBtn.addEventListener("click", function() {
@@ -58,7 +80,7 @@ submitIDBtn.addEventListener("click", function() {
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;
-let socket = new WebSocket("ws://192.168.1.106:1337/");
+let socket = new WebSocket("ws://192.168.1.105:1337/");
 
 socket.onopen = function() {
     connected = true;
@@ -77,11 +99,12 @@ function serverCommandHandler(event) {
     let data = JSON.parse(event.data);
 
     console.log(event.data)
-    if (data.type === "drawDot") {
+    if (data.type === "drawLine") {
         ctx.beginPath();
-        ctx.arc(data.x, data.y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = "black";
-        ctx.fill();
+        ctx.moveTo(data.from.x, data.from.y);
+        ctx.lineTo(data.to.x, data.to.y);
+        ctx.strokeStyle = "black";
+        ctx.stroke();
     }
 }
 

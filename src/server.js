@@ -71,14 +71,14 @@ function handleCommand(command, socket) {
         socket.send(JSON.stringify({
             type: "incorrectID"
         }));
-    } else if (command.type === "drawDot") {
+    } else if (command.type === "drawLine") {
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID) {
                 console.log(sockets[sckt].DTData.lobbyID);
                 sockets[sckt].send(JSON.stringify({
-                    type: "drawDot",
-                    x: command.x,
-                    y: command.y
+                    type: "drawLine",
+                    from: command.from,
+                    to: command.to
                 }));
             }
         }
