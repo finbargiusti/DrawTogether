@@ -32,3 +32,10 @@ h1 {
   transform: translateX(-50%) translateY(-50%);
   transition: all 0.5s;
 }
+#canvas {
+    background: ghostwhite;
+    border: 1px solid gray;
+    border-radius: 12px;
+    margin: auto;
+    display: none;
+}
