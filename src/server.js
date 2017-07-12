@@ -70,5 +70,15 @@ function handleCommand(command, socket) {
         socket.send(JSON.stringify({
             type: "incorrectID"
         }));
+    } else if (command.type === "drawDot") {
+        for (var sckt in sockets) {
+            if (sckt.DTData.lobbyID === socket.DTData.lobbyID) {
+                sckt.send(JSON.stringify({
+                    type: "drawDot",
+                    x: command.x,
+                    y: command.y
+                }));
+            }
+        }
     }
 }
