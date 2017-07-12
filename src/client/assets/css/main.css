@@ -16,6 +16,9 @@ h1 {
   font-family:title;
   width:300px;
   height:60px;
+  /*border: 1px gray solid;*/
+  border: none;
+  box-shadow: 2px 2px 1px gray;
   background-color:#2ECC40;
   color:ghostwhite;
   position: absolute;
@@ -33,9 +36,36 @@ h1 {
   transition: all 0.5s;
 }
 #canvas {
-    background: ghostwhite;
-    border: 1px solid gray;
-    border-radius: 12px;
-    margin: auto;
-    display: none;
+  background: ghostwhite;
+  border: 1px solid gray;
+  border-radius: 12px;
+  margin: auto;
+  display: none;
+}
+#joinLobby {
+  position: absolute;
+  display:flex;
+  left:50%;
+  top:65%;
+  transform: translateX(-50%) translateY(-50%);
+  box-shadow: 2px 2px 1px gray;
+}
+#joinLobby * {
+  border:none;
+  padding:10px;
+}
+#joinLobby input {
+  font-size:25px;
+}
+#submitId {
+  font-size:25px;
+  color:ghostwhite;
+  background-color:#2ECC40;
+  border:none;
+}
+#joinLobby input:focus {
+  outline:none;
+}
+#joinLobby input:focus::placeholder {
+  color:lightgray;
 }

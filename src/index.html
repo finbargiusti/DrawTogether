@@ -7,11 +7,14 @@
     </head>
     <body>
         <h1>DrawTogether</h1>
-        <button id="createLobby">Create new lobby</button>
-        <p id="linkDisplay"></p>
-        
+        <div id="controls">
+          <button id="createLobby">Create new lobby</button>
+          <div id="joinLobby">
+            <input type="text" maxlength="5" placeholder="Lobby id" id="lobbyId"/>
+            <button id="submitId">Join</button>
+          </div>
+        </div>
         <canvas id="canvas" width="800" height="550"></canvas>
-        
         <script src="lobby.js"></script>
     </body>
 </html>
