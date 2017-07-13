@@ -15,12 +15,14 @@ var lobbies = [];
 
 server.on("connection", function(ws) {
     sockets[currentSocketID] = ws;
-    ws.DTData.id = currentSocketID;
     var thisID = currentSocketID;
+    
     ws.DTData = {};
+    ws.DTData.id = currentSocketID;
 
     ws.on("message", function(message) {
         var command = JSON.parse(message);
+        
         handleCommand(command, ws);
     });
 
@@ -55,12 +57,12 @@ function handleCommand(command, socket) {
 
         lobbies.push(new Lobby(newLobbyID));
         socket.DTData.lobbyID = newLobbyID;
-        socket.send(JSON.stringify([0, newLobbyID, []]));
+        socket.send(JSON.stringify([0, newLobbyID, [1, []]]));
     } else if (command[0] === 1) { // Join lobby
         for (var i = 0; i < lobbies.length; i++) {
             if (lobbies[i].id === command[1]) {
                 socket.DTData.lobbyID = command[1];
-                socket.send(JSON.stringify([0, lobbies[i].id, lobbies[i].instructions]));
+                socket.send(JSON.stringify([0, lobbies[i].id, [1, lobbies[i].instructions]]));
 
                 return;
             }
@@ -76,7 +78,13 @@ function handleCommand(command, socket) {
         }
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID) {
-                sockets[sckt].send(JSON.stringify([command]));
+                sockets[sckt].send(JSON.stringify([1, [command]]));
+            }
+        }
+    } else if (command[0] === 9) { // Player update
+        for (var sckt in sockets) {
+            if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID && sockets[sckt] !== socket) {
+                sockets[sckt].send(JSON.stringify([0, [socket.DTData.id, command[1], command[2], command[3], command[4]]]));
             }
         }
     }

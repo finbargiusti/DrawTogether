@@ -4,7 +4,7 @@
 }
 @font-face {
   font-family: icons;
-  src url(../fonts/MaterialIcons-Regular.ttf);
+  src: url(../fonts/MaterialIcons-Regular.ttf);
 }
 body {
   background-color:ghostwhite;
@@ -47,12 +47,23 @@ h1 {
   border: 1px solid gray;
   border-radius: 12px;
   margin: auto;
+    position: absolute;
+    top: 82px;
+}
+#playerCanvas {
+    position: absolute;
+    top: 82px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    cursor: none;
+    pointer-events: none;
 }
 #writingUtensils {
   width:800px;
   height:550px;
   display:none;
   margin:auto;
+    position: relative;
 }
 #joinLobby {
   position: absolute;
@@ -92,6 +103,7 @@ h1 {
   color:dimgrey;
   background-color: ghostwhite;
   transform: translateY(-1px);
+  padding-left: 6px;
 }
 #utensils input[type="text"]:focus {
   outline:none;
