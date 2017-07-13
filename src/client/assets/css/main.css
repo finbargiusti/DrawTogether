@@ -2,6 +2,10 @@
   font-family: title;
   src: url(../fonts/roboto-bold.ttf);
 }
+@font-face {
+  font-family: icons;
+  src url(../fonts/MaterialIcons-Regular.ttf);
+}
 body {
   background-color:ghostwhite;
   font-family:title;
@@ -80,28 +84,44 @@ h1 {
 #idDisplay {
   color:dimgray;
 }
+#utensils input[type="text"] {
+  padding: 6px;
+  border:2px solid;
+  border-radius:5px;
+  border-color:black;
+}
 #utensils label {
   margin-right:10px;
-  background-color:#2ECC40;
   height:10px;
   width:30px;
   color:ghostwhite;
   padding:5px;
+  background-color:gray;
+  border-radius:5px;
+  transition: 0.5s all;
 }
 #utensils  {
   margin:auto;
   padding:10px;
 }
-
+#Lpencil i {
+  padding-left:4px;
+}
 input[type="radio"] {
     display:none;
 }
 input[type="radio"]:checked + #Lpencil{
-    background-color:green;
+  background-color:#2ECC40;
+  padding:5px 10px;
+  transition: 0.5s all;
 }
 input[type="radio"]:checked + #Lrubber{
-    background-color:green;
+  background-color:#2ECC40;
+  padding:5px 10px;
+  transition: 0.5s all;
 }
 input[type="radio"]:checked + #Lbrush{
-    background-color:green;
+  background-color:#2ECC40;
+  padding:  5px 10px;
+  transition: 0.5s all;
 }
