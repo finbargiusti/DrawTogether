@@ -1,9 +1,12 @@
-@font-face {
+@font-face   {
   font-family: title;
   src: url(../fonts/roboto-bold.ttf);
 }
 body {
   background-color:ghostwhite;
+  font-family:title;
+}
+*{
   font-family:title;
 }
 h1 {
@@ -40,7 +43,12 @@ h1 {
   border: 1px solid gray;
   border-radius: 12px;
   margin: auto;
-  display: none;
+}
+#writingUtensils {
+  width:800px;
+  height:550px;
+  display:none;
+  margin:auto;
 }
 #joinLobby {
   position: absolute;
@@ -68,4 +76,32 @@ h1 {
 }
 #joinLobby input:focus::placeholder {
   color:lightgray;
+}
+#idDisplay {
+  color:dimgray;
+}
+#utensils label {
+  margin-right:10px;
+  background-color:#2ECC40;
+  height:10px;
+  width:30px;
+  color:ghostwhite;
+  padding:5px;
+}
+#utensils  {
+  margin:auto;
+  padding:10px;
+}
+
+input[type="radio"] {
+    display:none;
+}
+input[type="radio"]:checked + #Lpencil{
+    background-color:green;
+}
+input[type="radio"]:checked + #Lrubber{
+    background-color:green;
+}
+input[type="radio"]:checked + #Lbrush{
+    background-color:green;
 }

@@ -14,7 +14,25 @@
             <button id="submitId">Join</button>
           </div>
         </div>
-        <canvas id="canvas" width="800" height="550"></canvas>
+        <div id="writingUtensils">
+          <p id="idDisplay" ></p>
+          <div id="utensils">
+            <input type="radio" name="dank" id="pencil"/>
+            <label for="pencil" id="Lpencil">
+              Pencil
+            </label>
+            <input type="radio" name="dank" id="rubber"/>
+            <label for="rubber" id="Lrubber">
+              Rubber
+            </label>
+            <input type="radio" name="dank" id="brush"/>
+            <label for="brush" id="Lbrush">
+              Brush
+            </label>
+            <input type="text" placeholder="Enter HTML color.." value="black" id="colorPick"/>
+          </div>
+          <canvas id="canvas" width="800" height="550"></canvas>
+        </div>
         <script src="lobby.js"></script>
     </body>
 </html>
