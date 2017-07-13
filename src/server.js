@@ -14,7 +14,6 @@ var currentSocketID = 0;
 var lobbies = [];
 
 server.on("connection", function(ws) {
-
     sockets[currentSocketID] = ws;
     var thisID = currentSocketID;
     ws.DTData = {};
@@ -36,7 +35,7 @@ function Lobby(id) {
 }
 
 function handleCommand(command, socket) {
-    if (command.type === "createLobby") {
+    if (command[0] === 0) { // Create lobby
         var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
 
         while (true) { // Checks if generated newLobbyID is duplicate
@@ -55,28 +54,19 @@ function handleCommand(command, socket) {
 
         lobbies.push(new Lobby(newLobbyID));
         socket.DTData.lobbyID = newLobbyID;
-        socket.send(JSON.stringify({
-            type: "joinLobby",
-            lobbyID: newLobbyID,
-            instructions: []
-        }));
-    } else if (command.type === "joinLobby") {
+        socket.send(JSON.stringify([0, newLobbyID, []]));
+    } else if (command[0] === 1) { // Join lobby
         for (var i = 0; i < lobbies.length; i++) {
-            if (lobbies[i].id === command.requestedID) {
-                socket.DTData.lobbyID = command.requestedID;
-                socket.send(JSON.stringify({
-                    type: "joinLobby",
-                    lobbyID: lobbies[i].id,
-                    instructions: lobbies[i].instructions
-                }));
+            if (lobbies[i].id === command[1]) {
+                socket.DTData.lobbyID = command[1];
+                socket.send(JSON.stringify([0, lobbies[i].id, lobbies[i].instructions]));
 
                 return;
             }
         }
-        socket.send(JSON.stringify({
-            type: "incorrectID"
-        }));
-    } else if (command.type === "drawLine" || command.type === "eraseLine" || command.type === "brushLine") {
+        
+        socket.send(JSON.stringify([1]));
+    } else if (command[0] === 10 || command[0] === 11 || command[0] === 12) { // Draw line, Erase line, Brush line
         for (var i = 0; i < lobbies.length; ++i) {
             if (lobbies[i].id === socket.DTData.lobbyID) {
                 lobbies[i].instructions.push(command)

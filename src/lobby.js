@@ -17,6 +17,8 @@ let lastPosition = {
     y: 0
 };
 
+let r = Math.round;
+
 document.addEventListener("mousemove", function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
@@ -27,26 +29,12 @@ document.addEventListener("mousemove", function(event) {
             y: mouseYElement(canvas)
         };
 
-        if (pencilRadio.checked) {
-            socket.send(JSON.stringify({
-                type: "drawLine",
-                from: lastPosition,
-                to: thisPosition,
-                color: colorTxtField.value
-            }));
-        } else if (rubberRadio.checked) {
-            socket.send(JSON.stringify({
-                type: "eraseLine",
-                from: lastPosition,
-                to: thisPosition
-            }));
-        } else if (brushRadio.checked) {
-            socket.send(JSON.stringify({
-                type: "brushLine",
-                from: lastPosition,
-                to: thisPosition,
-                color: colorTxtField.value
-            }));
+        if (pencilRadio.checked) { // Draw line
+            socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value]));
+        } else if (rubberRadio.checked) { // Erase line
+            socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y)]));
+        } else if (brushRadio.checked) { // Brush line
+            socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value]));
         }
     }
 
@@ -63,12 +51,6 @@ function mouseYElement(element) {
 
 document.addEventListener("mousedown", function() {
     mousePressed = true;
-
-    /*socket.send(JSON.stringify({
-        type: "drawDot",
-        x: clickX,
-        y: clickY
-    }));*/
 });
 document.addEventListener("mouseup", function() {
     mousePressed = false;
@@ -78,9 +60,7 @@ createLobbyBtn.addEventListener("click", function() {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify({
-            type: "createLobby"
-        }));
+        socket.send(JSON.stringify([0]));
 
         socket.onmessage = lobbyJoinHandler;
     }
@@ -90,10 +70,7 @@ submitIDBtn.addEventListener("click", function() {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify({
-            type: "joinLobby",
-            requestedID: Number(lobbyIDInput.value)
-        }));
+        socket.send(JSON.stringify([1, Number(lobbyIDInput.value)]));
 
         socket.onmessage = lobbyJoinHandler;
     }
@@ -102,7 +79,7 @@ submitIDBtn.addEventListener("click", function() {
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;
-let socket = new WebSocket("ws://192.168.1.106:1337/");
+let socket = new WebSocket("ws://192.168.1.105:1337/");
 
 socket.onopen = function() {
     connected = true;
@@ -125,30 +102,30 @@ function serverCommandHandler(event) {
 function handleInstructions(arr) {
   for (let i = 0; i < arr.length; ++i) {
       let instruction = arr[i]
-      if (instruction.type === "drawLine") {
+      if (instruction[0] === 10) { // Draw line
           ctx.beginPath();
-          ctx.moveTo(instruction.from.x, instruction.from.y);
-          ctx.lineTo(instruction.to.x, instruction.to.y);
-          ctx.strokeStyle = instruction.color;
+          ctx.moveTo(instruction[1], instruction[2]);
+          ctx.lineTo(instruction[3], instruction[4]);
+          ctx.strokeStyle = instruction[5];
           ctx.lineWidth = 4;
           ctx.lineCap = "round";
           ctx.stroke();
-      } else if (instruction.type === "eraseLine") {
+      } else if (instruction[0] === 11) { // Erase line
           ctx.beginPath();
-          ctx.moveTo(instruction.from.x, instruction.from.y);
-          ctx.lineTo(instruction.to.x, instruction.to.y);
+          ctx.moveTo(instruction[1], instruction[2]);
+          ctx.lineTo(instruction[3], instruction[4]);
           ctx.strokeStyle = "ghostwhite";
           ctx.lineWidth = 40;
           ctx.lineCap = "round";
           ctx.stroke();
-      } else if (instruction.type === "brushLine") {
-          let dist = Math.hypot(instruction.from.x - instruction.to.x,
-                                instruction.from.y - instruction.to.y);
+      } else if (instruction[0] === 12) { // Brush line
+          let dist = Math.hypot(instruction[1] - instruction[3],
+                                instruction[2] - instruction[4]);
           ctx.beginPath();
-          ctx.moveTo(instruction.from.x, instruction.from.y);
-          ctx.lineTo(instruction.to.x, instruction.to.y);
-          ctx.strokeStyle = instruction.color;
-          ctx.lineWidth = Math.max(20 - dist, 1);
+          ctx.moveTo(instruction[1], instruction[2]);
+          ctx.lineTo(instruction[3], instruction[4]);
+          ctx.strokeStyle = instruction[5];
+          ctx.lineWidth = Math.max(1, Math.pow(0.935, dist) * 15);
           ctx.lineCap = "round";
           ctx.stroke();
       }
@@ -156,16 +133,19 @@ function handleInstructions(arr) {
 }
 
 function lobbyJoinHandler(event) {
-    console.log(event.data)
-    let data = JSON.parse(event.data);
+    let command = JSON.parse(event.data);
 
-    if (data.type === "joinLobby") {
+    if (command[0] === 0) { // Join lobby
         joinLobby();
-        lobbyID = data.lobbyID;
-        handleInstructions(data.instructions);
-        idDisplayP.innerHTML = "Lobby id (share with friends):"+lobbyID;
+        lobbyID = command[1];
+        
+        let startTime = window.performance.now();
+        handleInstructions(command[2]);
+        console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
+        
+        idDisplayP.innerHTML = "Lobby id (share with friends): " + lobbyID;
         socket.onmessage = serverCommandHandler;
-    } else if (data.type === "incorrectID") {
+    } else if (command[0] === 0) { // Incorrect lobby ID
         alert("That lobby does not exist!");
     }
 

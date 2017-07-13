@@ -1,0 +1,13 @@
+Client
+------
+0 () => Create lobby
+1 (lobbyID) => Join lobby
+10 (startX, startY, endX, endY, color) => Draw line
+11 (startX, startY, endX, endY) => Erase line
+12 (startX, startY, endX, endY, color) => Brush line
+
+Server
+------
+
+0 (lobbyID, instructions) => Join lobby
+1 () => Incorrect lobby ID
