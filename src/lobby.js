@@ -76,8 +76,10 @@ submitIDBtn.addEventListener("click", function() {
     }
 });
 
-colorTxtField.addEventListener("change", function() {
-    colorTxtField.style.borderColor = colorTxtField.value;
+colorTxtField.addEventListener("keydown", function() {
+    setTimeout(function() {
+        colorTxtField.style.borderColor = colorTxtField.value;
+    }, 16);
 });
 
 let connected = false;
@@ -147,7 +149,7 @@ function lobbyJoinHandler(event) {
         handleInstructions(command[2]);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
         
-        idDisplayP.innerHTML = "Lobby id (share with friends): " + lobbyID;
+        idDisplayP.innerHTML = "Lobby ID (share with friends): " + lobbyID;
         socket.onmessage = serverCommandHandler;
     } else if (command[0] === 0) { // Incorrect lobby ID
         alert("That lobby does not exist!");
