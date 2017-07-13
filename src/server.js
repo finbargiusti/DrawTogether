@@ -80,7 +80,6 @@ function handleCommand(command, socket) {
         for (var i = 0; i < lobbies.length; ++i) {
             if (lobbies[i].id === socket.DTData.lobbyID) {
                 lobbies[i].instructions.push(command)
-                console.log("lobby "+lobbies[i].id+" has a size of "+JSON.stringify(lobbies[i].instructions).length+"B")
                 break;
             }
         }
