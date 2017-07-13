@@ -85,10 +85,17 @@ h1 {
   color:dimgray;
 }
 #utensils input[type="text"] {
-  padding: 6px;
+  height:23px;
   border:2px solid;
   border-radius:5px;
   border-color:black;
+  color:dimgrey;
+  background-color: ghostwhite;
+  transform: translateY(-1px);
+}
+#utensils input[type="text"]:focus {
+  outline:none;
+  color:black;
 }
 #utensils label {
   margin-right:10px;
@@ -98,14 +105,14 @@ h1 {
   padding:5px;
   background-color:gray;
   border-radius:5px;
-  transition: 0.5s all;
+  transition: 0.2s all;
 }
 #utensils  {
   margin:auto;
   padding:10px;
 }
 #Lpencil i {
-  padding-left:4px;
+  padding-left:3px;
 }
 input[type="radio"] {
     display:none;
@@ -113,7 +120,7 @@ input[type="radio"] {
 input[type="radio"]:checked + #Lpencil{
   background-color:#2ECC40;
   padding:5px 10px;
-  transition: 0.5s all;
+  transition: 0.2s all;
 }
 input[type="radio"]:checked + #Lrubber{
   background-color:#2ECC40;
