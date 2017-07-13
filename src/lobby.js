@@ -76,6 +76,10 @@ submitIDBtn.addEventListener("click", function() {
     }
 });
 
+colorTxtField.addEventListener("change", function() {
+    colorTxtField.style.borderColor = colorTxtField.value;
+});
+
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;

@@ -15,6 +15,7 @@ var lobbies = [];
 
 server.on("connection", function(ws) {
     sockets[currentSocketID] = ws;
+    ws.DTData.id = currentSocketID;
     var thisID = currentSocketID;
     ws.DTData = {};
 
