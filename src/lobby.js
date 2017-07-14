@@ -24,24 +24,29 @@ let r = Math.round;
 requestAnimationFrame(updatePlayerCanvas);
 function updatePlayerCanvas() {
     playerCtx.clearRect(0, 0, 800, 550);
-    
+
     for (let id in playerData) {
-        renderPlayer(playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3]);
+        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3]);
     }
-    
+
     let type = 0;
     if (rubberRadio.checked) {
         type = 1;
     } else if (brushRadio.checked) {
         type = 2;
     }
-    
-    renderPlayer(lastPosition.x, lastPosition.y, colorTxtField.value, type);
-    
+
+    renderPlayer(true, lastPosition.x, lastPosition.y, colorTxtField.value, type);
+
     requestAnimationFrame(updatePlayerCanvas);
 }
 
-function renderPlayer(x, y, color, type) {
+function renderPlayer(isLocal, x, y, color, type) {
+    if (!isLocal) {
+      playerCtx.globalAlpha = 0.5;
+    } else  {
+      playerCtx.globalAlpha = 1;
+    }
     if (type === 0) {
         playerCtx.beginPath();
         playerCtx.arc(x, y, 5, 0, Math.PI * 2);
@@ -58,29 +63,30 @@ function renderPlayer(x, y, color, type) {
         playerCtx.fillStyle = color;
         playerCtx.fill();
     }
+
 }
 
 document.addEventListener("mousemove", function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
-    
+
     let thisPosition = {
         x: mouseXElement(canvas),
         y: mouseYElement(canvas)
     };
-    
+
     if (connected && lobbyID) {
         let type = 0;
-        
+
     if (rubberRadio.checked) {
         type = 1;
     } else if (brushRadio.checked) {
         type = 2;
     }
-        
+
         socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), colorTxtField.value, type]));
     }
-    
+
 
     if (mousePressed) {
         if (pencilRadio.checked) { // Draw line
@@ -139,7 +145,7 @@ colorTxtField.addEventListener("keydown", function() {
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;
-let socket = new WebSocket("ws://192.168.1.105:1337/");
+let socket = new WebSocket("ws://localhost:1337/");
 let playerData = {};
 
 socket.onopen = function() {
@@ -157,9 +163,9 @@ function joinLobby() {
 
 function serverCommandHandler(event) {
     let data = JSON.parse(event.data);
-    
+
     if (data[0] === 1) {
-        
+
         handleInstructions(data[1]);
     } else {
         handlePlayerUpdate(data[1]);
@@ -210,11 +216,11 @@ function lobbyJoinHandler(event) {
     if (command[0] === 0) { // Join lobby
         joinLobby();
         lobbyID = command[1];
-        
+
         let startTime = window.performance.now();
         handleInstructions(command[2][1]);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
-        
+
         idDisplayP.innerHTML = "Lobby ID (share with friends): " + lobbyID;
         socket.onmessage = serverCommandHandler;
     } else if (command[0] === 0) { // Incorrect lobby ID

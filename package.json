@@ -1,0 +1,26 @@
+{
+  "name": "draw-together",
+  "version": "1.0.0",
+  "description": "The server that allows you to draw together",
+  "main": "src/server.js",
+  "dependencies": {
+    "connect": "^3.6.2",
+    "serve-static": "^1.12.3",
+    "ws": "^3.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/finbargiusti/DrawTogether.git"
+  },
+  "author": "Finbar Giusti + David Payr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/finbargiusti/DrawTogether/issues"
+  },
+  "homepage": "https://github.com/finbargiusti/DrawTogether#readme"
+}

@@ -49,6 +49,7 @@ h1 {
   margin: auto;
     position: absolute;
     top: 82px;
+  cursor: none;
 }
 #playerCanvas {
     position: absolute;
