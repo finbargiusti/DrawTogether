@@ -145,7 +145,7 @@ colorTxtField.addEventListener("keydown", function() {
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;
-let socket = new WebSocket("ws://localhost:1337/");
+let socket = new WebSocket("ws://192.168.1.106:1337/");
 let playerData = {};
 
 socket.onopen = function() {
