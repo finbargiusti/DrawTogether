@@ -168,15 +168,28 @@ input[type=range]::-ms-track {
   color: transparent;
 }
 input[type="range"]::-webkit-slider-thumb  {
-  border:1px solid black;
-  height:20px;
+  border:1px solid dimgray;
+  border-top:none;
+  border-bottom:none;
+  height:26px;
   width:10px;
-  transform: translateY(-8px);
+  /*border-radius:10px;*/
+  background-color:#2ECC40;
+  transform: translateY(-12px);
 }
 input[type="range"]::-webkit-slider-runnable-track {
   width:70px;
-  height:5px;
-  border-radius:5px;
+  height:1px;
   border:1px black solid;
-  transform:translateY(-2px);
+  transform:translateY(-5px);
+}
+span {
+  color:dimgray;
+}
+#sizeSelect {
+  border:2px dimgray solid;
+  border-radius: 5px;
+  height:10px;
+  margin-left:4px;
+  padding:3px;
 }
