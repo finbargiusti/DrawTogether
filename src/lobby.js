@@ -10,6 +10,7 @@ let idDisplayP = document.getElementById("idDisplay");
 let pencilRadio = document.getElementById("pencil");
 let rubberRadio = document.getElementById("rubber");
 let brushRadio = document.getElementById("brush");
+let sizeSlider = document.getElementById("sizeSlider");
 let ctx = canvas.getContext("2d");
 let playerCtx = playerCanvas.getContext("2d");
 
@@ -18,6 +19,11 @@ let lastPosition = {
     x: 0,
     y: 0
 };
+let brushSize = 3;
+
+sizeSlider.addEventListener("change", function() {
+    brushSize = Number(sizeSlider.value);
+});
 
 let r = Math.round;
 
@@ -26,7 +32,7 @@ function updatePlayerCanvas() {
     playerCtx.clearRect(0, 0, 800, 550);
 
     for (let id in playerData) {
-        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3]);
+        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3], playerData[id][4]);
     }
 
     let type = 0;
@@ -36,12 +42,12 @@ function updatePlayerCanvas() {
         type = 2;
     }
 
-    renderPlayer(true, lastPosition.x, lastPosition.y, colorTxtField.value, type);
+    renderPlayer(true, lastPosition.x, lastPosition.y, colorTxtField.value, type, brushSize);
 
     requestAnimationFrame(updatePlayerCanvas);
 }
 
-function renderPlayer(isLocal, x, y, color, type) {
+function renderPlayer(isLocal, x, y, color, type, brushSize) {
     if (!isLocal) {
       playerCtx.globalAlpha = 0.5;
     } else  {
@@ -49,21 +55,24 @@ function renderPlayer(isLocal, x, y, color, type) {
     }
     if (type === 0) {
         playerCtx.beginPath();
-        playerCtx.arc(x, y, 5, 0, Math.PI * 2);
+        playerCtx.arc(x, y, brushSize / 2 + 3, 0, Math.PI * 2);
         playerCtx.fillStyle = color;
         playerCtx.fill();
+        playerCtx.strokeStyle = "ghostwhite";
+        playerCtx.stroke();
     } else if (type === 1) {
         playerCtx.beginPath();
-        playerCtx.arc(x, y, 20, 0, Math.PI * 2);
+        playerCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
         playerCtx.strokeStyle = "black";
         playerCtx.stroke();
     } else if (type === 2) {
         playerCtx.beginPath();
-        playerCtx.arc(x, y, 10, 0, Math.PI * 2);
+        playerCtx.ellipse(x, y, (brushSize / 2) + 3, ((brushSize / 2) + 3) / 2, -Math.PI / 4, 0, Math.PI * 2);
         playerCtx.fillStyle = color;
         playerCtx.fill();
+        playerCtx.strokeStyle = "ghostwhite";
+        playerCtx.stroke();
     }
-
 }
 
 document.addEventListener("mousemove", function(event) {
@@ -84,17 +93,17 @@ document.addEventListener("mousemove", function(event) {
         type = 2;
     }
 
-        socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), colorTxtField.value, type]));
+        socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), colorTxtField.value, type, brushSize]));
     }
 
 
     if (mousePressed) {
         if (pencilRadio.checked) { // Draw line
-            socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value]));
+            socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value, brushSize]));
         } else if (rubberRadio.checked) { // Erase line
-            socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y)]));
+            socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), brushSize]));
         } else if (brushRadio.checked) { // Brush line
-            socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value]));
+            socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), colorTxtField.value, brushSize]));
         }
     }
 
@@ -145,7 +154,7 @@ colorTxtField.addEventListener("keydown", function() {
 let connected = false;
 let lobbyID = null;
 let connectingToLobby = false;
-let socket = new WebSocket("ws://192.168.1.106:1337/");
+let socket = new WebSocket("ws://192.168.1.105:1337/");
 let playerData = {};
 
 socket.onopen = function() {
@@ -180,7 +189,7 @@ function handleInstructions(arr) {
           ctx.moveTo(instruction[1], instruction[2]);
           ctx.lineTo(instruction[3], instruction[4]);
           ctx.strokeStyle = instruction[5];
-          ctx.lineWidth = 4;
+          ctx.lineWidth = instruction[6];
           ctx.lineCap = "round";
           ctx.stroke();
       } else if (instruction[0] === 11) { // Erase line
@@ -188,7 +197,7 @@ function handleInstructions(arr) {
           ctx.moveTo(instruction[1], instruction[2]);
           ctx.lineTo(instruction[3], instruction[4]);
           ctx.strokeStyle = "ghostwhite";
-          ctx.lineWidth = 40;
+          ctx.lineWidth = instruction[5];
           ctx.lineCap = "round";
           ctx.stroke();
       } else if (instruction[0] === 12) { // Brush line
@@ -198,7 +207,7 @@ function handleInstructions(arr) {
           ctx.moveTo(instruction[1], instruction[2]);
           ctx.lineTo(instruction[3], instruction[4]);
           ctx.strokeStyle = instruction[5];
-          ctx.lineWidth = Math.max(1, Math.pow(0.935, dist) * 15);
+          ctx.lineWidth = Math.max(1, Math.pow(0.935, dist) * instruction[6]);
           ctx.lineCap = "round";
           ctx.stroke();
       }
@@ -207,7 +216,6 @@ function handleInstructions(arr) {
 
 function handlePlayerUpdate(update) {
     playerData[update[0]] = update.slice(1);
-    console.log(playerData);
 }
 
 function lobbyJoinHandler(event) {

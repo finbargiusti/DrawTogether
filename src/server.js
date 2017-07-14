@@ -84,7 +84,7 @@ function handleCommand(command, socket) {
     } else if (command[0] === 9) { // Player update
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID && sockets[sckt] !== socket) {
-                sockets[sckt].send(JSON.stringify([0, [socket.DTData.id, command[1], command[2], command[3], command[4]]]));
+                sockets[sckt].send(JSON.stringify([0, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]));
             }
         }
     }
