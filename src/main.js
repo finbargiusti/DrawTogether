@@ -18,6 +18,7 @@ let createLobbyHeight = document.getElementById("createLobbyHeight");
 let createLobbyBgColor = document.getElementById("createLobbyBgColor");
 let createLobbyClose = document.getElementById("createLobbyClose");
 let canvasholder = document.getElementById("canvases");
+let validationClock;
 let ctx = null;
 let playerCtx = null;
 let bgColor = null;
@@ -83,9 +84,12 @@ document.addEventListener("mouseup", function() {
 });
 createLobbyBtn.addEventListener("click", function() {
     optionPanel.style.display = "block";
+    validationClock = setInterval(validateCreateLobby, 0);
 });
 createLobbyConfirm.addEventListener("click", function() {
-    createLobbyRequest(Number(createLobbyWidth.value), Number(createLobbyHeight.value), createLobbyBgColor.value);
+    if (validateCreateLobby()) {
+        createLobbyRequest(Number(createLobbyWidth.value), Number(createLobbyHeight.value), createLobbyBgColor.value);
+    } 
 });
 submitIDBtn.addEventListener("click", function() {
     joinLobbyRequest(Number(lobbyIDInput.value));
@@ -95,12 +99,6 @@ colorTxtField.addEventListener("keydown", function() {
         colorTxtField.style.borderColor = colorTxtField.value;
     }, 16);
 });
-createLobbyHeight.addEventListener("keydown", function() {
-    setTimeout(validateCreateLobby, 16);
-});
-createLobbyWidth.addEventListener("keydown", function() {
-    setTimeout(validateCreateLobby, 16);
-});
 createLobbyBgColor.addEventListener("keydown", function() {
     setTimeout(function() {
         createLobbyBgColor.style.borderColor = createLobbyBgColor.value;
@@ -108,6 +106,7 @@ createLobbyBgColor.addEventListener("keydown", function() {
 });
 createLobbyClose.addEventListener("click", function() {
     optionPanel.style.display = "none";
+    clearInterval(validationClock);
 });
 
 function validateCreateLobby() {
@@ -116,10 +115,12 @@ function validateCreateLobby() {
         createLobbyWidth.style.background = "white";
         createLobbyHeight.style.background = "white";
         createLobbyConfirm.style.opacity = 1;
+        return true;
     } else {
         createLobbyConfirm.disabled = true;
         createLobbyWidth.style.background = "red";
         createLobbyHeight.style.background = "red";
         createLobbyConfirm.style.opacity = 0.333;
+        return false;
     }
 }

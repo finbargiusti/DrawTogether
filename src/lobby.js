@@ -65,7 +65,7 @@ function renderPlayer(isLocal, x, y, color, type, brushSize) {
         playerCtx.stroke();
     } else if (type === 1) {
         playerCtx.beginPath();
-        playerCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+        playerCtx.arc(x, y, brushSize, 0, Math.PI * 2);
         playerCtx.strokeStyle = "black";
         playerCtx.stroke();
     } else if (type === 2) {

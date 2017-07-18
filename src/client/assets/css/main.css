@@ -261,14 +261,19 @@ span {
   position:absolute;
   bottom:10px;
   left:50%;
-  transform:translateX(-50%);
+  transform:translate(calc(-50% - 3.5px), -3.5px);
   padding:8px;
     font-size: 16px;
   width:100px;
   background-color:#2ECC40;
   color:ghostwhite;
   border:none;
-  box-shadow:2px 2px 1px gray;
+  box-shadow:7px 7px 5px gray;
+    transition: all 0.3333s;
+}
+#optionsmenu button:hover {
+    box-shadow:2px 2px 0px gray;
+    transform:translate(calc(-50% - 0px), 0px);
 }
 .fa-window-close:hover {
   transform:scale(1.15);
