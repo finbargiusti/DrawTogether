@@ -13,7 +13,7 @@ function handleDrawingInstructions(arr) {
           ctx.beginPath();
           ctx.moveTo(instruction[1], instruction[2]);
           ctx.lineTo(instruction[3], instruction[4]);
-          ctx.strokeStyle = "ghostwhite";
+          ctx.strokeStyle = bgColor;
           ctx.lineWidth = instruction[5];
           ctx.lineCap = "round";
           ctx.stroke();
@@ -31,9 +31,8 @@ function handleDrawingInstructions(arr) {
   }
 }
 
-requestAnimationFrame(updatePlayerCanvas);
 function updatePlayerCanvas() {
-    playerCtx.clearRect(0, 0, 800, 550);
+    playerCtx.clearRect(0, 0, playerCanvas.getAttribute("width"), playerCanvas.getAttribute("height"));
 
     for (let id in playerData) {
         renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3], playerData[id][4]);

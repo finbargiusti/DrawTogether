@@ -13,9 +13,9 @@ socket.onclose = function() {
 function serverCommandHandler(event) {
     let data = JSON.parse(event.data);
 
-    if (data[0] === 1) {
+    if (data[0] === 0) { // Draw instruction
         handleDrawingInstructions(data[1]);
-    } else {
+    } else if (data[0] === 1) { // Player update
         handlePlayerUpdate(data[1]);
     }
 }
@@ -24,11 +24,11 @@ function handlePlayerUpdate(update) {
     playerData[update[0]] = update.slice(1);
 }
 
-function createLobbyRequest() {
+function createLobbyRequest(width, height, bgColor) {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify([0, Number(prompt("Width:")), Number(prompt("Height:"))]));
+        socket.send(JSON.stringify([0, width, height, bgColor]));
 
         socket.onmessage = lobbyJoinHandler;
     }
@@ -44,20 +44,36 @@ function joinLobbyRequest(ID) {
     }
 }
 
-function joinLobby() {
+function joinLobby(width, height, backgroundColor) {
+    console.log(width, height, backgroundColor)
+    bgColor = backgroundColor;
+    
     controls.style.display = "none";
-    writingUtensils.style.display = "block";
+    writingUtensils.style.display = "inline-block";
+    optionPanel.style.display = "none";
+    
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    playerCanvas.setAttribute("width", width);
+    playerCanvas.setAttribute("height", height);
+    
+    ctx = canvas.getContext("2d");
+    playerCtx = playerCanvas.getContext("2d");
+    
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, width, height);
 }
 
 function lobbyJoinHandler(event) {
     let command = JSON.parse(event.data);
 
     if (command[0] === 0) { // Join lobby
-        joinLobby();
+        joinLobby(command[3], command[4], command[5]);
         lobbyID = command[1];
 
         let startTime = window.performance.now();
-        handleDrawingInstructions(command[2][1]);
+        handleDrawingInstructions(command[2]);
+        requestAnimationFrame(updatePlayerCanvas);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
 
         idDisplayP.innerHTML = "Lobby ID (share with friends): " + lobbyID;

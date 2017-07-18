@@ -32,11 +32,16 @@ server.on("connection", function(ws) {
     ++currentSocketID;
 });
 
-function Lobby(id, width, height) {
+function Lobby(id, width, height, bgColor) {
     this.id = id;
     this.width = width;
     this.height = height;
+    this.bgColor = bgColor;
     this.instructions = [];
+}
+
+function sendJoinLobbyInstruction(socket, lobby) {
+    socket.send(JSON.stringify([0, lobby.id, lobby.instructions, lobby.width, lobby.height, lobby.bgColor]));
 }
 
 function handleCommand(command, socket) {
@@ -56,15 +61,17 @@ function handleCommand(command, socket) {
 
             if (!foundDuplicate) break;
         }
+        
+        var newLobby = new Lobby(newLobbyID, command[1], command[2], command[3]);
 
-        lobbies.push(new Lobby(newLobbyID, command[1], command[2]));
+        lobbies.push(newLobby);
         socket.DTData.lobbyID = newLobbyID;
-        socket.send(JSON.stringify([0, newLobbyID, [1, []]]));
+        sendJoinLobbyInstruction(socket, newLobby);
     } else if (command[0] === 1) { // Join lobby
         for (var i = 0; i < lobbies.length; i++) {
             if (lobbies[i].id === command[1]) {
                 socket.DTData.lobbyID = command[1];
-                socket.send(JSON.stringify([0, lobbies[i].id, [1, lobbies[i].instructions]]));
+                sendJoinLobbyInstruction(socket, lobbies[i]);
 
                 return;
             }
@@ -80,13 +87,13 @@ function handleCommand(command, socket) {
         }
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID) {
-                sockets[sckt].send(JSON.stringify([1, [command]]));
+                sockets[sckt].send(JSON.stringify([0, [command]]));
             }
         }
     } else if (command[0] === 9) { // Player update
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID && sockets[sckt] !== socket) {
-                sockets[sckt].send(JSON.stringify([0, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]));
+                sockets[sckt].send(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]));
             }
         }
     }

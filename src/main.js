@@ -11,8 +11,14 @@ let pencilRadio = document.getElementById("pencil");
 let rubberRadio = document.getElementById("rubber");
 let brushRadio = document.getElementById("brush");
 let sizeSlider = document.getElementById("sizeSlider");
-let ctx = canvas.getContext("2d");
-let playerCtx = playerCanvas.getContext("2d");
+let optionPanel = document.getElementById("options");
+let createLobbyConfirm = document.getElementById("createLobbyConfirm");
+let createLobbyWidth = document.getElementById("createLobbyWidth");
+let createLobbyHeight = document.getElementById("createLobbyHeight");
+let createLobbyBgColor = document.getElementById("createLobbyBgColor");
+let ctx = null;
+let playerCtx = null;
+let bgColor = null;
 let mouseX = 0, mouseY = 0, mousePressed = false;
 let lastPosition = {
     x: 0,
@@ -42,11 +48,11 @@ document.addEventListener("mousemove", function(event) {
     if (connected && lobbyID) {
         let type = 0;
 
-    if (rubberRadio.checked) {
-        type = 1;
-    } else if (brushRadio.checked) {
-        type = 2;
-    }
+        if (rubberRadio.checked) {
+            type = 1;
+        } else if (brushRadio.checked) {
+            type = 2;
+        }
 
         socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), colorTxtField.value, type, brushSize]));
     }
@@ -74,7 +80,10 @@ document.addEventListener("mouseup", function() {
     mousePressed = false;
 });
 createLobbyBtn.addEventListener("click", function() {
-    createLobbyRequest();
+    optionPanel.style.display = "block";
+});
+createLobbyConfirm.addEventListener("click", function() {
+    createLobbyRequest(Number(createLobbyWidth.value), Number(createLobbyHeight.value), createLobbyBgColor.value);
 });
 submitIDBtn.addEventListener("click", function() {
     joinLobbyRequest(Number(lobbyIDInput.value));
