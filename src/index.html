@@ -5,7 +5,7 @@
         <meta charset="utf-8">
      <link rel="stylesheet" href="client/assets/css/main.css" / >
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    </head  >
+    </head>
     <body>
         <h1>DrawTogether</h1>
         <div id="controls">
@@ -13,6 +13,15 @@
           <div id="joinLobby">
             <input type="text" maxlength="5" placeholder="Lobby id" id="lobbyId"/>
             <button id="submitId">Join</button>
+          </div>
+        </div>
+        <div id="options">
+          <div id="optionsmenu">
+            <h3 id="topbar">Options</h3>
+            <i class="fa fa-window-close fa-lg" aria-hidden="true" style="color:white"></i>
+            <span>Width: </span><input type="number" /><br/>
+            <span>Height: </span><input type="number" />
+            <button >Done</button>
           </div>
         </div>
         <div id="writingUtensils">
@@ -41,9 +50,10 @@
           <canvas id="canvas" width="800" height="550"></canvas>
           <canvas id="playerCanvas" width="800" height="550"></canvas>
         </div>
-        
+
         <script src="main.js"></script>
         <script src="lobby.js"></script>
         <script src="communication.js"></script>
+        <script src="drag.js"></script>
     </body>
 </html>
