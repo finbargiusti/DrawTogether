@@ -194,6 +194,7 @@ span {
   padding:3px;
 }
 #options {
+  display:none;
   position:absolute;
   top:0;
   left:0;
