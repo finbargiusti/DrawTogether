@@ -14,7 +14,7 @@ function handleDrawingInstructions(arr) {
           ctx.moveTo(instruction[1], instruction[2]);
           ctx.lineTo(instruction[3], instruction[4]);
           ctx.strokeStyle = bgColor;
-          ctx.lineWidth = instruction[5];
+          ctx.lineWidth = instruction[5] * 2;
           ctx.lineCap = "round";
           ctx.stroke();
       } else if (instruction[0] === 12) { // Brush line

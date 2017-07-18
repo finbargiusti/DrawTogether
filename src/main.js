@@ -16,6 +16,7 @@ let createLobbyConfirm = document.getElementById("createLobbyConfirm");
 let createLobbyWidth = document.getElementById("createLobbyWidth");
 let createLobbyHeight = document.getElementById("createLobbyHeight");
 let createLobbyBgColor = document.getElementById("createLobbyBgColor");
+let createLobbyClose = document.getElementById("createLobbyClose");
 let canvasholder = document.getElementById("canvases");
 let ctx = null;
 let playerCtx = null;
@@ -94,3 +95,31 @@ colorTxtField.addEventListener("keydown", function() {
         colorTxtField.style.borderColor = colorTxtField.value;
     }, 16);
 });
+createLobbyHeight.addEventListener("keydown", function() {
+    setTimeout(validateCreateLobby, 16);
+});
+createLobbyWidth.addEventListener("keydown", function() {
+    setTimeout(validateCreateLobby, 16);
+});
+createLobbyBgColor.addEventListener("keydown", function() {
+    setTimeout(function() {
+        createLobbyBgColor.style.borderColor = createLobbyBgColor.value;
+    }, 16);
+});
+createLobbyClose.addEventListener("click", function() {
+    optionPanel.style.display = "none";
+});
+
+function validateCreateLobby() {
+    if (Number(createLobbyWidth.value) >= 256 && Number(createLobbyHeight.value) >= 256) {
+        createLobbyConfirm.disabled = false;
+        createLobbyWidth.style.background = "white";
+        createLobbyHeight.style.background = "white";
+        createLobbyConfirm.style.opacity = 1;
+    } else {
+        createLobbyConfirm.disabled = true;
+        createLobbyWidth.style.background = "red";
+        createLobbyHeight.style.background = "red";
+        createLobbyConfirm.style.opacity = 0.333;
+    }
+}
