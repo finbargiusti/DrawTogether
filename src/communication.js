@@ -28,7 +28,7 @@ function createLobbyRequest() {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify([0]));
+        socket.send(JSON.stringify([0, Number(prompt("Width:")), Number(prompt("Height:"))]));
 
         socket.onmessage = lobbyJoinHandler;
     }

@@ -1,8 +1,8 @@
 // http
 var connect = require('connect');
 var serveStatic = require('serve-static');
-connect().use(serveStatic(__dirname)).listen(8080, function(){
-});
+
+connect().use(serveStatic(__dirname)).listen(8080, function(){});
 
 // Web socket
 
@@ -32,8 +32,10 @@ server.on("connection", function(ws) {
     ++currentSocketID;
 });
 
-function Lobby(id) {
+function Lobby(id, width, height) {
     this.id = id;
+    this.width = width;
+    this.height = height;
     this.instructions = [];
 }
 
@@ -55,7 +57,7 @@ function handleCommand(command, socket) {
             if (!foundDuplicate) break;
         }
 
-        lobbies.push(new Lobby(newLobbyID));
+        lobbies.push(new Lobby(newLobbyID, command[1], command[2]));
         socket.DTData.lobbyID = newLobbyID;
         socket.send(JSON.stringify([0, newLobbyID, [1, []]]));
     } else if (command[0] === 1) { // Join lobby
@@ -72,7 +74,7 @@ function handleCommand(command, socket) {
     } else if (command[0] === 10 || command[0] === 11 || command[0] === 12) { // Draw line, Erase line, Brush line
         for (var i = 0; i < lobbies.length; ++i) {
             if (lobbies[i].id === socket.DTData.lobbyID) {
-                lobbies[i].instructions.push(command)
+                lobbies[i].instructions.push(command);
                 break;
             }
         }
