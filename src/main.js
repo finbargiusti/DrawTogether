@@ -84,11 +84,13 @@ document.addEventListener("mouseup", function() {
 });
 createLobbyBtn.addEventListener("click", function() {
     optionPanel.style.display = "block";
+    optionPanel.getElementsByClassName("popup")[0].style.left = "50%";
+    optionPanel.getElementsByClassName("popup")[0].style.top = "50%";
     validationClock = setInterval(validateCreateLobby, 0);
 });
 createLobbyConfirm.addEventListener("click", function() {
     if (validateCreateLobby()) {
-        createLobbyRequest(Number(createLobbyWidth.value), Number(createLobbyHeight.value), createLobbyBgColor.value);
+        createLobbyRequest(parseInt(createLobbyWidth.value), parseInt(createLobbyHeight.value), createLobbyBgColor.value);
     } 
 });
 submitIDBtn.addEventListener("click", function() {
@@ -104,13 +106,18 @@ createLobbyBgColor.addEventListener("keydown", function() {
         createLobbyBgColor.style.borderColor = createLobbyBgColor.value;
     }, 16);
 });
+let popupCloseButtons = document.getElementsByClassName("fa fa-window-close fa-lg");
+for (let i = 0; i < popupCloseButtons.length; i++) {
+    popupCloseButtons[i].addEventListener("click", function() {
+        popupCloseButtons[i].parentNode.parentNode.style.display = "none";
+    })
+}
 createLobbyClose.addEventListener("click", function() {
-    optionPanel.style.display = "none";
     clearInterval(validationClock);
 });
 
 function validateCreateLobby() {
-    if (Number(createLobbyWidth.value) >= 256 && Number(createLobbyHeight.value) >= 256) {
+    if (Number(createLobbyWidth.value) >= 256 && Number(createLobbyHeight.value) >= 256 && Number(createLobbyWidth.value) <= 16384 && Number(createLobbyHeight.value) <= 16384) {
         createLobbyConfirm.disabled = false;
         createLobbyWidth.style.background = "white";
         createLobbyHeight.style.background = "white";

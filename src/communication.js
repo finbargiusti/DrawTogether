@@ -17,6 +17,8 @@ function serverCommandHandler(event) {
         handleDrawingInstructions(data[1]);
     } else if (data[0] === 1) { // Player update
         handlePlayerUpdate(data[1]);
+    } else if (data[0] === 2) { // Player disconnect
+        delete playerData[data[1][0]];
     }
 }
 
