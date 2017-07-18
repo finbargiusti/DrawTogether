@@ -125,6 +125,7 @@ h1 {
   transition: 0.2s all;
 }
 #utensils  {
+  white-space: nowrap;
   margin-left:50%;
   padding:10px;
   transform:translateX(-50%);
@@ -197,7 +198,7 @@ span {
   margin-left:4px;
   padding:3px;
 }
-#options {
+.popupHolder  {
   top:0;
   left:0;
   right:0;
@@ -206,19 +207,17 @@ span {
   display:none;
   background-color:rgba(0, 0, 0, 0.4);
 }
-#optionsmenu {
+.popup {
   box-shadow:2px 2px 1px gray;
   border-radius:5px;
   overflow:hidden;
   position:absolute;
   top:50%;
   left:50%;
-  width:400px;
-  height:200px;
   background-color:ghostwhite;
   transform:translateY(-50%) translateX(-50%);
 }
-#optionsmenu h3 {
+.popup h3 {
   padding-top:5px;
   padding-bottom:5px;
   text-align:center;
@@ -276,4 +275,8 @@ span {
 }
 canvas {
   position:absolute;
+}
+#optionsmenu {
+  width:400px;
+  height:200px;
 }
