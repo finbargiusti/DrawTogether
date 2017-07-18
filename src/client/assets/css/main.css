@@ -243,6 +243,12 @@ span {
   bottom:10px;
   left:50%;
   transform:translateX(-50%);
+  padding:8px;
+  width:100px;
+  background-color:#2ECC40;
+  color:ghostwhite;
+  border:none;
+  box-shadow:2px 2px 1px gray;
 }
 .fa-window-close:hover {
   transform:scale(1.15);
