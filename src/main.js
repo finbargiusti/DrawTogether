@@ -16,6 +16,7 @@ let createLobbyConfirm = document.getElementById("createLobbyConfirm");
 let createLobbyWidth = document.getElementById("createLobbyWidth");
 let createLobbyHeight = document.getElementById("createLobbyHeight");
 let createLobbyBgColor = document.getElementById("createLobbyBgColor");
+let canvasholder = document.getElementById("canvases");
 let ctx = null;
 let playerCtx = null;
 let bgColor = null;

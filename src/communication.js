@@ -47,19 +47,21 @@ function joinLobbyRequest(ID) {
 function joinLobby(width, height, backgroundColor) {
     console.log(width, height, backgroundColor)
     bgColor = backgroundColor;
-    
+
     controls.style.display = "none";
     writingUtensils.style.display = "inline-block";
     optionPanel.style.display = "none";
-    
+
     canvas.setAttribute("width", width);
     canvas.setAttribute("height", height);
     playerCanvas.setAttribute("width", width);
     playerCanvas.setAttribute("height", height);
-    
+    canvasholder.style.height = height+"px";
+    canvasholder.style.width = width+"px";
+
     ctx = canvas.getContext("2d");
     playerCtx = playerCanvas.getContext("2d");
-    
+
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
 }

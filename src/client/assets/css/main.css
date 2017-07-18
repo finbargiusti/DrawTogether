@@ -42,29 +42,30 @@ h1 {
   transform: translateX(-50%) translateY(-50%);
   transition: all 0.5s;
 }
+#canvases {
+  position:relative;
+}
 #canvas {
+  position:absolute;
+  z-index:1;
   background: ghostwhite;
   border: 1px solid gray;
   border-radius: 12px;
-  margin: auto;
-    position: absolute;
-    top: 82px;
   cursor: none;
 }
 #playerCanvas {
-    position: absolute;
-    top: 82px;
+    position:absolute;
+    z-index:2;
     border: 1px solid transparent;
     border-radius: 12px;
     cursor: none;
     pointer-events: none;
 }
 #writingUtensils {
-  width:800px;
-  height:550px;
   display:none;
-  margin:auto;
-    position: relative;
+  position:relative;
+  left:50%;
+  transform:translateX(-50%);
 }
 #joinLobby {
   position: absolute;
@@ -253,4 +254,7 @@ span {
 .fa-window-close:hover {
   transform:scale(1.15);
   transition: transform 0.3s;
+}
+canvas {
+  position:absolute;
 }
