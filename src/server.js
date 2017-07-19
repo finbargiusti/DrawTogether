@@ -2,7 +2,7 @@
 var connect = require('connect');
 var serveStatic = require('serve-static');
 
-connect().use(serveStatic(__dirname)).listen(8080, function(){});
+connect().use(serveStatic(__dirname+"/client")).listen(8080, function(){});
 
 // Web socket
 
@@ -46,7 +46,8 @@ function Lobby(id, width, height, bgColor) {
 }
 
 function sendJoinLobbyInstruction(socket, lobby) {
-    socket.send(JSON.stringify([0, lobby.id, lobby.instructions, lobby.width, lobby.height, lobby.bgColor]));
+    socket.send(JSON.stringify([0, lobby.id, lobby.instructions, lobby.width,
+                               lobby.height, lobby.bgColor]));
 }
 
 function onPlayerDisconnect(socket) {
@@ -107,7 +108,10 @@ function handleCommand(command, socket) {
         } else if (command[0] === 9) { // Player update
             for (var sckt in sockets) {
                 if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID && sockets[sckt] !== socket) {
-                    sockets[sckt].send(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]));
+                    sockets[sckt].send(JSON.stringify([1, [socket.DTData.id, 
+                                                      command[1], command[2], 
+                                                      command[3], command[4], 
+                                                      command[5]]]));
                 }
             }
         }

@@ -1,1 +1,2 @@
-Fuck Github for forcing me to create this file
+# DrawTogether
+## A clone of the popular drawing app, DrawTogether

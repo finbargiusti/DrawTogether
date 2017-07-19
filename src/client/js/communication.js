@@ -1,6 +1,6 @@
 let connectingToLobby = false;
 let connected = false;
-let socket = new WebSocket("ws://192.168.1.105:1337/");
+let socket = new WebSocket("ws://localhost:1337/");
 
 socket.onopen = function() {
     connected = true;
@@ -66,6 +66,8 @@ function joinLobby(width, height, backgroundColor) {
 
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
+
+    currentUI = "draw";
 }
 
 function lobbyJoinHandler(event) {
