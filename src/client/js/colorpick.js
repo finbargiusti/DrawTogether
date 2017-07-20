@@ -10,6 +10,7 @@ let usingNewColor = false;
 let justPickedPalette = false;
 let circleX = 0;
 let circleY = colorCanvas.height;
+let justDisabledEyedropper = false;
 
 closeColorPickButton.addEventListener("click", function() {
     clearInterval(colorUpdateClock);
@@ -40,6 +41,14 @@ document.addEventListener("mousemove", function() {
 
 colorSlider.addEventListener("mousedown", function() {
     justPickedPalette = false;
+});
+
+eyeDropSelect.addEventListener("click", function() {
+    if (!justDisabledEyedropper) {
+        eyeDropSelect.style.border = "3px solid #2ECC40";
+        eyeDropSelect.style.textShadow = "0px 0px 10px white";
+        eyeDropperSelected = true;
+    }
 });
 
 for (let i = 0;i < sliderCanvas.width; ++i) {

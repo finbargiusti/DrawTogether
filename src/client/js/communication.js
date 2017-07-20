@@ -31,7 +31,6 @@ function handlePlayerUpdate(update) {
 }
 
 function joinLobby(width, height, backgroundColor) {
-    console.log(width, height, backgroundColor)
     bgColor = backgroundColor;
 
     controls.style.display = "none";

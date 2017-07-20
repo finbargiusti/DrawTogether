@@ -40,12 +40,6 @@ let palette = [];
 
 colorPickContainer.style.display = "none";
 
-eyeDropSelect.addEventListener("click", function() {
-    eyeDropSelect.style.border = "3px solid #2ECC40";
-    eyeDropSelect.style.textShadow = "0px 0px 10px white";
-    eyeDropperSelected = true;
-});
-
 document.addEventListener("mousemove", function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
@@ -84,10 +78,14 @@ document.addEventListener("mousemove", function(event) {
 });
 document.addEventListener("mousedown", function() {
     if (eyeDropperSelected) {
-        if (currEyeDropperColor !== currColor) usingNewColor = true;
-        updateColorPickerFromRGB(currEyeDropperColor);
-        currColor = currEyeDropperColor;
+        if (lastPosition.x >= 0 && lastPosition.x <= canvas.width && lastPosition.y >= 0 && lastPosition.y <= canvas.height) {
+            if (currEyeDropperColor !== currColor) usingNewColor = true;
+            updateColorPickerFromRGB(currEyeDropperColor);
+            currColor = currEyeDropperColor;
+        }
+        
         eyeDropperSelected = false;
+        justDisabledEyedropper = true;
         eyeDropSelect.style.border = "3px solid gray";
         eyeDropSelect.style.textShadow = "none";
         openColorPickButton.style.backgroundColor = currColor;
@@ -97,6 +95,9 @@ document.addEventListener("mousedown", function() {
 });
 document.addEventListener("mouseup", function() {
     mousePressed = false;
+    setTimeout(function() {
+        justDisabledEyedropper = false;
+    });
 });
 // Makes popups be closable
 let popupCloseButtons = document.getElementsByClassName("fa fa-window-close fa-lg");
