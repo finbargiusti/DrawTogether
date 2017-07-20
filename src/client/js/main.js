@@ -47,6 +47,8 @@ function mouseYElement(element) {
 }
 
 eyeDropSelect.addEventListener("click", function() {
+    eyeDropSelect.style.border = "3px solid #2ECC40";
+    eyeDropSelect.style.textShadow = "0px 0px 10px white";
     eyeDropperSelected = true;
 });
 
@@ -75,7 +77,7 @@ document.addEventListener("mousemove", function(event) {
     }
 
 
-    if (mousePressed && !eyeDropperSelected && document.getElementById('colorpick').style.display === "none" && currentUI == "draw") {
+    if (mousePressed && !eyeDropperSelected /*&& document.getElementById('colorpick').style.display === "none"*/ && currentUI == "draw") {
         if (pencilRadio.checked) { // Draw line
             socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
         } else if (rubberRadio.checked) { // Erase line
@@ -103,10 +105,20 @@ sizeSlider.addEventListener("change", function() {
 });
 document.addEventListener("mousedown", function() {
     if (eyeDropperSelected) {
-      if (currEyeDropperColor !== currColor) usingNewColor = true;
-      currColor = currEyeDropperColor;
-      eyeDropperSelected = false;
-      document.getElementById("openColorPickMenu").style.backgroundColor = currColor;
+        if (currEyeDropperColor !== currColor) usingNewColor = true;
+
+        let rawRgb = currEyeDropperColor.slice(4).slice(0, -1);
+        let rgbArr = rawRgb.split(",");
+        let hsv = rgbToHsv(rgbArr[0], rgbArr[1], rgbArr[2]);
+        colorSlider.value = hsv[0] * 360;
+        circleX = hsv[1] * colorCanvas.width;
+        circleY = (1 - hsv[2]) * colorCanvas.height;
+
+        currColor = currEyeDropperColor;
+        eyeDropperSelected = false;
+        eyeDropSelect.style.border = "3px solid gray";
+        eyeDropSelect.style.textShadow = "none";
+        document.getElementById("openColorPickMenu").style.backgroundColor = currColor;
     }
     mousePressed = true;
 });

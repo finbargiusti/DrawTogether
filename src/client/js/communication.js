@@ -2,6 +2,7 @@ let connectingToLobby = false;
 let connected = false;
 let socket = new WebSocket("ws://localhost:1337/");
 
+
 socket.onopen = function() {
     connected = true;
 };
@@ -19,7 +20,7 @@ function serverCommandHandler(event) {
         handlePlayerUpdate(data[1]);
     } else if (data[0] === 2) { // Player disconnect
         delete playerData[data[1][0]];
-    } else if (data[0] === 3) { // Palette update
+    } else if (data[0] === 3) { // Palette updatejk
         palette = data[1];
         updatePalette();
     }

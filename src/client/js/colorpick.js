@@ -47,7 +47,7 @@ window.addEventListener("mouseup", function() {
 
 document.addEventListener("mousemove", function() {
 	if (draggingColor) {
-    justPickedPalette = false;
+        justPickedPalette = false;
 		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
 		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
 		updateCircleSelect();
@@ -55,8 +55,7 @@ document.addEventListener("mousemove", function() {
 })
 
 colorSlider.addEventListener("mousedown", function() {
-  justPickedPalette = false;
-  console.log("Get danked")
+    justPickedPalette = false;
 })
 
 function updateCircleSelect() {
@@ -75,9 +74,8 @@ function updateCircleSelect() {
 
 let colorUpdateClock;
 function colorUpdate()  {
-  console.log(justPickedPalette)
-	updateCircleSelect();
-  document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb',"background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
+    updateCircleSelect();
+    document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb',"background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
 	updateCanvas();
 }
 function updatePalette() {
