@@ -104,7 +104,7 @@ function updateColorPicker() {
 
     circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
     circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))";
-    document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background-color: " + currColor);
+    document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
 }
 
 let colorUpdateClock;
