@@ -22,10 +22,7 @@ let ctx = null;
 let playerCtx = null;
 let bgColor = null;
 let mouseX = 0, mouseY = 0, mousePressed = false;
-let lastPosition = {
-    x: 0,
-    y: 0
-};
+let lastPosition = {x: 0, y: 0};
 let currColor = "rgb(0,0,0)";
 let brushSize = Number(sizeSlider.value);
 let r = Math.round;
