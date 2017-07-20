@@ -353,16 +353,17 @@ canvas {
     transform:translateY(8px) translateX(-3px);
 }
 #eyeDrop {
-    /*box-sizing: border-box;*/
     margin-left:5px;
+    box-sizing: border-box;
     color:white;
-    height:19px;
-    width:20px;
+    height:29px;
+    width:29px;
     padding:5px;
+    border: 3px solid gray;
     border-radius:5px;
-    background-color:dimgray;
-    text-indent: 1px;
-    line-height: 18px;
+    text-indent: -2px;
+    background-color:gray;
+    line-height: 13px;
     transition: all 0.3s;
 }
 #recentColorContainer {
