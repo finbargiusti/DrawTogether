@@ -2,7 +2,6 @@ let connectingToLobby = false;
 let connected = false;
 let socket = new WebSocket("ws://localhost:1337/");
 
-
 socket.onopen = function() {
     connected = true;
 };
@@ -67,7 +66,7 @@ function lobbyJoinHandler(event) {
         requestAnimationFrame(updatePlayerCanvas);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
 
-        idDisplayP.innerHTML = "Lobby ID (share with friends): " + lobbyID;
+        idDisplayP.innerHTML = "Lobby ID: <span class='lobbyIDHighlight'><b>" + lobbyID + "</b></span>";
         socket.onmessage = serverCommandHandler;
     } else if (command[0] === 0) { // Incorrect lobby ID
         alert("That lobby does not exist!");

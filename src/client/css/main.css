@@ -96,7 +96,13 @@ h1 {
     color:lightgray;
 }
 #idDisplay {
+    text-align: center;
     color:dimgray;
+    font-size: 20px;
+    margin: 0;
+}
+.lobbyIDHighlight {
+    color: #2564f0;
 }
 #utensils input[type="text"] {
     height:23px;
