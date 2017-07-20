@@ -7,8 +7,10 @@ let circleSelect = document.getElementById("selectcircle");
 let paletteContainer = document.getElementById("recentColorContainer");
 let draggingColor = false;
 let usingNewColor = false;
-let circleX;
-let circleY;
+let justPickedPalette = false;
+let lastFuckingHue = 0;
+let circleX = 0;
+let circleY = colorCanvas.height;
 for (let i = 0;i < sliderCanvas.width; ++i) {
   sliderCtx.beginPath();
   sliderCtx.rect(i, 0, 1, sliderCanvas.height);
@@ -45,46 +47,54 @@ window.addEventListener("mouseup", function() {
 
 document.addEventListener("mousemove", function() {
 	if (draggingColor) {
+    justPickedPalette = false;
 		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
 		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
 		updateCircleSelect();
 	}
 })
 
+colorSlider.addEventListener("mousedown", function() {
+  justPickedPalette = false;
+  console.log("Get danked")
+})
+
 function updateCircleSelect() {
-    let rgb = hslToRgb(colorSlider.value / 360, circleX/(colorCanvas.width-1), (0.5+(1-circleX/(colorCanvas.width-1))*0.5) * (1-circleY/(colorCanvas.height-1)));
+    let color = new Color();
+    color.setHSV(colorSlider.value, circleX/colorCanvas.width, 1 - circleY/colorCanvas.height);
 
+    let newColor = color.getRGB();
+    if (!justPickedPalette) {
+      if (newColor !== currColor) usingNewColor = true;
+      currColor = newColor;
+    }
 
-		let newColor = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
-    if (newColor !== currColor) usingNewColor = true;
-    currColor = newColor;
-		circleSelect.style.backgroundColor = currColor;
-		circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))"	;
+    circleSelect.style.backgroundColor = currColor;
+    circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))"	;
 }
 
 let colorUpdateClock;
 function colorUpdate()  {
+  console.log(justPickedPalette)
 	updateCircleSelect();
   document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb',"background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
 	updateCanvas();
 }
 function updatePalette() {
 	recentColorContainer.innerHTML = "";
-	for (let i = 0; i < palette.length; i += (533 / 533)) {
+	for (let i = 0; i < palette.length; i++) {
 		let newPaletteEntry = document.createElement("div");
 		newPaletteEntry.className = "recentColor";
 		newPaletteEntry.style.backgroundColor = palette[i];
         newPaletteEntry.addEventListener("click", function() {
             currColor = palette[i];
+            usingNewColor = true;
+            justPickedPalette = true;
 
             let rawRgb = palette[i].slice(4).slice(0, -1);
             let rgbArr = rawRgb.split(",");
 
-            console.log(rgbArr)
-
             let hsv = rgbToHsv(rgbArr[0], rgbArr[1], rgbArr[2]);
-
-            console.log(hsv)
 
             colorSlider.value = hsv[0] * 360;
             circleX = hsv[1] * colorCanvas.width;
@@ -143,3 +153,14 @@ function rgbToHsv(r, g, b) {
 
   return [ h, s, v ];
 }
+function hsv2hsl(h, s, v)
+{
+  let hsl = [0,0,0];
+      hsl[0] = h;
+      hsl[2] = (2 - s) * v;
+     hsl[1] = s * v;
+      hsl[1] /= (hsl[2] <= 1) ? (hsl[2]) : 2 - (hsl[2]);
+      hsl[2] /= 2;
+
+      return hsl;
+  }

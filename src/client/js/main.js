@@ -26,7 +26,7 @@ let lastPosition = {
     x: 0,
     y: 0
 };
-let currColor = "black";
+let currColor = "rgb(0,0,0)";
 let brushSize = Number(sizeSlider.value);
 let r = Math.round;
 let lobbyID = null;
