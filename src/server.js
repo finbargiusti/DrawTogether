@@ -48,7 +48,7 @@ function Lobby(id, width, height, bgColor) {
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
             if (sockets[sckt].DTData.lobbyID === this.id && ((excludedSocket) ? sockets[sckt] !== excludedSocket : true)) {
-                socket[sckt].send(msg);
+                sockets[sckt].send(msg);
             }
         }
     }
@@ -67,7 +67,9 @@ Lobby.prototype.getLobbyByID = function(ID) {
 }
 
 function onPlayerDisconnect(socket) {
-    Lobby.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([2, [socket.DTData.id]]), socket);
+    try {
+        Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([2, [socket.DTData.id]]), socket);
+    } catch(e) {}
 }
 
 function handleCommand(command, socket) {
@@ -76,7 +78,7 @@ function handleCommand(command, socket) {
             var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
 
             while (true) { // Checks if generated newLobbyID is duplicate
-                if (Lobby.getLobbyByID(newLobbyID)) {
+                if (Lobby.prototype.getLobbyByID(newLobbyID)) {
                     newLobbyID = 10000 + Math.floor(Math.random() * 90000);
                 } else {
                     break;
@@ -88,7 +90,7 @@ function handleCommand(command, socket) {
             socket.DTData.lobbyID = newLobbyID;
             newLobby.sendJoinInstruction(socket);
         } else if (command[0] === 1) { // Join lobby
-            var lobby = Lobby.getLobbyByID(command[1]);
+            var lobby = Lobby.prototype.getLobbyByID(command[1]);
             
             if (lobby) {
                 socket.DTData.lobbyID = command[1];
@@ -97,17 +99,17 @@ function handleCommand(command, socket) {
                 socket.send(JSON.stringify([1]));
             }
         } else if (command[0] === 10 || command[0] === 11 || command[0] === 12) { // Draw line, Erase line, Brush line
-            var lobby = Lobby.getLobbyByID(socket.DTData.lobbyID);
+            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
             
             lobby.instructions.push(command);
             lobby.sendMsgToMembers(JSON.stringify([0, [command]]));
         } else if (command[0] === 9) { // Player update
-            Lobby.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
+            Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
         } else if (command[0] === 50) { // New color
-            var lobby = Lobby.getLobbyByID(socket.DTData.lobbyID);
+            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
             
             lobby.palette.unshift(command[1]);
-            if (lobby.palette.indexOf(command[1]) !== -1) lobby.palette.splice(lobby.palette.indexOf(command[1]), 1);
+            if (lobby.palette.indexOf(command[1], 1) !== -1) lobby.palette.splice(lobby.palette.indexOf(command[1], 1), 1);
             if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20);
             
             lobby.sendMsgToMembers(JSON.stringify([3, lobby.palette]));

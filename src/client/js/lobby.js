@@ -31,13 +31,7 @@ function handleDrawingInstructions(arr) {
   }
 }
 
-function updatePlayerCanvas() {
-    playerCtx.clearRect(0, 0, playerCanvas.getAttribute("width"), playerCanvas.getAttribute("height"));
-
-    for (let id in playerData) {
-        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3], playerData[id][4]);
-    }
-
+function getCursorType() {
     let type = 0;
     if (rubberRadio.checked) {
         type = 1;
@@ -47,12 +41,16 @@ function updatePlayerCanvas() {
     if (eyeDropperSelected) {
         type = 3;
     }
+    return type;
+}
 
-    if (eyeDropperSelected) {
-      renderPlayer(true, lastPosition.x, lastPosition.y, currEyeDropperColor, type, brushSize);
-    } else {
-      renderPlayer(true, lastPosition.x, lastPosition.y, currColor, type, brushSize);
+function updatePlayerCanvas() {
+    playerCtx.clearRect(0, 0, playerCanvas.getAttribute("width"), playerCanvas.getAttribute("height"));
+
+    for (let id in playerData) {
+        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3], playerData[id][4]);
     }
+    renderPlayer(true, lastPosition.x, lastPosition.y, eyeDropperSelected ? currEyeDropperColor : currColor, getCursorType(), brushSize);
 
     requestAnimationFrame(updatePlayerCanvas);
 }
