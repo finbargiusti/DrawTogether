@@ -17,6 +17,11 @@ let createLobbyHeight = document.getElementById("createLobbyHeight");
 let createLobbyBgColor = document.getElementById("createLobbyBgColor");
 let createLobbyClose = document.getElementById("createLobbyClose");
 let canvasholder = document.getElementById("canvases");
+let colorPickContainer = document.getElementById("colorpick");
+let openColorPickButton = document.getElementById("openColorPickMenu");
+let closeColorPickButton = document.getElementById("colorpickclose");
+let eyeDropSelect = document.getElementById("eyeDrop");
+
 let validationClock;
 let ctx = null;
 let playerCtx = null;
@@ -28,20 +33,14 @@ let brushSize = Number(sizeSlider.value);
 let r = Math.round;
 let lobbyID = null;
 let playerData = {};
-let eyeDropSelect = document.getElementById("eyeDrop");
 let eyeDropperSelected = false;
 let currentUI = "menu";
 let currEyeDropperColor = null;
 let palette = [];
 
-document.getElementById("colorpick").style.display = "none";
+colorPickContainerstyle.display = "none";
 
-function mouseXElement(element) {
-    return (mouseX - element.getBoundingClientRect().left) ;
-}
-function mouseYElement(element) {
-    return (mouseY - element.getBoundingClientRect().top) ;
-}
+
 
 eyeDropSelect.addEventListener("click", function() {
     eyeDropSelect.style.border = "3px solid #2ECC40";
@@ -74,7 +73,7 @@ document.addEventListener("mousemove", function(event) {
     }
 
 
-    if (mousePressed && !eyeDropperSelected /*&& document.getElementById('colorpick').style.display === "none"*/ && currentUI == "draw") {
+    if (mousePressed && !eyeDropperSelected && colorPickContainer.style.display === "none" && currentUI == "draw") {
         if (pencilRadio.checked) { // Draw line
             socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
         } else if (rubberRadio.checked) { // Erase line
@@ -115,7 +114,7 @@ document.addEventListener("mousedown", function() {
         eyeDropperSelected = false;
         eyeDropSelect.style.border = "3px solid gray";
         eyeDropSelect.style.textShadow = "none";
-        document.getElementById("openColorPickMenu").style.backgroundColor = currColor;
+        openColorPickButton.style.backgroundColor = currColor;
     }
     mousePressed = true;
 });
@@ -150,14 +149,14 @@ for (let i = 0; i < popupCloseButtons.length; i++) {
 createLobbyClose.addEventListener("click", function() {
     clearInterval(validationClock);
 });
-document.getElementById("colorpickclose").addEventListener("click", function() {
+closeColorPickButton.addEventListener("click", function() {
     clearInterval(colorUpdateClock);
-    document.getElementById("openColorPickMenu").style.backgroundColor = currColor;
+    openColorPickButton.style.backgroundColor = currColor;
 });
-document.getElementById("openColorPickMenu").addEventListener("click", function() {
+openColorPickButton.addEventListener("click", function() {
     colorUpdateClock = setInterval(colorUpdate);
-    document.getElementById("colorpick").style.display = "block";
-})
+    colorPickContainer.style.display = "block";
+});
 
 function validateCreateLobby() {
     if (Number(createLobbyWidth.value) >= 256 && Number(createLobbyHeight.value) >= 256 && Number(createLobbyWidth.value) <= 16384 && Number(createLobbyHeight.value) <= 16384) {
@@ -174,12 +173,3 @@ function validateCreateLobby() {
         return false;
     }
 }
-Math.clamp = function(value, min, max) {
-    if (value < min) {
-      return min;
-    } else if (value > max) {
-      return max;
-    } else {
-      return value;
-    }
-};
