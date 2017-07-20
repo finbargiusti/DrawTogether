@@ -325,7 +325,7 @@ canvas {
     height:26px;
     width:26px;
     border-radius:13px;
-    background-color:#2ECC40;
+    background-color:red;
 }
 /*#colorSlider::-webkit-slider-runnable-track {
     width:555px;
@@ -427,4 +427,9 @@ canvas {
 }
 #alphaSlider input::-webkit-slider-runnable-track {
     z-index: 100;
+}
+.horizontalDivider {
+    border-top: 1px solid lightgray;
+    margin-top: 5px;
+    margin-bottom: -5px;
 }

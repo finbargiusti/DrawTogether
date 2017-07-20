@@ -14,12 +14,16 @@ let justPickedPalette = false;
 let circleX = 0;
 let circleY = colorCanvas.height;
 let justDisabledEyedropper = false;
+let newHue = true;
+let newRGB = true;
+let oldHueValue = 0;
 
 closeColorPickButton.addEventListener("click", function() {
     clearInterval(colorUpdateClock);
     openColorPickButton.style.backgroundColor = currColor;
 });
 openColorPickButton.addEventListener("click", function() {
+    colorUpdate(true);
     colorUpdateClock = setInterval(colorUpdate);
     colorPickContainer.style.display = "block";
 });
@@ -38,7 +42,6 @@ document.addEventListener("mousemove", function() {
         justPickedPalette = false;
 		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
 		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
-		updateColorPicker();
 	}
 });
 
@@ -61,32 +64,38 @@ for (let i = 0; i < sliderCanvas.width; ++i) {
     sliderCtx.fill();
 }
 function updateCanvas() {
-	let imageData = colorCtx.getImageData(0, 0, colorCanvas.width, colorCanvas.height);
-	let rgbval = hslToRgb(colorSlider.value/360, 1, 0.5);
-	for (let y = 0; y < colorCanvas.height; ++y) {
-		for (let x = 0; x < colorCanvas.width; ++x) {
-			let index = x*4+y*colorCanvas.width*4;
-			let darknessFactor = 1-(y/colorCanvas.height);
-			let lightnessFactor = 1-(x/colorCanvas.width);
-			imageData.data[index] = (rgbval[0]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-			imageData.data[index+1] = (rgbval[1]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-			imageData.data[index+2] = (rgbval[2]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-			imageData.data[index+3] = 255;
-		}
-	}
-	colorCtx.putImageData(imageData, 0, 0);
-    
-    alphaSliderCtx.globalAlpha = 1;
-    for (let x = 0; x < Math.ceil((alphaSliderCanvas.width - 2) / 6) + 1; x++) {
-        for (let y = 0; y <= 2; y++) {
-            alphaSliderCtx.fillStyle = ((x + y) % 2) ? "#ededed" : "#cccccc";
-            alphaSliderCtx.fillRect(x * 6 + 1, y * 6, 6, 6);
+    if (newHue) {
+        let imageData = colorCtx.getImageData(0, 0, colorCanvas.width, colorCanvas.height);
+        let rgbval = hslToRgb(colorSlider.value/360, 1, 0.5);
+        for (let y = 0; y < colorCanvas.height; ++y) {
+            for (let x = 0; x < colorCanvas.width; ++x) {
+                let index = x*4+y*colorCanvas.width*4;
+                let darknessFactor = 1-(y/colorCanvas.height);
+                let lightnessFactor = 1-(x/colorCanvas.width);
+                imageData.data[index] = (rgbval[0]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
+                imageData.data[index+1] = (rgbval[1]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
+                imageData.data[index+2] = (rgbval[2]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
+                imageData.data[index+3] = 255;
+            }
         }
-    }
-    for (let x = 0; x < alphaSliderCanvas.width; x++) {
-        alphaSliderCtx.globalAlpha = 1 - x / alphaSliderCanvas.width;
-        alphaSliderCtx.fillStyle = getRGBFromRGBA(currColor);
-        alphaSliderCtx.fillRect(x, 0, 1, alphaSliderCanvas.height);
+        colorCtx.putImageData(imageData, 0, 0);
+        newHue = false;
+    } 
+    
+    if (newRGB) {
+        alphaSliderCtx.globalAlpha = 1;
+        for (let x = 0; x < Math.ceil((alphaSliderCanvas.width - 2) / 6) + 1; x++) {
+            for (let y = 0; y <= 2; y++) {
+                alphaSliderCtx.fillStyle = ((x + y) % 2) ? "#ededed" : "#cccccc";
+                alphaSliderCtx.fillRect(x * 6 + 1, y * 6, 6, 6);
+            }
+        }
+        for (let x = 0; x < alphaSliderCanvas.width; x++) {
+            alphaSliderCtx.globalAlpha = 1 - x / alphaSliderCanvas.width;
+            alphaSliderCtx.fillStyle = getRGBFromRGBA(currColor);
+            alphaSliderCtx.fillRect(x, 0, 1, alphaSliderCanvas.height);
+        }
+        newRGB = false;
     }
 }
 
@@ -98,19 +107,37 @@ function updateColorPicker() {
         color.setAlpha(1 - alphaSlider.value / 100);
         let newColor = color.getRGBA();
         
-        if (newColor !== currColor) usingNewColor = true;
+        if (newColor !== currColor) {
+            usingNewColor = true;
+            circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
+            document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
+        }
+        
+        if (getRGBFromRGBA(newColor) !== getRGBFromRGBA(currColor)) {
+            newRGB = true;
+        }
+        
         currColor = newColor;
     }
 
-    circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
     circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))";
-    document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
 }
 
 let colorUpdateClock;
-function colorUpdate()  {
+function colorUpdate(forceRerender) { // Updates all the stuff
+    if (colorSlider.value != oldHueValue) {
+        newHue = true;
+        document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb', "background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
+    }
+    oldHueValue = colorSlider.value;
+    
+    if (forceRerender) {
+        newRGB = true;
+        document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
+        circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
+    }
+    
     updateColorPicker();
-    document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb', "background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
 	updateCanvas();
 }
 function updatePalette() {
@@ -124,6 +151,7 @@ function updatePalette() {
             updateColorPickerFromRGB(palette[i]);
             usingNewColor = true;
             justPickedPalette = true;
+            newHue = newRGB = true; // Hehe nice syntax
         });
 		paletteContainer.appendChild(newPaletteEntry);
 	}
