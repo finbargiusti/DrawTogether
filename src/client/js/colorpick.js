@@ -125,13 +125,13 @@ function updateColorPicker() {
 
 let colorUpdateClock;
 function colorUpdate(forceRerender) { // Updates all the stuff
-    if (colorSlider.value != oldHueValue) {
+    if (colorSlider.value != oldHueValue || newHue) {
         newHue = true;
         document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb', "background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
     }
     oldHueValue = colorSlider.value;
     
-    if (forceRerender) {
+    if (forceRerender || newRGB) {
         newRGB = true;
         document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
         circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
