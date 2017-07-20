@@ -406,9 +406,10 @@ canvas {
     transform: rotate(90deg) translateY(-7px);
 }
 #alphaSlider canvas {
-    background-color:red;
     margin-left:-1px;
     margin-top:2px;
+    border-radius: 14px;
+    background: -webkit-linear-gradient(left, rgba(30,87,153,1) 0%,rgba(125,185,232,0) 100%);
 }
 #alphaSlider input {
     z-index: 100;
@@ -418,9 +419,11 @@ canvas {
 }
 #alphaSlider input::-webkit-slider-thumb {
     z-index: 100;
-    width:8px;
-    background-color:black;
-    height:12px;
+    width:26px;
+    background-color:rgba(30,87,153,1);
+    height:26px;
+    border-radius: 20px;
+    border: 1px solid white;
 }
 #alphaSlider input::-webkit-slider-runnable-track {
     z-index: 100;
