@@ -1,3 +1,7 @@
+sizeSlider.addEventListener("change", function() {
+    brushSize = Number(sizeSlider.value);
+});
+
 function handleDrawingInstructions(arr) {
   for (let i = 0; i < arr.length; ++i) {
       let instruction = arr[i]

@@ -1,84 +1,85 @@
 <!DOCTYPE html>
 <html>
-        <head>
-                <title>DrawTogether</title>
-                <meta charset="utf-8">
-         <link rel="stylesheet" href="css/main.css" / >
-         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-        </head>
-        <body>
-                <h1>DrawTogether</h1>
-                <div id="controls">
-                    <button id="createLobby">Create new lobby</button>
-                    <div id="joinLobby">
-                        <input type="text" maxlength="5" placeholder="Lobby id" id="lobbyId"/>
-                        <button id="submitId">Join</button>
+    <head>
+        <title>DrawTogether</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="css/main.css" / >
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    </head>
+    <body>
+        <h1>DrawTogether</h1>
+        <div id="controls">
+            <button id="createLobby">Create new lobby</button>
+            <div id="joinLobby">
+                <input type="text" maxlength="5" placeholder="Lobby id" id="lobbyId"/>
+                <button id="submitId">Join</button>
+            </div>
+        </div>
+        <div id="options" class="popupHolder">
+            <div class="popup" id="optionsmenu">
+                <h3 class="topbar">Options</h3>
+                <i class="fa fa-window-close fa-lg" aria-hidden="true" style="color:white" id="createLobbyClose"></i>
+                <span >Width: </span><input type="number" id="createLobbyWidth"/ value="800"><br/>
+                <span >Height: </span><input type="number" id="createLobbyHeight" value="550" /><br>
+                <span>Background color: </span><input type="text" id="createLobbyBgColor" value="ghostwhite"/>
+                <button id="createLobbyConfirm">Done</button>
+            </div>
+        </div>
+        <div id="writingUtensils">
+            <p id="idDisplay" ></p>
+            <div id="utensils">
+                <input type="radio" name="dank" id="pencil" checked/>
+                <label for="pencil" id="Lpencil">
+                     <i class="fa fa-pencil" ></i>
+                </label>
+                <input type="radio" name="dank" id="rubber"/>
+                <label for="rubber" id="Lrubber">
+                    <i class="fa fa-eraser"></i>
+                </label>
+                <input type="radio" name="dank" id="brush"/>
+                <label for="brush" id="Lbrush">
+                    <i class="fa fa-paint-brush"></i>
+                </label>
+                <div class="seperator"></div>
+                <div id="openColorPickMenu"></div>
+                <i class="fa fa-eyedropper" for="eyeDropCheck" id="eyeDrop"></i>
+                <div class="seperator" style="transform:translateY(8px) translateX(2px);"></div>
+                <span id="sizeSelect">
+                    <span>Size: </span>
+                    <input type="range" class="customslider" id="sizeSlider" min="1" max="40" value="3"/>
+                </span>
+            </div>
+            <div id="canvases">
+                <canvas id="canvas" width="800" height="550"></canvas>
+                <canvas id="playerCanvas" width="800" height="550"></canvas>
+            </div>
+        </div>
+        <div class="popupHolder" id="colorpick" style="display:block">
+            <div class="popup" id="colorpickmenu">
+                <h3 class="topbar">Pick a color..</h3>
+                <i class="fa fa-window-close fa-lg" id="colorpickclose" aria-hidden="true" style="color:white" id="createLobbyClose"></i>
+                <div>
+                    <canvas width=355 height=150 id="colorpickcanvas"></canvas>
+                    <div id="selectcircle"></div>
+                    <div>
+                        <canvas width=355 height=12 id="colorslidercanvas"></canvas>
+                        <input type="range" min="0" max="360" value="0" class="customslider" id="colorSlider">
+                    </div>
+                    <div id="recentColorContainer">
                     </div>
                 </div>
-                <div id="options" class="popupHolder">
-                    <div class="popup" id="optionsmenu">
-                        <h3 class="topbar">Options</h3>
-                        <i class="fa fa-window-close fa-lg" aria-hidden="true" style="color:white" id="createLobbyClose"></i>
-                        <span >Width: </span><input type="number" id="createLobbyWidth"/ value="800"><br/>
-                        <span >Height: </span><input type="number" id="createLobbyHeight" value="550" /><br>
-                        <span>Background color: </span><input type="text" id="createLobbyBgColor" value="ghostwhite"/>
-                        <button id="createLobbyConfirm">Done</button>
-                    </div>
+                <div id="alphaSlider">
+                    <canvas width=180 height=12 id="alphaslidercanvas"></canvas>
+                    <input type="range" min="0" max="360" value="0" class="customslider"/>
                 </div>
-                <div id="writingUtensils">
-                    <p id="idDisplay" ></p>
-                    <div id="utensils">
-                        <input type="radio" name="dank" id="pencil" checked/>
-                        <label for="pencil" id="Lpencil">
-                             <i class="fa fa-pencil" ></i>
-                        </label>
-                        <input type="radio" name="dank" id="rubber"/>
-                        <label for="rubber" id="Lrubber">
-                            <i class="fa fa-eraser"></i>
-                        </label>
-                        <input type="radio" name="dank" id="brush"/>
-                        <label for="brush" id="Lbrush">
-                            <i class="fa fa-paint-brush"></i>
-                        </label>
-                        <div class="seperator"></div>
-                        <div id="openColorPickMenu"></div>
-                        <i class="fa fa-eyedropper" for="eyeDropCheck" id="eyeDrop"></i>
-                        <div class="seperator" style="transform:translateY(8px) translateX(2px);"></div>
-                        <span id="sizeSelect">
-                            <span>Size: </span>
-                            <input type="range" class="customslider" id="sizeSlider" min="1" max="40" value="3"/>
-                        </span>
-                    </div>
-                    <div id="canvases">
-                        <canvas id="canvas" width="800" height="550"></canvas>
-                        <canvas id="playerCanvas" width="800" height="550"></canvas>
-                    </div>
-                </div>
-                <div class="popupHolder" id="colorpick" style="display:block">
-                    <div class="popup" id="colorpickmenu">
-                        <h3 class="topbar">Pick a color..</h3>
-                        <i class="fa fa-window-close fa-lg" id="colorpickclose" aria-hidden="true" style="color:white" id="createLobbyClose"></i>
-                        <div>
-                            <canvas width=355 height=150 id="colorpickcanvas"></canvas>
-                            <div id="selectcircle"></div>
-                            <div>
-                                <canvas width=355 height=12 id="colorslidercanvas"></canvas>
-                                <input type="range" min="0" max="360" value="0" class="customslider" id="colorSlider">
-                            </div>
-                            <div id="recentColorContainer">
-                            </div>
-                        </div>
-                        <div id="alphaSlider">
-                            <canvas width=180 height=12 id="alphaslidercanvas"></canvas>
-                            <input type="range" min="0" max="360" value="0" class="customslider"/>
-                        </div>
-                    </div>
-                </div>
-                <script src="js/main.js"></script>
-                <script src="js/lobby.js"></script>
-                <script src="js/communication.js"></script>
-                <script src="js/drag.js"></script>
-                <script src="js/colorpick.js"></script>
-                <script src="js/lib.js"></script>
-        </body>
+            </div>
+        </div>
+        <script src="js/main.js"></script>
+        <script src="js/menu.js"></script>
+        <script src="js/lobby.js"></script>
+        <script src="js/communication.js"></script>
+        <script src="js/drag.js"></script>
+        <script src="js/colorpick.js"></script>
+        <script src="js/lib.js"></script>
+    </body>
 </html>

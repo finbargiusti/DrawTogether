@@ -11,6 +11,37 @@ let justPickedPalette = false;
 let circleX = 0;
 let circleY = colorCanvas.height;
 
+closeColorPickButton.addEventListener("click", function() {
+    clearInterval(colorUpdateClock);
+    openColorPickButton.style.backgroundColor = currColor;
+});
+openColorPickButton.addEventListener("click", function() {
+    colorUpdateClock = setInterval(colorUpdate);
+    colorPickContainer.style.display = "block";
+});
+colorCanvas.addEventListener("mousedown", function() {
+	draggingColor = true;
+	circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
+	circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
+	updateColorPicker();
+});
+
+window.addEventListener("mouseup", function() {
+	draggingColor = false;
+});
+document.addEventListener("mousemove", function() {
+	if (draggingColor) {
+        justPickedPalette = false;
+		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
+		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
+		updateColorPicker();
+	}
+});
+
+colorSlider.addEventListener("mousedown", function() {
+    justPickedPalette = false;
+});
+
 for (let i = 0;i < sliderCanvas.width; ++i) {
     sliderCtx.beginPath();
     sliderCtx.rect(i, 0, 1, sliderCanvas.height);
@@ -33,30 +64,6 @@ function updateCanvas() {
 	}
 	colorCtx.putImageData(imageData, 0, 0);
 }
-
-colorCanvas.addEventListener("mousedown", function() {
-	draggingColor = true;
-	circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
-	circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
-	updateColorPicker();
-});
-
-window.addEventListener("mouseup", function() {
-	draggingColor = false;
-});
-
-document.addEventListener("mousemove", function() {
-	if (draggingColor) {
-        justPickedPalette = false;
-		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
-		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
-		updateColorPicker();
-	}
-});
-
-colorSlider.addEventListener("mousedown", function() {
-    justPickedPalette = false;
-});
 
 function updateColorPicker() {
     let color = new Color();

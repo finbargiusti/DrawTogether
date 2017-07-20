@@ -30,26 +30,6 @@ function handlePlayerUpdate(update) {
     playerData[update[0]] = update.slice(1);
 }
 
-function createLobbyRequest(width, height, bgColor) {
-    if (connected && !connectingToLobby) {
-        connectingToLobby = true;
-
-        socket.send(JSON.stringify([0, width, height, bgColor]));
-
-        socket.onmessage = lobbyJoinHandler;
-    }
-}
-
-function joinLobbyRequest(ID) {
-    if (connected && !connectingToLobby) {
-        connectingToLobby = true;
-
-        socket.send(JSON.stringify([1, ID]));
-
-        socket.onmessage = lobbyJoinHandler;
-    }
-}
-
 function joinLobby(width, height, backgroundColor) {
     console.log(width, height, backgroundColor)
     bgColor = backgroundColor;
