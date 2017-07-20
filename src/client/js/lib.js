@@ -91,7 +91,7 @@ var Color = function(startR, startG, startB, startA) {
     }
 
     this.getRGBA = function() {
-        return "rgba(" + Math.floor(this._r) + ", " + Math.floor(this._g) + ", " + Math.floor(this._b) + ", " + this._a.toFixed(3) + ")";
+        return "rgba(" + Math.floor(this._r) + "," + Math.floor(this._g) + "," + Math.floor(this._b) + "," + Number(this._a.toFixed(2)) + ")";
     }
 
     this.getHex = function() {

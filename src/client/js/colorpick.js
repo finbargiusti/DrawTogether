@@ -5,6 +5,9 @@ let sliderCtx = sliderCanvas.getContext("2d");
 let colorSlider = document.getElementById("colorSlider");
 let circleSelect = document.getElementById("selectcircle");
 let paletteContainer = document.getElementById("recentColorContainer");
+let alphaSlider = document.getElementById("alphaSliderRange");
+let alphaSliderCanvas = document.getElementById("alphaslidercanvas");
+let alphaSliderCtx = alphaSliderCanvas.getContext("2d");
 let draggingColor = false;
 let usingNewColor = false;
 let justPickedPalette = false;
@@ -51,7 +54,7 @@ eyeDropSelect.addEventListener("click", function() {
     }
 });
 
-for (let i = 0;i < sliderCanvas.width; ++i) {
+for (let i = 0; i < sliderCanvas.width; ++i) {
     sliderCtx.beginPath();
     sliderCtx.rect(i, 0, 1, sliderCanvas.height);
     sliderCtx.fillStyle = "hsl(" + (i/sliderCanvas.width*360) + ", 100%, 50%)";
@@ -72,6 +75,19 @@ function updateCanvas() {
 		}
 	}
 	colorCtx.putImageData(imageData, 0, 0);
+    
+    alphaSliderCtx.globalAlpha = 1;
+    for (let x = 0; x < Math.ceil((alphaSliderCanvas.width - 2) / 6) + 1; x++) {
+        for (let y = 0; y <= 2; y++) {
+            alphaSliderCtx.fillStyle = ((x + y) % 2) ? "#ededed" : "#cccccc";
+            alphaSliderCtx.fillRect(x * 6 + 1, y * 6, 6, 6);
+        }
+    }
+    for (let x = 0; x < alphaSliderCanvas.width; x++) {
+        alphaSliderCtx.globalAlpha = 1 - x / alphaSliderCanvas.width;
+        alphaSliderCtx.fillStyle = getRGBFromRGBA(currColor);
+        alphaSliderCtx.fillRect(x, 0, 1, alphaSliderCanvas.height);
+    }
 }
 
 function updateColorPicker() {
@@ -79,19 +95,22 @@ function updateColorPicker() {
     color.setHSV(colorSlider.value, circleX/colorCanvas.width, 1 - circleY/colorCanvas.height);
 
     if (!justPickedPalette) {
-        let newColor = color.getRGB();
+        color.setAlpha(1 - alphaSlider.value / 100);
+        let newColor = color.getRGBA();
+        
         if (newColor !== currColor) usingNewColor = true;
         currColor = newColor;
     }
 
-    circleSelect.style.backgroundColor = currColor;
-    circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))"	;
+    circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
+    circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))";
+    document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background-color: " + currColor);
 }
 
 let colorUpdateClock;
 function colorUpdate()  {
     updateColorPicker();
-    document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb',"background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
+    document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb', "background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
 	updateCanvas();
 }
 function updatePalette() {
@@ -111,9 +130,15 @@ function updatePalette() {
 }
 
 function updateColorPickerFromRGB(rgb) {
-    let rgbArr = rgb.slice(4).slice(0, -1).split(",");
-    let hsv = rgbToHsv(rgbArr[0], rgbArr[1], rgbArr[2]);
+    let rgbaArr = rgb.slice(5).slice(0, -1).split(",");
+    let hsv = rgbToHsv(rgbaArr[0], rgbaArr[1], rgbaArr[2]);
     colorSlider.value = hsv[0] * 360;
     circleX = hsv[1] * colorCanvas.width;
     circleY = (1 - hsv[2]) * colorCanvas.height;
+    alphaSlider.value = (1 - rgbaArr[3]) * 100;
+}
+
+function getRGBFromRGBA(rgb) {
+    let rgbArr = rgb.slice(5).slice(0, -1).split(",");
+    return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
 }

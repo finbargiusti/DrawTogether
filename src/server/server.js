@@ -43,7 +43,7 @@ function Lobby(id, width, height, bgColor) {
     this.height = height;
     this.bgColor = bgColor;
     this.instructions = [];
-    this.palette = ["rgb(0,0,0)"];
+    this.palette = ["rgba(0,0,0,1)"];
     
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
