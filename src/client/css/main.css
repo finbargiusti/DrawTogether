@@ -2,6 +2,9 @@
     font-family: title;
     src: url(../fonts/roboto-bold.ttf);
 }
+* {
+    user-select: none;
+}
 body {
     background-color:ghostwhite;
     font-family:title;
@@ -198,14 +201,14 @@ span {
 .popupHolder    {
     top:0;
     left:0;
-    right:0;
-    bottom:0;
+    height:100%;
+    width:100%;
     position:fixed;
     display:none;
     background-color:rgba(0, 0, 0, 0.4);
 }
 .popup {
-    box-shadow:2px 2px 1px gray;
+    box-shadow:0px 0px 7px rgba(0,0,0,0.4);
     border-radius:5px;
     position:absolute;
     top:50%;
@@ -296,6 +299,10 @@ canvas {
     border: 1px solid black;
 }
 #colorpick {
+    top:50%;
+    left:50%;
+    width:0;
+    height:0;
     display:none;
 }
 #colorSlider {

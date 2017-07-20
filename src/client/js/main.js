@@ -26,7 +26,7 @@ let validationClock;
 let ctx = null;
 let playerCtx = null;
 let bgColor = null;
-let mouseX = 0, mouseY = 0, mousePressed = false;
+let mouseX = 0, mouseY = 0, isDrawing = false;
 let lastPosition = {x: 0, y: 0};
 let currColor = "rgb(0,0,0)";
 let brushSize = Number(sizeSlider.value);
@@ -53,7 +53,7 @@ document.addEventListener("mousemove", function(event) {
         socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), (eyeDropperSelected)?currEyeDropperColor:currColor, getCursorType(), brushSize]));
     }
 
-    if (mousePressed && !eyeDropperSelected && colorPickContainer.style.display === "none" && currentUI == "draw") {
+    if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
         if (pencilRadio.checked) { // Draw line
             socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
         } else if (rubberRadio.checked) { // Erase line
@@ -90,11 +90,12 @@ document.addEventListener("mousedown", function() {
         eyeDropSelect.style.textShadow = "none";
         openColorPickButton.style.backgroundColor = currColor;
     }
-    
-    mousePressed = true;
+});
+canvas.addEventListener("mousedown", function() {
+    isDrawing = true;
 });
 document.addEventListener("mouseup", function() {
-    mousePressed = false;
+    isDrawing = false;
     setTimeout(function() {
         justDisabledEyedropper = false;
     });
