@@ -54,7 +54,7 @@
                         <canvas id="playerCanvas" width="800" height="550"></canvas>
                     </div>
                 </div>
-                <div class="popupHolder" id="colorpick">
+                <div class="popupHolder" id="colorpick" style="display:block">
                     <div class="popup" id="colorpickmenu">
                         <h3 class="topbar">Pick a color..</h3>
                         <i class="fa fa-window-close fa-lg" id="colorpickclose" aria-hidden="true" style="color:white" id="createLobbyClose"></i>
@@ -66,8 +66,11 @@
                                 <input type="range" min="0" max="360" value="0" class="customslider" id="colorSlider">
                             </div>
                             <div id="recentColorContainer">
-
                             </div>
+                        </div>
+                        <div id="alphaSlider">
+                            <canvas width=180 height=12 id="alphaslidercanvas"></canvas>
+                            <input type="range" min="0" max="360" value="0" class="customslider"/>
                         </div>
                     </div>
                 </div>
