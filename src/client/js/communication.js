@@ -19,6 +19,9 @@ function serverCommandHandler(event) {
         handlePlayerUpdate(data[1]);
     } else if (data[0] === 2) { // Player disconnect
         delete playerData[data[1][0]];
+    } else if (data[0] === 3) { // Palette update
+        palette = data[1];
+        updatePalette();
     }
 }
 
@@ -79,6 +82,8 @@ function lobbyJoinHandler(event) {
 
         let startTime = window.performance.now();
         handleDrawingInstructions(command[2]);
+        palette = command[6];
+        updatePalette();
         requestAnimationFrame(updatePlayerCanvas);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
 

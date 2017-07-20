@@ -3,11 +3,10 @@ let colorCtx = colorCanvas.getContext("2d");
 let sliderCanvas = document.getElementById("colorslidercanvas");
 let sliderCtx = sliderCanvas.getContext("2d");
 let colorSlider = document.getElementById("colorSlider");
-let sliderThumb = window.getComputedStyle(
-	document.querySelector('#colorSlider'), '::slider-thumb'
-);
 let circleSelect = document.getElementById("selectcircle");
+let paletteContainer = document.getElementById("recentColorContainer");
 let draggingColor = false;
+let usingNewColor = false;
 let circleX;
 let circleY;
 for (let i = 0;i < sliderCanvas.width; ++i) {
@@ -53,9 +52,12 @@ document.addEventListener("mousemove", function() {
 })
 
 function updateCircleSelect() {
-    let rgb = hslToRgb(colorSlider.value / 360, circleX/colorCanvas.width, (0.5+(1-circleX/colorCanvas.width)*0.5) * (1-circleY/colorCanvas.height));
+    let rgb = hslToRgb(colorSlider.value / 360, circleX/(colorCanvas.width-1), (0.5+(1-circleX/(colorCanvas.width-1))*0.5) * (1-circleY/(colorCanvas.height-1)));
 
-		currColor = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+
+		let newColor = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+    if (newColor !== currColor) usingNewColor = true;
+    currColor = newColor;
 		circleSelect.style.backgroundColor = currColor;
 		circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))"	;
 }
@@ -66,6 +68,33 @@ function colorUpdate()  {
   document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb',"background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
 	updateCanvas();
 }
+function updatePalette() {
+	recentColorContainer.innerHTML = "";
+	for (let i = 0; i < palette.length; i += (533 / 533)) {
+		let newPaletteEntry = document.createElement("div");
+		newPaletteEntry.className = "recentColor";
+		newPaletteEntry.style.backgroundColor = palette[i];
+        newPaletteEntry.addEventListener("click", function() {
+            currColor = palette[i];
+
+            let rawRgb = palette[i].slice(4).slice(0, -1);
+            let rgbArr = rawRgb.split(",");
+
+            console.log(rgbArr)
+
+            let hsv = rgbToHsv(rgbArr[0], rgbArr[1], rgbArr[2]);
+
+            console.log(hsv)
+
+            colorSlider.value = hsv[0] * 360;
+            circleX = hsv[1] * colorCanvas.width;
+            circleY = (1 - hsv[2]) * colorCanvas.height;
+        });
+		paletteContainer.appendChild(newPaletteEntry);
+	}
+}
+
+
 function hslToRgb(h, s, l){
     var r, g, b;
 
@@ -89,4 +118,28 @@ function hslToRgb(h, s, l){
     }
 
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function rgbToHsv(r, g, b) {
+  r /= 255, g /= 255, b /= 255;
+
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+
+  var d = max - min;
+  s = max == 0 ? 0 : d / max;
+
+  if (max == min) {
+    h = 0; // achromatic
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  return [ h, s, v ];
 }

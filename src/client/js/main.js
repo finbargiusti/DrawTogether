@@ -35,6 +35,7 @@ let eyeDropSelect = document.getElementById("eyeDrop");
 let eyeDropperSelected = false;
 let currentUI = "menu";
 let currEyeDropperColor = null;
+let palette = [];
 
 document.getElementById("colorpick").style.display = "none";
 
@@ -82,12 +83,17 @@ document.addEventListener("mousemove", function(event) {
         } else if (brushRadio.checked) { // Brush line
             socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
         }
+
+        if (usingNewColor && (pencilRadio.checked || brushRadio.checked)) {
+            socket.send(JSON.stringify([50, currColor]));
+            usingNewColor = false;
+        }
     }
 
     if (eyeDropperSelected) {
         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let currentIndex = (Math.clamp(thisPosition.x, 0, canvas.width)*4)+Math.clamp(thisPosition.y, 0, canvas.height)*canvas.width*4;
-        currEyeDropperColor = "rgb("+imageData.data[currentIndex] +", "+ imageData.data[currentIndex+1] + ", " + imageData.data[currentIndex+2] + ")"
+        currEyeDropperColor = "rgb("+imageData.data[currentIndex] +","+ imageData.data[currentIndex+1] + "," + imageData.data[currentIndex+2] + ")"
     }
 
     lastPosition.x = mouseXElement(canvas), lastPosition.y = mouseYElement(canvas);
@@ -97,6 +103,7 @@ sizeSlider.addEventListener("change", function() {
 });
 document.addEventListener("mousedown", function() {
     if (eyeDropperSelected) {
+      if (currEyeDropperColor !== currColor) usingNewColor = true;
       currColor = currEyeDropperColor;
       eyeDropperSelected = false;
       document.getElementById("openColorPickMenu").style.backgroundColor = currColor;

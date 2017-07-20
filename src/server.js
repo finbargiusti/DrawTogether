@@ -43,11 +43,12 @@ function Lobby(id, width, height, bgColor) {
     this.height = height;
     this.bgColor = bgColor;
     this.instructions = [];
+    this.palette = ["rgb(0,0,0)"];
 }
 
 function sendJoinLobbyInstruction(socket, lobby) {
     socket.send(JSON.stringify([0, lobby.id, lobby.instructions, lobby.width,
-                               lobby.height, lobby.bgColor]));
+                               lobby.height, lobby.bgColor, lobby.palette]));
 }
 
 function onPlayerDisconnect(socket) {
@@ -108,12 +109,35 @@ function handleCommand(command, socket) {
         } else if (command[0] === 9) { // Player update
             for (var sckt in sockets) {
                 if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID && sockets[sckt] !== socket) {
-                    sockets[sckt].send(JSON.stringify([1, [socket.DTData.id, 
-                                                      command[1], command[2], 
-                                                      command[3], command[4], 
+                    sockets[sckt].send(JSON.stringify([1, [socket.DTData.id,
+                                                      command[1], command[2],
+                                                      command[3], command[4],
                                                       command[5]]]));
                 }
             }
+        } else if (command[0] === 50) { // New color
+          for (var i = 0; i < lobbies.length; ++i) {
+              if (lobbies[i].id === socket.DTData.lobbyID) {
+                  lobbies[i].palette.unshift(command[1]);
+
+                  for (var j = 1; j < lobbies[i].palette.length; ++j) {
+                      if (lobbies[i].palette[j] === command[1]) {
+                          lobbies[i].palette.splice(j, 1);
+                          break;
+                      }
+                  }
+
+                  if (lobbies[i].palette.length > 20) lobbies[i].palette = lobbies[i].palette.slice(0, 20);
+
+                  for (var sckt in sockets) {
+                      if (sockets[sckt].DTData.lobbyID === socket.DTData.lobbyID) {
+                          sockets[sckt].send(JSON.stringify([3, lobbies[i].palette]));
+                      }
+                  }
+
+                  break;
+              }
+          }
         }
     } catch (e) {
         console.error(e);
