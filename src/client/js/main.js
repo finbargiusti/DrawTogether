@@ -102,9 +102,12 @@ canvas.addEventListener("mousedown", function() {
     if (brushRadio.checked) lineType = "brush";
     
     addLine("localLine", lastPosition, lineType, brushSize, currColor);
+    //socket.send(JSON.stringify([10]));
 });
 document.addEventListener("mouseup", function() {
     isDrawing = false;
+    if (currentLines["localLine"]) currentLines["localLine"].combine();
+    
     setTimeout(function() {
         justDisabledEyedropper = false;
     });

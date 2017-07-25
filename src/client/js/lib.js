@@ -394,3 +394,14 @@ function hermite(t, points, tangents, knots, derivative, result) {
 
   return v;
 }
+
+let stopwatchEventStartTimes = {};
+let stopwatch = {
+    start: function(name) {
+        stopwatchEventStartTimes[name] = window.performance.now();
+    },
+    end: function(name) {
+        console.log("Timer '" + name + "' took " + (window.performance.now() - stopwatchEventStartTimes[name]).toFixed(3) + "ms.");
+        delete stopwatchEventStartTimes[name];
+    }
+}
