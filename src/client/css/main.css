@@ -46,21 +46,20 @@ h1 {
     transform:translateX(-50%);
     position:relative;
 }
-#canvas {
-    position:absolute;
-    z-index:1;
-    background: ghostwhite;
-    border: 1px solid gray;
+#canvases canvas {
+    position: absolute;
     border-radius: 12px;
     cursor: none;
+    border: 1px solid transparent;
+    pointer-events: none;
+}
+#mainCanvas {
+    z-index:1;
+    border: 1px solid gray !IMPORTANT;
+    pointer-events: auto !IMPORTANT;
 }
 #playerCanvas {
-        position:absolute;
-        z-index:2;
-        border: 1px solid transparent;
-        border-radius: 12px;
-        cursor: none;
-        pointer-events: none;
+    z-index:100000;
 }
 #writingUtensils {
     display:none;

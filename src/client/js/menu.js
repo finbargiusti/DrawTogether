@@ -7,6 +7,7 @@ createLobbyBtn.addEventListener("click", function() {
 createLobbyConfirm.addEventListener("click", function() {
     if (validateCreateLobby()) {
         createLobbyRequest(parseInt(createLobbyWidth.value), parseInt(createLobbyHeight.value), createLobbyBgColor.value);
+        clearInterval(validationClock);
     }
 });
 submitIDBtn.addEventListener("click", function() {

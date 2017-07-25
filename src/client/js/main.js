@@ -3,7 +3,7 @@ let createLobbyBtn = document.getElementById("createLobby");
 let writingUtensils = document.getElementById("writingUtensils");
 let submitIDBtn = document.getElementById("submitId");
 let lobbyIDInput = document.getElementById("lobbyId");
-let canvas = document.getElementById("canvas");
+let canvas = document.getElementById("mainCanvas");
 let playerCanvas = document.getElementById("playerCanvas");
 let idDisplayP = document.getElementById("idDisplay");
 let pencilRadio = document.getElementById("pencil");
@@ -54,7 +54,9 @@ document.addEventListener("mousemove", function(event) {
     }
 
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
-        if (pencilRadio.checked) { // Draw line
+        currentLines["localLine"].extendLine(thisPosition);
+        
+        /*if (pencilRadio.checked) { // Draw line
             socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
         } else if (rubberRadio.checked) { // Erase line
             socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), brushSize]));
@@ -65,7 +67,7 @@ document.addEventListener("mousemove", function(event) {
         if (usingNewColor && (pencilRadio.checked || brushRadio.checked)) { // Send new color for palette update
             socket.send(JSON.stringify([50, currColor]));
             usingNewColor = false;
-        }
+        }*/
     }
 
     if (eyeDropperSelected) { // Update eyedropper's color based on pixel below it
@@ -93,6 +95,13 @@ document.addEventListener("mousedown", function() {
 });
 canvas.addEventListener("mousedown", function() {
     isDrawing = true;
+    
+    let lineType;
+    if (pencilRadio.checked) lineType = "pencil";
+    if (rubberRadio.checked) lineType = "rubber";
+    if (brushRadio.checked) lineType = "brush";
+    
+    addLine("localLine", lastPosition, lineType, brushSize, currColor);
 });
 document.addEventListener("mouseup", function() {
     isDrawing = false;
