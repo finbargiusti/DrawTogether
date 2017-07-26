@@ -49,7 +49,7 @@ function Line(id, startPoint, type, size, color) {
         } else if (this.type === "brush") {
             let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y);
             context.strokeStyle = color;
-            context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size);
+            context.lineWidth = Math.max(3, Math.pow(0.935, dist) * this.size);
         }
     }
     
@@ -82,8 +82,13 @@ function Line(id, startPoint, type, size, color) {
         tangents.push([0, 0]);
         
         let calcedPoints = [];
+        let lineLength = 0;
+
+        for (let i = 0; i < (this.points.length-1); ++i) {
+            lineLength += Math.hypot(this.points[i + 1].x - this.points[i].x, this.points[i + 1].y - this.points[i].y);
+        }
         
-        for (let t = 0; t < 1; t += 0.001) {
+        for (let t = 0; t < 1; t += (1/(lineLength/2))) {
             calcedPoints.push(hermite(t, points, tangents));
         }
         
