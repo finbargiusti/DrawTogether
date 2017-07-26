@@ -8,8 +8,7 @@ function Line(id, startPoint, type, size, color) {
     this.id = id;
     this.points = [startPoint];
     this.type = type;
-    this.size = size;
-    this.color = color;
+    this.size = size; this.color = color;
     this.RGB = getRGBFromRGBA(color);
     this.alpha = getAlphaFromRGBA(color);
     
@@ -20,7 +19,6 @@ function Line(id, startPoint, type, size, color) {
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("width", canvas.width);
     this.canvas.setAttribute("height", canvas.height);
-    this.canvas.style.background = "rgba(255, 0, 0, 0.05)";
     this.canvas.style.opacity = this.alpha;
     (typeof id === "number") ? this.updateZIndexFromID(id) : this.canvas.style.zIndex = 900000;
     canvasholder.appendChild(this.canvas);
@@ -53,7 +51,7 @@ function Line(id, startPoint, type, size, color) {
         } else if (this.type === "brush") {
             let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y);
             context.strokeStyle = color;
-            context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size);
+            context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size*0.8);
         }
     }
     
@@ -86,18 +84,34 @@ function Line(id, startPoint, type, size, color) {
         tangents.push([0, 0]);
         
         let calcedPoints = [];
+        let lineLength = 0;
+
+        for (let i = 0; i < (this.points.length-1); ++i) {
+            lineLength += Math.hypot(this.points[i + 1].x - this.points[i].x, this.points[i + 1].y - this.points[i].y);
+        }
         
-        for (let t = 0; t < 1; t += 0.001) {
+        for (let t = 0; t < 1; t += (1/(lineLength/2))) {
             calcedPoints.push(hermite(t, points, tangents));
         }
-        
-        ctx.beginPath();
-        ctx.moveTo(calcedPoints[0][0], calcedPoints[0][1]);
-        for (let i = 1; i < calcedPoints.length; i++) {
-            ctx.lineTo(calcedPoints[i][0], calcedPoints[i][1]);
-        }
+
         this.setLineStyle(ctx, this.color);
-        ctx.stroke();
+
+        if (this.type == "brush") { 
+            for (let i = 0; i < calcedPoints.length-1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(calcedPoints[i+1][0], calcedPoints[i+1][1]);
+                ctx.lineTo(calcedPoints[i][0], calcedPoints[i][1]);
+                ctx.lineWidth = (Math.max(1, Math.pow(0.935, 5*Math.hypot(calcedPoints[i][0] - calcedPoints[i+1][0], calcedPoints[i][1] - calcedPoints[i+1][1])) * this.size));
+                ctx.stroke();
+            }
+        } else if (this.type == "pencil" || this.type == "rubber") {
+            ctx.beginPath();
+            ctx.moveTo(calcedPoints[0][0], calcedPoints[0][1]);
+            for (let i = 0; i < calcedPoints.length; i++) {
+                ctx.lineTo(calcedPoints[i][0], calcedPoints[i][1]);
+            }
+            ctx.stroke();
+        }
         
         stopwatch.end("combine");
         
