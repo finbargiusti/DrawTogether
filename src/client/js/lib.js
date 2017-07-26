@@ -405,3 +405,13 @@ let stopwatch = {
         delete stopwatchEventStartTimes[name];
     }
 }
+
+function getNormalizedAngleDelta(alpha, beta) {
+    let difference = alpha - beta;
+    if (beta - alpha < -Math.PI) {
+        difference -= Math.PI * 2;
+    } else if (difference < -Math.PI) {
+        difference += Math.PI * 2;
+    }
+    return difference;
+}

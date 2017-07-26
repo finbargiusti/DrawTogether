@@ -75,8 +75,11 @@ document.addEventListener("mousemove", function(event) {
         let currentIndex = (Math.clamp(thisPosition.x, 0, canvas.width)*4)+Math.clamp(thisPosition.y, 0, canvas.height)*canvas.width*4;
         currEyeDropperColor = "rgba("+imageData.data[currentIndex] +","+ imageData.data[currentIndex+1] + "," + imageData.data[currentIndex+2] + ",1)";
     }
-
-    lastPosition.x = mouseXElement(canvas), lastPosition.y = mouseYElement(canvas);
+    
+    lastPosition = {
+        x: mouseXElement(canvas),
+        y: mouseYElement(canvas)
+    };
 });
 document.addEventListener("mousedown", function() {
     if (eyeDropperSelected) {

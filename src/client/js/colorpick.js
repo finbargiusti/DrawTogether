@@ -166,7 +166,12 @@ function updateColorPickerFromRGB(rgb) {
     alphaSlider.value = (1 - rgbaArr[3]) * 100;
 }
 
-function getRGBFromRGBA(rgb) {
-    let rgbArr = rgb.slice(5).slice(0, -1).split(",");
-    return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
+function getRGBFromRGBA(rgba) {
+    let rgbaArr = rgba.slice(5).slice(0, -1).split(",");
+    return "rgb(" + rgbaArr[0] + "," + rgbaArr[1] + "," + rgbaArr[2] + ")";
+}
+
+function getAlphaFromRGBA(rgba) {
+    let rgbaArr = rgba.slice(5).slice(0, -1).split(",");
+    return rgbaArr[3];
 }
