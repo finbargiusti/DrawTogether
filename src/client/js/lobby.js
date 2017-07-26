@@ -2,37 +2,21 @@ sizeSlider.addEventListener("change", function() {
     brushSize = Number(sizeSlider.value);
 });
 
-function handleDrawingInstructions(arr) {
-  for (let i = 0; i < arr.length; ++i) {
-      let instruction = arr[i]
-      if (instruction[0] === 10) { // Draw line
-          ctx.beginPath();
-          ctx.moveTo(instruction[1], instruction[2]);
-          ctx.lineTo(instruction[3], instruction[4]);
-          ctx.strokeStyle = instruction[5];
-          ctx.lineWidth = instruction[6];
-          ctx.lineCap = "round";
-          ctx.stroke();
-      } else if (instruction[0] === 11) { // Erase line
-          ctx.beginPath();
-          ctx.moveTo(instruction[1], instruction[2]);
-          ctx.lineTo(instruction[3], instruction[4]);
-          ctx.strokeStyle = bgColor;
-          ctx.lineWidth = instruction[5] * 2;
-          ctx.lineCap = "round";
-          ctx.stroke();
-      } else if (instruction[0] === 12) { // Brush line
-          let dist = Math.hypot(instruction[1] - instruction[3],
-                                instruction[2] - instruction[4]);
-          ctx.beginPath();
-          ctx.moveTo(instruction[1], instruction[2]);
-          ctx.lineTo(instruction[3], instruction[4]);
-          ctx.strokeStyle = instruction[5];
-          ctx.lineWidth = Math.max(1, Math.pow(0.935, dist) * instruction[6]);
-          ctx.lineCap = "round";
-          ctx.stroke();
-      }
-  }
+function handleLineInstruction(instruction) {
+    if (instruction[0] === 0) { // New line
+        console.log(instruction[1]);
+        
+        
+        addLine(instruction[1], {x: instruction[2], y: instruction[3]}, instruction[4], instruction[5], instruction[6]);
+        
+        console.log(currentLines)
+    } else if (instruction[0] === 1) { // Get own line ID
+        if (currentLines["localLine"]) currentLines["localLine"].updateZIndexFromID(instruction[1]);
+    } else if (instruction[0] === 2) { // Extend line        
+        currentLines[instruction[1]].extendLine({x: instruction[2], y: instruction[3]});
+    } else if (instruction[0] === 3) { // End line
+        currentLines[instruction[1]].combine();
+    }
 }
 
 function getCursorType() {

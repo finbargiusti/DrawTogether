@@ -1,6 +1,6 @@
 let connectingToLobby = false;
 let connected = false;
-let socket = new WebSocket("ws://localhost:1337/");
+let socket = new WebSocket("ws://192.168.1.102:1337/");
 
 socket.onopen = function() {
     connected = true;
@@ -13,8 +13,8 @@ socket.onclose = function() {
 function serverCommandHandler(event) {
     let data = JSON.parse(event.data);
 
-    if (data[0] === 0) { // Draw instruction
-        handleDrawingInstructions(data[1]);
+    if (data[0] === 0) { // Line instruction
+        handleLineInstruction(data[1]);
     } else if (data[0] === 1) { // Player update
         handlePlayerUpdate(data[1]);
     } else if (data[0] === 2) { // Player disconnect
@@ -60,7 +60,7 @@ function lobbyJoinHandler(event) {
         lobbyID = command[1];
 
         let startTime = window.performance.now();
-        handleDrawingInstructions(command[2]);
+        //handleDrawingInstructions(command[2]);
         palette = command[6];
         updatePalette();
         requestAnimationFrame(updatePlayerCanvas);

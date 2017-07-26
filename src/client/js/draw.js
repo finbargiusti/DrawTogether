@@ -13,12 +13,16 @@ function Line(id, startPoint, type, size, color) {
     this.RGB = getRGBFromRGBA(color);
     this.alpha = getAlphaFromRGBA(color);
     
+    this.updateZIndexFromID = function(id) {
+        this.canvas.style.zIndex = 2 + id;
+    }
+    
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("width", canvas.width);
     this.canvas.setAttribute("height", canvas.height);
     this.canvas.style.background = "rgba(255, 0, 0, 0.05)";
     this.canvas.style.opacity = this.alpha;
-    this.canvas.style.zIndex = 2;
+    (typeof id === "number") ? this.updateZIndexFromID(id) : this.canvas.style.zIndex = 900000;
     canvasholder.appendChild(this.canvas);
     
     this.ctx = this.canvas.getContext("2d");

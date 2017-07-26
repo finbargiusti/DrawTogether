@@ -55,6 +55,7 @@ document.addEventListener("mousemove", function(event) {
 
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
         currentLines["localLine"].extendLine(thisPosition);
+        socket.send(JSON.stringify([11, r(thisPosition.x), r(thisPosition.y)]));
         
         /*if (pencilRadio.checked) { // Draw line
             socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
@@ -62,12 +63,12 @@ document.addEventListener("mousemove", function(event) {
             socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), brushSize]));
         } else if (brushRadio.checked) { // Brush line
             socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
-        }
+        }*/
 
         if (usingNewColor && (pencilRadio.checked || brushRadio.checked)) { // Send new color for palette update
             socket.send(JSON.stringify([50, currColor]));
             usingNewColor = false;
-        }*/
+        }
     }
 
     if (eyeDropperSelected) { // Update eyedropper's color based on pixel below it
@@ -105,11 +106,11 @@ canvas.addEventListener("mousedown", function() {
     if (brushRadio.checked) lineType = "brush";
     
     addLine("localLine", lastPosition, lineType, brushSize, currColor);
-    //socket.send(JSON.stringify([10]));
+    socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), lineType, brushSize, currColor]));
 });
 document.addEventListener("mouseup", function() {
     isDrawing = false;
-    if (currentLines["localLine"]) currentLines["localLine"].combine();
+    if (currentLines["localLine"]) currentLines["localLine"].combine(), socket.send(JSON.stringify([12]));
     
     setTimeout(function() {
         justDisabledEyedropper = false;

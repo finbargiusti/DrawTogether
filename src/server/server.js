@@ -44,6 +44,8 @@ function Lobby(id, width, height, bgColor) {
     this.bgColor = bgColor;
     this.instructions = [];
     this.palette = ["rgba(0,0,0,1)"];
+    this.currentLineID = 0;
+    this.lines = {};
     
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
@@ -98,11 +100,24 @@ function handleCommand(command, socket) {
             } else {
                 socket.send(JSON.stringify([1]));
             }
-        } else if (command[0] === 10 || command[0] === 11 || command[0] === 12) { // Draw line, Erase line, Brush line
+        } else if (command[0] === 10) { // Start line
             var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
             
-            lobby.instructions.push(command);
-            lobby.sendMsgToMembers(JSON.stringify([0, [command]]));
+            // Send new line creation to everybody EXCEPT sender
+            lobby.sendMsgToMembers(JSON.stringify([0, [0, lobby.currentLineID, command[1], command[2], command[3], command[4], command[5]]]), socket);
+            // Send sender their line's ID
+            socket.send(JSON.stringify([0, [1, lobby.currentLineID]]));
+            socket.DTData.lineID = lobby.currentLineID;
+            
+            lobby.currentLineID++;
+        } else if (command[0] === 11) { // Extend line
+            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            
+            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.DTData.lineID, command[1], command[2]]]), socket);
+        } else if (command[0] === 12) { // End line
+            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            
+            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.lineID]]), socket);
         } else if (command[0] === 9) { // Player update
             Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
         } else if (command[0] === 50) { // New color
