@@ -68,7 +68,7 @@ function lobbyJoinHandler(event) {
 
         idDisplayP.innerHTML = "Lobby ID: <span class='lobbyIDHighlight'><b>" + lobbyID + "</b></span>";
         socket.onmessage = serverCommandHandler;
-    } else if (command[0] === 0) { // Incorrect lobby ID
+    } else if (command[0] === 1) { // Incorrect lobby ID
         alert("That lobby does not exist!");
     }
 

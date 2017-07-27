@@ -42,7 +42,7 @@ function Line(id, startPoint, type, size, color) {
     this.canvas.setAttribute("width", canvas.width);
     this.canvas.setAttribute("height", canvas.height);
     this.canvas.style.boxShadow = "0px 0px 25px rgba(238, 130, 238, 0.6)";
-    this.canvas.style.opacity = this.alpha;
+    if (this.type !== "rubber") this.canvas.style.opacity = this.alpha;
     (typeof id === "number") ? this.setZIndexFromID(id) : this.canvas.style.zIndex = 900000;
     canvasholder.appendChild(this.canvas);
     
@@ -87,6 +87,8 @@ function Line(id, startPoint, type, size, color) {
         stopwatch.start("Evolve");
         
         if (this.type !== "rubber") {
+            this.canvas.style.opacity = 1;
+            
             stopwatch.start("Clear rect");
             this.ctx.clearRect(0, 0, canvas.width, canvas.height);
             stopwatch.end("Clear rect");
@@ -165,7 +167,7 @@ function Line(id, startPoint, type, size, color) {
         
         canvasholder.removeChild(this.canvas);
         
-        if (currentLines["localLine"].id === this.id) {
+        if (currentLines["localLine"] && currentLines["localLine"].id === this.id) {
             delete currentLines["localLine"];
         }
         delete currentLines[this.id];
