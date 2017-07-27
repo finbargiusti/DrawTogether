@@ -130,7 +130,7 @@ function handleCommand(command, socket) {
             // Send sender their line's ID
             socket.send(JSON.stringify([0, [1, lobby.currentLineID]]));
             
-            let newLine = new Line(lobby.currentLineID);
+            var newLine = new Line(lobby.currentLineID);
             socket.DTData.currentLine = newLine;
             lobby.lines.push(newLine);
             
