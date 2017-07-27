@@ -28,7 +28,7 @@ let playerCtx = null;
 let bgColor = null;
 let mouseX = 0, mouseY = 0, isDrawing = false;
 let lastPosition = {x: 0, y: 0};
-let currColor = "rgb(0,0,0)";
+let currColor = "rgba(0,0,0,1)";
 let brushSize = Number(sizeSlider.value);
 let r = Math.round;
 let lobbyID = null;
@@ -54,17 +54,11 @@ document.addEventListener("mousemove", function(event) {
     }
 
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
-        if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) currentLines["localLine"].extendLine(thisPosition);
+        if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
+            currentLines["localLine"].extendLine(thisPosition);
+        }
         socket.send(JSON.stringify([11, r(thisPosition.x), r(thisPosition.y)]));
         
-        /*if (pencilRadio.checked) { // Draw line
-            socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
-        } else if (rubberRadio.checked) { // Erase line
-            socket.send(JSON.stringify([11, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), brushSize]));
-        } else if (brushRadio.checked) { // Brush line
-            socket.send(JSON.stringify([12, r(lastPosition.x), r(lastPosition.y), r(thisPosition.x), r(thisPosition.y), currColor, brushSize]));
-        }*/
-
         if (usingNewColor && (pencilRadio.checked || brushRadio.checked)) { // Send new color for palette update
             socket.send(JSON.stringify([50, currColor]));
             usingNewColor = false;
@@ -105,9 +99,7 @@ canvas.addEventListener("mousedown", function() {
     if (rubberRadio.checked) lineType = "rubber";
     if (brushRadio.checked) lineType = "brush";
     
-    if (currentLines["localLine"]) {
-        //socket.send(JSON.stringify([12]))
-    } else { // If there's no localline
+    if (!currentLines["localLine"]) { // If there's no localline
         addLine("localLine", lastPosition, lineType, brushSize, currColor);
         socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), lineType, brushSize, currColor]));
     }

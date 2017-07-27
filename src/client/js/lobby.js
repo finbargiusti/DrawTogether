@@ -2,6 +2,13 @@ sizeSlider.addEventListener("change", function() {
     brushSize = Number(sizeSlider.value);
 });
 
+dl.addEventListener("click", dlCanvas);
+function dlCanvas() {
+    var dt = canvas.toDataURL('image/png');
+    this.download = "DrawTogether@" + lobbyID;
+    this.href = dt;
+};
+
 function getCursorType() {
     let type = 0;
     if (rubberRadio.checked) {

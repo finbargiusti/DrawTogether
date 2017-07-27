@@ -58,9 +58,11 @@ function lobbyJoinHandler(event) {
     if (command[0] === 0) { // Join lobby
         joinLobby(command[3], command[4], command[5]);
         lobbyID = command[1];
+        
+        console.log(command[2]);
 
         let startTime = window.performance.now();
-        //handleDrawingInstructions(command[2]);
+        processRedrawingInstructions(command[2]);
         palette = command[6];
         updatePalette();
         requestAnimationFrame(updatePlayerCanvas);

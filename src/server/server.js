@@ -18,7 +18,7 @@ server.on("connection", function(ws) {
         sockets[currentSocketID] = ws;
         var thisID = currentSocketID;
 
-        ws.DTData = {
+        ws.appData = {
             id: currentSocketID,
             currentLine: null
         };
@@ -51,22 +51,33 @@ function Lobby(id, width, height, bgColor) {
     
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
-            if (sockets[sckt].DTData.lobbyID === this.id && ((excludedSocket) ? sockets[sckt] !== excludedSocket : true)) {
+            if (sockets[sckt].appData.lobbyID === this.id && ((excludedSocket) ? sockets[sckt] !== excludedSocket : true)) {
                 sockets[sckt].send(msg);
             }
         }
     }
     
     this.sendJoinInstruction = function(socket) {
-        socket.send(JSON.stringify([0, this.id, this.instructions, this.width, this.height, this.bgColor, this.palette]));
+        socket.send(JSON.stringify([0, this.id, this.generateRedrawingInstructions(), this.width, this.height, this.bgColor, this.palette]));
+    }
+    
+    this.generateRedrawingInstructions = function() {
+        var instructions = [];
+        
+        for (var i = 0; i < this.instructions.length; i++) {
+            var instruction = this.instructions[i];
+            
+            instructions.push([instruction.points, instruction.type, instruction.size, instruction.color]);
+        }
+        
+        return instructions;
     }
     
     this.tryLineCollapse = function() {
-        if (this.lines.length) {
-            console.log(this.lines);
-            
+        if (this.lines.length) {            
             while (this.lines[0].completed === true) {
                 this.sendMsgToMembers(JSON.stringify([0, [4, this.lines[0].id]]));
+                this.instructions.push(this.lines[0]);
                 this.lines.splice(0, 1);
                 
                 if (!this.lines.length) {
@@ -85,14 +96,18 @@ Lobby.prototype.getLobbyByID = function(ID) {
     return null;
 }
 
-function Line(id) {
+function Line(id, startPoint, type, size, color) {
     this.id = id;
     this.completed = false;
+    this.points = [startPoint];
+    this.type = type;
+    this.size = size;
+    this.color = color;
 }
 
 function onPlayerDisconnect(socket) {
     try {
-        Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([2, [socket.DTData.id]]), socket);
+        Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(JSON.stringify([2, [socket.appData.id]]), socket);
     } catch(e) {}
 }
 
@@ -111,46 +126,50 @@ function handleCommand(command, socket) {
 
             var newLobby = new Lobby(newLobbyID, command[1], command[2], command[3]);
             lobbies.push(newLobby);
-            socket.DTData.lobbyID = newLobbyID;
+            socket.appData.lobbyID = newLobbyID;
             newLobby.sendJoinInstruction(socket);
         } else if (command[0] === 1) { // Join lobby
             var lobby = Lobby.prototype.getLobbyByID(command[1]);
             
             if (lobby) {
-                socket.DTData.lobbyID = command[1];
+                socket.appData.lobbyID = command[1];
                 lobby.sendJoinInstruction(socket);
             } else {
                 socket.send(JSON.stringify([1]));
             }
         } else if (command[0] === 10) { // Start line
-            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             
             // Send new line creation to everybody EXCEPT sender
             lobby.sendMsgToMembers(JSON.stringify([0, [0, lobby.currentLineID, command[1], command[2], command[3], command[4], command[5]]]), socket);
             // Send sender their line's ID
             socket.send(JSON.stringify([0, [1, lobby.currentLineID]]));
             
-            var newLine = new Line(lobby.currentLineID);
-            socket.DTData.currentLine = newLine;
+            var newLine = new Line(lobby.currentLineID, [command[1], command[2]], command[3], command[4], command[5]);
+            socket.appData.currentLine = newLine;
             lobby.lines.push(newLine);
+            console.log(newLine);
             
             lobby.currentLineID++;
         } else if (command[0] === 11) { // Extend line
-            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            socket.appData.currentLine.points.push([command[1], command[2]]);
             
-            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.DTData.currentLine.id, command[1], command[2]]]), socket);
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            
+            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.appData.currentLine.id, command[1], command[2]]]), socket);
         } else if (command[0] === 12) { // End line
-            socket.DTData.currentLine.completed = true;
+            socket.appData.currentLine.completed = true;
+            console.log(socket.appData.currentLine);
             
-            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
-            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.currentLine.id]]));
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.appData.currentLine.id]]));
             lobby.tryLineCollapse();
             
-            socket.DTData.currentLine = null;
+            socket.appData.currentLine = null;
         } else if (command[0] === 9) { // Player update
-            Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
+            Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.appData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
         } else if (command[0] === 50) { // New color
-            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             
             lobby.palette.unshift(command[1]);
             if (lobby.palette.indexOf(command[1], 1) !== -1) lobby.palette.splice(lobby.palette.indexOf(command[1], 1), 1);
