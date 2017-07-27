@@ -33,21 +33,36 @@ function validateCreateLobby() {
         return false;
     }
 }
+
+communicator.sendCreateLobbyRequest = function(width, height, bgColor) {
+    let COMMAND_ID = 0;
+    
+    let message = formatter.toUByte(COMMAND_ID) + formatter.toUShort(width) + formatter.toUShort(height) + bgColor;
+    
+    socket.send(message);
+};
 function createLobbyRequest(width, height, bgColor) {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify([0, width, height, bgColor]));
+        communicator.sendCreateLobbyRequest(width, height, bgColor);
 
         socket.onmessage = lobbyJoinHandler;
     }
 }
 
+communicator.sendJoinLobbyRequest = function(lobbyID) {
+    let COMMAND_ID = 1;
+    
+    let message = formatter.toUByte(COMMAND_ID) + formatter.toUTribyte(lobbyID);
+    
+    socket.send(message);
+};
 function joinLobbyRequest(ID) {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
 
-        socket.send(JSON.stringify([1, ID]));
+        communicator.sendJoinLobbyRequest(ID);
 
         socket.onmessage = lobbyJoinHandler;
     }

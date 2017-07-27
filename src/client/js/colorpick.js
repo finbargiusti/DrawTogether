@@ -18,6 +18,10 @@ let newHue = true;
 let newRGB = true;
 let oldHueValue = 0;
 
+communicator.getRGBAStr = function(str) {
+    return "rgba(" + str.charCodeAt(0) + "," + str.charCodeAt(1) + "," + str.charCodeAt(2) + "," + (str.charCodeAt(3) / 255) + ")";
+};
+
 closeColorPickButton.addEventListener("click", function() {
     clearInterval(colorUpdateClock);
     openColorPickButton.style.backgroundColor = currColor;

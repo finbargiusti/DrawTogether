@@ -1,8 +1,13 @@
+var fs = require('fs');
+
+eval(fs.readFileSync(__dirname + "/../universal/formatter.js").toString());
+eval(fs.readFileSync(__dirname + "/communicator.js").toString());
+
 // HTTP
 var connect = require('connect');
 var serveStatic = require('serve-static');
 
-connect().use(serveStatic(__dirname+"/../client")).listen(process.argv[2], function(){});
+connect().use(serveStatic(__dirname + "/../")).listen(process.argv[2], function(){});
 
 // WebSocket
 
@@ -24,9 +29,9 @@ server.on("connection", function(ws) {
         };
         
         ws.on("message", function(message) {
-            var command = JSON.parse(message);
+            console.log(formatter.binToNumArr(message));
 
-            handleCommand(command, ws);
+            handleCommand(message, ws);
         });
 
         ws.on("close", function() {
@@ -45,7 +50,7 @@ function Lobby(id, width, height, bgColor) {
     this.height = height;
     this.bgColor = bgColor;
     this.instructions = [];
-    this.palette = ["rgba(0,0,0,1)"];
+    this.palette = [new Color(0, 0, 0, 255)];
     this.currentLineID = 0;
     this.lines = [];
     
@@ -58,19 +63,7 @@ function Lobby(id, width, height, bgColor) {
     }
     
     this.sendJoinInstruction = function(socket) {
-        socket.send(JSON.stringify([0, this.id, this.generateRedrawingInstructions(), this.width, this.height, this.bgColor, this.palette]));
-    }
-    
-    this.generateRedrawingInstructions = function() {
-        var instructions = [];
-        
-        for (var i = 0; i < this.instructions.length; i++) {
-            var instruction = this.instructions[i];
-            
-            instructions.push([instruction.points, instruction.type, instruction.size, instruction.color]);
-        }
-        
-        return instructions;
+        socket.send(communicator.generateJoinInstruction(this));
     }
     
     this.tryLineCollapse = function() {
@@ -96,6 +89,13 @@ Lobby.prototype.getLobbyByID = function(ID) {
     return null;
 }
 
+function Color(r, g, b, a) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.a = a;
+}
+
 function Line(id, startPoint, type, size, color) {
     this.id = id;
     this.completed = false;
@@ -113,6 +113,40 @@ function onPlayerDisconnect(socket) {
 
 function handleCommand(command, socket) {
     try {
+        var commandID = command.charCodeAt(0);
+        var data = command.slice(1);
+        
+        if (commandID === 0) { // Create lobby
+            var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
+
+            while (true) { // Checks if generated newLobbyID is duplicate
+                if (Lobby.prototype.getLobbyByID(newLobbyID)) {
+                    newLobbyID = 10000 + Math.floor(Math.random() * 90000);
+                } else {
+                    break;
+                }
+            }
+            
+            var info = communicator.getLobbyCreationInfo(data);
+
+            var newLobby = new Lobby(newLobbyID, info.width, info.height, info.color);
+            lobbies.push(newLobby);
+            socket.appData.lobbyID = newLobbyID;
+            newLobby.sendJoinInstruction(socket);
+        } else if (commandID === 1) { // Join lobby
+            var requestedID = formatter.fromUTribyte(data.slice(0, 3));
+            
+            var lobby = Lobby.prototype.getLobbyByID(requestedID);
+            
+            if (lobby) {
+                socket.appData.lobbyID = requestedID;
+                lobby.sendJoinInstruction(socket);
+            } else {
+                socket.send(formatter.toUByte(communicator.incorrectIDCommandID));
+            }
+        }
+        
+        /*
         if (command[0] === 0) { // Create lobby
             var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
 
@@ -177,6 +211,7 @@ function handleCommand(command, socket) {
             
             lobby.sendMsgToMembers(JSON.stringify([3, lobby.palette]));
         }
+        */
     } catch (e) {
         console.error(e);
     }
