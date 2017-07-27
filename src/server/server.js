@@ -18,9 +18,11 @@ server.on("connection", function(ws) {
         sockets[currentSocketID] = ws;
         var thisID = currentSocketID;
 
-        ws.DTData = {};
-        ws.DTData.id = currentSocketID;
-
+        ws.DTData = {
+            id: currentSocketID,
+            currentLine: null
+        };
+        
         ws.on("message", function(message) {
             var command = JSON.parse(message);
 
@@ -45,7 +47,7 @@ function Lobby(id, width, height, bgColor) {
     this.instructions = [];
     this.palette = ["rgba(0,0,0,1)"];
     this.currentLineID = 0;
-    this.lines = {};
+    this.lines = [];
     
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
@@ -58,6 +60,21 @@ function Lobby(id, width, height, bgColor) {
     this.sendJoinInstruction = function(socket) {
         socket.send(JSON.stringify([0, this.id, this.instructions, this.width, this.height, this.bgColor, this.palette]));
     }
+    
+    this.tryLineCollapse = function() {
+        if (this.lines.length) {
+            console.log(this.lines);
+            
+            while (this.lines[0].completed === true) {
+                this.sendMsgToMembers(JSON.stringify([0, [4, this.lines[0].id]]));
+                this.lines.splice(0, 1);
+                
+                if (!this.lines.length) {
+                    break;
+                }
+            }
+        }
+    }
 }
 Lobby.prototype.getLobbyByID = function(ID) {
     for (var i = 0; i < lobbies.length; i++) {
@@ -66,6 +83,11 @@ Lobby.prototype.getLobbyByID = function(ID) {
         }
     }
     return null;
+}
+
+function Line(id) {
+    this.id = id;
+    this.completed = false;
 }
 
 function onPlayerDisconnect(socket) {
@@ -107,17 +129,24 @@ function handleCommand(command, socket) {
             lobby.sendMsgToMembers(JSON.stringify([0, [0, lobby.currentLineID, command[1], command[2], command[3], command[4], command[5]]]), socket);
             // Send sender their line's ID
             socket.send(JSON.stringify([0, [1, lobby.currentLineID]]));
-            socket.DTData.lineID = lobby.currentLineID;
+            
+            let newLine = new Line(lobby.currentLineID);
+            socket.DTData.currentLine = newLine;
+            lobby.lines.push(newLine);
             
             lobby.currentLineID++;
         } else if (command[0] === 11) { // Extend line
             var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
             
-            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.DTData.lineID, command[1], command[2]]]), socket);
+            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.DTData.currentLine.id, command[1], command[2]]]), socket);
         } else if (command[0] === 12) { // End line
-            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            socket.DTData.currentLine.completed = true;
             
-            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.lineID]]), socket);
+            var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
+            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.currentLine.id]]), socket);
+            lobby.tryLineCollapse();
+            
+            socket.DTData.currentLine = null;
         } else if (command[0] === 9) { // Player update
             Lobby.prototype.getLobbyByID(socket.DTData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.DTData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
         } else if (command[0] === 50) { // New color

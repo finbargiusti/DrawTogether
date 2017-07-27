@@ -54,7 +54,7 @@ document.addEventListener("mousemove", function(event) {
     }
 
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
-        currentLines["localLine"].extendLine(thisPosition);
+        if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) currentLines["localLine"].extendLine(thisPosition);
         socket.send(JSON.stringify([11, r(thisPosition.x), r(thisPosition.y)]));
         
         /*if (pencilRadio.checked) { // Draw line
@@ -105,12 +105,20 @@ canvas.addEventListener("mousedown", function() {
     if (rubberRadio.checked) lineType = "rubber";
     if (brushRadio.checked) lineType = "brush";
     
-    addLine("localLine", lastPosition, lineType, brushSize, currColor);
-    socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), lineType, brushSize, currColor]));
+    if (currentLines["localLine"]) {
+        //socket.send(JSON.stringify([12]))
+    } else { // If there's no localline
+        addLine("localLine", lastPosition, lineType, brushSize, currColor);
+        socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), lineType, brushSize, currColor]));
+    }
 });
 document.addEventListener("mouseup", function() {
     isDrawing = false;
-    if (currentLines["localLine"]) currentLines["localLine"].combine(), socket.send(JSON.stringify([12]));
+    if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
+        currentLines["localLine"].locallyBlocked = true;
+        currentLines["localLine"].evolve();
+        socket.send(JSON.stringify([12]));
+    }
     
     setTimeout(function() {
         justDisabledEyedropper = false;

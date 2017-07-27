@@ -2,23 +2,6 @@ sizeSlider.addEventListener("change", function() {
     brushSize = Number(sizeSlider.value);
 });
 
-function handleLineInstruction(instruction) {
-    if (instruction[0] === 0) { // New line
-        console.log(instruction[1]);
-        
-        
-        addLine(instruction[1], {x: instruction[2], y: instruction[3]}, instruction[4], instruction[5], instruction[6]);
-        
-        console.log(currentLines)
-    } else if (instruction[0] === 1) { // Get own line ID
-        if (currentLines["localLine"]) currentLines["localLine"].updateZIndexFromID(instruction[1]);
-    } else if (instruction[0] === 2) { // Extend line        
-        currentLines[instruction[1]].extendLine({x: instruction[2], y: instruction[3]});
-    } else if (instruction[0] === 3) { // End line
-        currentLines[instruction[1]].combine();
-    }
-}
-
 function getCursorType() {
     let type = 0;
     if (rubberRadio.checked) {
