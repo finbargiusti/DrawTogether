@@ -143,7 +143,7 @@ function handleCommand(command, socket) {
             socket.DTData.currentLine.completed = true;
             
             var lobby = Lobby.prototype.getLobbyByID(socket.DTData.lobbyID);
-            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.currentLine.id]]), socket);
+            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.DTData.currentLine.id]]));
             lobby.tryLineCollapse();
             
             socket.DTData.currentLine = null;

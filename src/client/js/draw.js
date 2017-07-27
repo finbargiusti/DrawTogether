@@ -12,7 +12,11 @@ function handleLineInstruction(instruction) {
         currentLines[instruction[1]].extendLine({x: instruction[2], y: instruction[3]});
     } else if (instruction[0] === 3) { // End line
         console.log("'End line' command received");
-        currentLines[instruction[1]].evolve();
+        if (currentLines["localLine"] && currentLines["localLine"] === currentLines[instruction[1]]) {
+            delete currentLines["localLine"];
+        } else {
+            currentLines[instruction[1]].evolve();
+        }
     }
     else if (instruction[0] === 4) { // Combine line
         currentLines[instruction[1]].combine();
@@ -168,6 +172,7 @@ function Line(id, startPoint, type, size, color) {
         canvasholder.removeChild(this.canvas);
         
         if (currentLines["localLine"] && currentLines["localLine"].id === this.id) {
+            console.log("Double delete LEL");
             delete currentLines["localLine"];
         }
         delete currentLines[this.id];
