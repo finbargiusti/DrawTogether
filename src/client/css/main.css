@@ -45,6 +45,7 @@ h1 {
     margin-left:50%;
     transform:translateX(-50%);
     position:relative;
+    margin-bottom:60px;
 }
 #canvases canvas {
     position: absolute;
@@ -128,11 +129,20 @@ h1 {
     border-radius:5px;
     transition: 0.2s all;
 }
+#utensils a {
+    margin-left:calc(50% - 35px);
+    transform: translateX();
+}
+#utensils a button {
+    background-color:transparent;
+    border:2px black solid;
+    border-radius: 5px;
+}
 #utensils  {
     white-space: nowrap;
     margin-left:50%;
     padding:10px;
-    width:300px;
+    width:345px;
     transform:translateX(-50%);
 }
 #Lpencil i {

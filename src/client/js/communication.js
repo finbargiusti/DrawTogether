@@ -1,7 +1,7 @@
 let connectingToLobby = false;
 let connected = false;
 let communicator = {};
-let socket = new WebSocket("ws://192.168.1.102:1337/");
+let socket = new WebSocket("ws://"+window.location.hostname+":1337/");
 
 socket.onopen = function() {
     connected = true;
