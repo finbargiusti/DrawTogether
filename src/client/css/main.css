@@ -1,9 +1,11 @@
 @keyframes scrollcolor{
-    0% {color:rgb(255,0,0);}
-    25% {color:rgb(0,255,0);}
-    50% {color:rgb(0,0,255);}
-    75% {color:rgb(255,255,0);}
-    100% {color:rgb(255,0,0);}
+    0% {color:hsl(0,70%,50%);}
+    16.66% {color:hsl(60, 70%, 50%);}
+    33.33% {color:hsl(120, 70%, 50%);}
+    50% {color:hsl(180, 70%, 50%);}
+    66.67% {color:hsl(240, 70%, 50%);}
+    83.33% {color:hsl(300, 70%, 50%);}
+    100% {color:hsl(359,70%,50%);}
 
 }
 @font-face   {
@@ -111,7 +113,7 @@ h1 {
 }
 .lobbyIDHighlight{
     color:red;
-    animation:scrollcolor 5s 1s ease infinite;
+    animation:scrollcolor 10s 1s linear infinite;
 }
 #utensils input[type="text"] {
     height:23px;
