@@ -1,3 +1,11 @@
+@keyframes scrollcolor{
+    0% {color:rgb(255,0,0);}
+    25% {color:rgb(0,255,0);}
+    50% {color:rgb(0,0,255);}
+    75% {color:rgb(255,255,0);}
+    100% {color:rgb(255,0,0);}
+
+}
 @font-face   {
     font-family: title;
     src: url(../fonts/roboto-bold.ttf);
@@ -101,8 +109,9 @@ h1 {
     font-size: 20px;
     margin: 0;
 }
-.lobbyIDHighlight {
-    color: #2564f0;
+.lobbyIDHighlight{
+    color:red;
+    animation:scrollcolor 5s 1s ease infinite;
 }
 #utensils input[type="text"] {
     height:23px;

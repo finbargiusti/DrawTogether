@@ -118,7 +118,7 @@ function lobbyJoinHandler(event) {
         requestAnimationFrame(updatePlayerCanvas);
         console.log("Joined lobby in " + (window.performance.now() - startTime).toFixed(3) + "ms (" + event.data.length / 1000 + "kB).");
 
-        idDisplayP.innerHTML = "Lobby ID: <span class='lobbyIDHighlight'><b>" + lobbyID + "</b></span>";
+        idDisplayP.innerHTML = "Lobby ID: <span class='lobbyIDHighlight'><b style='user-select:text;'>" + lobbyID + "</b></span>";
         socket.onmessage = serverCommandHandler;
     } else if (commandID === 1) { // Incorrect lobby ID
         alert("That lobby does not exist!");
