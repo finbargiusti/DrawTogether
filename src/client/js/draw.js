@@ -33,7 +33,7 @@ function handleLineInstruction(instruction) {
             currentLines[ownLineID] = currentLines["localLine"];
         }
     } else if (lineCommandID === 2) { // Extend line
-        var info = commuicator.getLineExtensionInfo(data);
+        var info = communicator.getLineExtensionInfo(data);
         currentLines[info.lineID].extendLine({x: info.x, y: info.y});
     } else if (lineCommandID === 3) {
         var lineID = formatter.fromUTribyte(data);
@@ -125,7 +125,11 @@ function Line(id, points, type, size, color) {
             context.strokeStyle = bgColor;
             context.lineWidth = this.size * 2;
         } else if (this.type === 2) {
-            let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y);
+            if (this.points.length >= 2) {
+                let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y); 
+            } else {
+                doNothing();
+            }
             context.strokeStyle = color;
             context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size*0.8);
         }

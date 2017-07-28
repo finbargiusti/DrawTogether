@@ -1,3 +1,5 @@
+function doNothing() {}
+
 let controls = document.getElementById("controls");
 let createLobbyBtn = document.getElementById("createLobby");
 let writingUtensils = document.getElementById("writingUtensils");
