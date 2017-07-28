@@ -163,7 +163,7 @@ function handleCommand(command, socket) {
             
             lobby.currentLineID++;
         } else if (commandID === 4) { // Extend line
-            let info = communicator.getLineExtensionInfo(data);
+            var info = communicator.getLineExtensionInfo(data);
             
             socket.appData.currentLine.points.push([info.x, info.y]);
             
