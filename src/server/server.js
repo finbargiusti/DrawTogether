@@ -69,7 +69,7 @@ function Lobby(id, width, height, bgColor) {
     this.tryLineCollapse = function() {
         if (this.lines.length) {            
             while (this.lines[0].completed === true) {
-                this.sendMsgToMembers(JSON.stringify([0, [4, this.lines[0].id]]));
+                this.sendMsgToMembers(communicator.generateCombineLine(this.lines[0].id));
                 this.instructions.push(this.lines[0]);
                 this.lines.splice(0, 1);
                 
@@ -107,7 +107,7 @@ function Line(id, startPoint, type, size, color) {
 
 function onPlayerDisconnect(socket) {
     try {
-        Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(JSON.stringify([2, [socket.appData.id]]), socket);
+        Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(communicator.createPlayerDisconnect(socket), socket);
     } catch(e) {}
 }
 
@@ -135,7 +135,6 @@ function handleCommand(command, socket) {
             newLobby.sendJoinInstruction(socket);
         } else if (commandID === 1) { // Join lobby
             var requestedID = formatter.fromUTribyte(data.slice(0, 3));
-            
             var lobby = Lobby.prototype.getLobbyByID(requestedID);
             
             if (lobby) {
@@ -144,74 +143,58 @@ function handleCommand(command, socket) {
             } else {
                 socket.send(formatter.toUByte(communicator.incorrectIDCommandID));
             }
-        }
-        
-        /*
-        if (command[0] === 0) { // Create lobby
-            var newLobbyID = 10000 + Math.floor(Math.random() * 90000);
-
-            while (true) { // Checks if generated newLobbyID is duplicate
-                if (Lobby.prototype.getLobbyByID(newLobbyID)) {
-                    newLobbyID = 10000 + Math.floor(Math.random() * 90000);
-                } else {
-                    break;
-                }
-            }
-
-            var newLobby = new Lobby(newLobbyID, command[1], command[2], command[3]);
-            lobbies.push(newLobby);
-            socket.appData.lobbyID = newLobbyID;
-            newLobby.sendJoinInstruction(socket);
-        } else if (command[0] === 1) { // Join lobby
-            var lobby = Lobby.prototype.getLobbyByID(command[1]);
-            
-            if (lobby) {
-                socket.appData.lobbyID = command[1];
-                lobby.sendJoinInstruction(socket);
-            } else {
-                socket.send(JSON.stringify([1]));
-            }
-        } else if (command[0] === 10) { // Start line
+        } else if (commandID === 2) { // Player update
+            Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(communicator.generatePlayerUpdate(socket, data), socket);
+        } else if (commandID === 3) { // Start line
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            var info = communicator.getLineStartInfo(data);
+            
+            console.log(info);
             
             // Send new line creation to everybody EXCEPT sender
-            lobby.sendMsgToMembers(JSON.stringify([0, [0, lobby.currentLineID, command[1], command[2], command[3], command[4], command[5]]]), socket);
+            lobby.sendMsgToMembers(communicator.generateLineStart(lobby, data), socket);
             // Send sender their line's ID
-            socket.send(JSON.stringify([0, [1, lobby.currentLineID]]));
+            socket.send(communicator.generateLineIDUpdate(lobby));
             
-            var newLine = new Line(lobby.currentLineID, [command[1], command[2]], command[3], command[4], command[5]);
+            var newLine = new Line(lobby.currentLineID, [info.x, info.y], info.type, info.size, info.color);
             socket.appData.currentLine = newLine;
             lobby.lines.push(newLine);
             console.log(newLine);
             
             lobby.currentLineID++;
-        } else if (command[0] === 11) { // Extend line
-            socket.appData.currentLine.points.push([command[1], command[2]]);
+        } else if (commandID === 4) { // Extend line
+            let info = communicator.getLineExtensionInfo(data);
+            
+            socket.appData.currentLine.points.push([info.x, info.y]);
             
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             
-            lobby.sendMsgToMembers(JSON.stringify([0, [2, socket.appData.currentLine.id, command[1], command[2]]]), socket);
-        } else if (command[0] === 12) { // End line
+            lobby.sendMsgToMembers(communicator.generateLineExtension(socket, data), socket);
+        } else if (commandID === 5) { // End line
             socket.appData.currentLine.completed = true;
             console.log(socket.appData.currentLine);
             
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            lobby.sendMsgToMembers(JSON.stringify([0, [3, socket.appData.currentLine.id]]));
+            lobby.sendMsgToMembers(communicator.generateEndLine(socket));
             lobby.tryLineCollapse();
             
             socket.appData.currentLine = null;
-        } else if (command[0] === 9) { // Player update
-            Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(JSON.stringify([1, [socket.appData.id, command[1], command[2], command[3], command[4], command[5]]]), socket);
-        } else if (command[0] === 50) { // New color
+        } else if (commandID === 6) { // New color
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            var newColor = communicator.generateRGBAFromBin(data);
+            var newColorString = JSON.stringify(newColor);
             
-            lobby.palette.unshift(command[1]);
-            if (lobby.palette.indexOf(command[1], 1) !== -1) lobby.palette.splice(lobby.palette.indexOf(command[1], 1), 1);
-            if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20);
+            lobby.palette.unshift(newColor);
+            for (var i = 1; i < lobby.palette.length; i++) { // Remove duplicate color
+                if (JSON.stringify(lobby.palette[i]) === newColorString) {
+                    lobby.palette.splice(i, 1);
+                    break;
+                }
+            }
+            if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20); // Cap size at 20 colors
             
-            lobby.sendMsgToMembers(JSON.stringify([3, lobby.palette]));
+            lobby.sendMsgToMembers(communicator.generatePalette(lobby.palette));
         }
-        */
     } catch (e) {
         console.error(e);
     }

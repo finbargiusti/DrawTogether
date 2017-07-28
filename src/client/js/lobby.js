@@ -26,14 +26,14 @@ function updatePlayerCanvas() {
     playerCtx.clearRect(0, 0, playerCanvas.getAttribute("width"), playerCanvas.getAttribute("height"));
 
     for (let id in playerData) {
-        renderPlayer(false, playerData[id][0], playerData[id][1], playerData[id][2], playerData[id][3], playerData[id][4]);
+        renderPlayer(false, playerData[id].x, playerData[id].y, playerData[id].type, playerData[id].size, playerData[id].color);
     }
-    renderPlayer(true, lastPosition.x, lastPosition.y, eyeDropperSelected ? currEyeDropperColor : currColor, getCursorType(), brushSize);
+    renderPlayer(true, lastPosition.x, lastPosition.y, getCursorType(), brushSize, eyeDropperSelected ? currEyeDropperColor : currColor);
 
     requestAnimationFrame(updatePlayerCanvas);
 }
 
-function renderPlayer(isLocal, x, y, color, type, brushSize) {
+function renderPlayer(isLocal, x, y, type, brushSize, color) {
     if (!isLocal) {
       playerCtx.globalAlpha = 0.5;
     } else  {

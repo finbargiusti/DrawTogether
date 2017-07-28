@@ -21,6 +21,10 @@ let oldHueValue = 0;
 communicator.getRGBAStr = function(str) {
     return "rgba(" + str.charCodeAt(0) + "," + str.charCodeAt(1) + "," + str.charCodeAt(2) + "," + (str.charCodeAt(3) / 255) + ")";
 };
+communicator.getBinRGBA = function(str) {
+    let rgbaArr = str.slice(5).slice(0, -1).split(",");
+    return formatter.toUByte(rgbaArr[0]) + formatter.toUByte(rgbaArr[1]) + formatter.toUByte(rgbaArr[2]) + formatter.toUByte(Math.round(rgbaArr[3] * 255));
+};
 
 closeColorPickButton.addEventListener("click", function() {
     clearInterval(colorUpdateClock);

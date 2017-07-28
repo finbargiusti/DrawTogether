@@ -1,27 +1,52 @@
 let currentLines = {};
 
-function handleLineInstruction(instruction) {
-    if (instruction[0] === 0) { // New line
-        addLine(instruction[1], {x: instruction[2], y: instruction[3]}, instruction[4], instruction[5], instruction[6]);
-    } else if (instruction[0] === 1) { // Get own line ID
+communicator.getLineStartInfo = function(data) {
+    return {
+        lineID: formatter.fromUTribyte(data.slice(0, 3)),
+        x: formatter.fromSShort(data.slice(3, 5)),
+        y: formatter.fromSShort(data.slice(5, 7)),
+        type: formatter.fromUByte(data.slice(7, 8)),
+        size: formatter.fromUByte(data.slice(8, 9)),
+        color: communicator.getRGBAStr(data.slice(9, 13))
+    };
+};
+communicator.getLineExtensionInfo = function(data) {
+    return {
+        lineID: formatter.fromUTribyte(data.slice(0, 3)),
+        x: formatter.fromSShort(data.slice(3, 5)),
+        y: formatter.fromSShort(data.slice(5, 7))
+    };
+};
+function handleLineInstruction(instruction) {    
+    var lineCommandID = instruction.charCodeAt(0);
+    var data = instruction.slice(1);
+    
+    if (lineCommandID === 0) { // New line
+        var info = communicator.getLineStartInfo(data);
+        
+        addLine(info.lineID, {x: info.x, y: info.y}, info.type, info.size, info.color);
+    } else if (lineCommandID === 1) { // Get own line ID from server
+        var ownLineID = formatter.fromUTribyte(data);
+        
         if (currentLines["localLine"]) {
-            currentLines["localLine"].updateID(instruction[1]);
-            currentLines[instruction[1]] = currentLines["localLine"];
+            currentLines["localLine"].updateID(ownLineID);
+            currentLines[ownLineID] = currentLines["localLine"];
         }
-    } else if (instruction[0] === 2) { // Extend line        
-        currentLines[instruction[1]].extendLine({x: instruction[2], y: instruction[3]});
-    } else if (instruction[0] === 3) { // End line
-        console.log("'End line' command received");
-        if (currentLines["localLine"] && currentLines["localLine"] === currentLines[instruction[1]]) {
+    } else if (lineCommandID === 2) { // Extend line
+        var info = commuicator.getLineExtensionInfo(data);
+        currentLines[info.lineID].extendLine({x: info.x, y: info.y});
+    } else if (lineCommandID === 3) {
+        var lineID = formatter.fromUTribyte(data);
+        
+        if (currentLines["localLine"] && currentLines["localLine"] === currentLines[lineID]) {
             delete currentLines["localLine"];
         } else {
-            currentLines[instruction[1]].evolve();
+            currentLines[lineID].evolve();
         }
-    }
-    else if (instruction[0] === 4) { // Combine line
-        currentLines[instruction[1]].combine();
+    } else if (lineCommandID === 4) { // Combine line
+        var lineID = formatter.fromUTribyte(data);
         
-        console.log(currentLines);
+        currentLines[lineID].combine();
     }
 }
 
@@ -34,7 +59,6 @@ function processRedrawingInstructions(instructions) {
             points.push({x: instruction[0][j][0], y: instruction[0][j][1]});
         }
         let line = new Line(null, points, instruction[1], instruction[2], instruction[3]);
-        console.log(line)
         
         line.drawFinalLine(ctx);
     }
@@ -45,7 +69,6 @@ function addLine(id, startPoint, type, size, color) {
     newLine.createCanavs();
     
     currentLines[id] = newLine;
-    
 }
 
 function Line(id, points, type, size, color) {
@@ -62,7 +85,7 @@ function Line(id, points, type, size, color) {
         this.canvas.setAttribute("width", canvas.width);
         this.canvas.setAttribute("height", canvas.height);
         this.canvas.style.boxShadow = "0px 0px 25px rgba(238, 130, 238, 0.6)";
-        if (this.type !== "rubber") this.canvas.style.opacity = this.alpha;
+        if (this.type !== 1) this.canvas.style.opacity = this.alpha;
         (typeof id === "number") ? this.setZIndexFromID(id) : this.canvas.style.zIndex = 900000;
         canvasholder.appendChild(this.canvas);
 
@@ -95,13 +118,13 @@ function Line(id, points, type, size, color) {
         context.lineCap = "round";
         context.lineJoin = "round";
         
-        if (this.type === "pencil") {
+        if (this.type === 0) {
             context.strokeStyle = color;
             context.lineWidth = this.size;
-        } else if (this.type === "rubber") {
+        } else if (this.type === 1) {
             context.strokeStyle = bgColor;
             context.lineWidth = this.size * 2;
-        } else if (this.type === "brush") {
+        } else if (this.type === 2) {
             let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y);
             context.strokeStyle = color;
             context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size*0.8);
@@ -109,26 +132,18 @@ function Line(id, points, type, size, color) {
     }
     
     this.evolve = function() {
-        stopwatch.start("Evolve");
-        
-        if (this.type !== "rubber") {
+        if (this.type !== 1) {
             this.canvas.style.opacity = 1;
             
-            stopwatch.start("Clear rect");
             this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stopwatch.end("Clear rect");
             
             this.drawFinalLine(this.ctx);
         }
-        
-        stopwatch.end("Evolve");
     }
     
     this.drawFinalLine = function(context) {
-        stopwatch.start("Point and tangent creation");
-
         let calcedPoints = [];
-        if (this.type === "rubber") { // Special treatment, as rubber shouldn't receive the hermite line modelling
+        if (this.type === 1) { // Special treatment, as rubber shouldn't receive the hermite line modelling
             for (let i = 0; i < this.points.length; i++) {
                 calcedPoints.push([this.points[i].x, this.points[i].y]);
             }
@@ -153,30 +168,24 @@ function Line(id, points, type, size, color) {
                 }
             }
             tangents.push([0, 0]);
-            stopwatch.end("Point and tangent creation");
 
             let lineLength = 0;
 
-            stopwatch.start("Length calc");
             for (let i = 0; i < (this.points.length-1); ++i) {
                 lineLength += Math.hypot(this.points[i + 1].x - this.points[i].x, this.points[i + 1].y - this.points[i].y);
             }
-            stopwatch.end("Length calc");
 
             let intervalCount = lineLength / 5;
             let intervalSize = 1 /intervalCount;
-            console.log("Interval count: " + intervalCount);
 
-            stopwatch.start("Curve calc");
             for (let t = 0; t < 1; t += intervalSize) {
                 calcedPoints.push(hermite(t, points, tangents));
             }
-            stopwatch.end("Curve calc");
         }
 
         this.setLineStyle(context, this.color);
 
-        if (this.type === "brush") { 
+        if (this.type === 2) { 
             for (let i = 0; i < calcedPoints.length-1; i++) {
                 context.beginPath();
                 context.moveTo(calcedPoints[i+1][0], calcedPoints[i+1][1]);
@@ -184,7 +193,7 @@ function Line(id, points, type, size, color) {
                 context.lineWidth = (Math.max(1, Math.pow(0.935, 5*Math.hypot(calcedPoints[i][0] - calcedPoints[i+1][0], calcedPoints[i][1] - calcedPoints[i+1][1])) * this.size));
                 context.stroke();
             }
-        } else if (this.type === "pencil" || this.type === "rubber") {
+        } else if (this.type === 0 || this.type === 1) {
             context.beginPath();
             context.moveTo(calcedPoints[0][0], calcedPoints[0][1]);
             for (let i = 1; i < calcedPoints.length; i++) {
@@ -195,9 +204,7 @@ function Line(id, points, type, size, color) {
     }
     
     this.combine = function() {
-        stopwatch.start("Combine");
         ctx.drawImage(this.canvas, 0, 0);
-        stopwatch.end("Combine");
         
         canvasholder.removeChild(this.canvas);
         
