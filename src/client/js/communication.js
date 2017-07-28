@@ -3,13 +3,28 @@ let connected = false;
 let communicator = {};
 let socket = new WebSocket("ws://"+window.location.hostname+":1337/");
 
+communicator.sendPingRequest = function() {
+    let COMMAND_ID = 255;
+    
+    socket.send(formatter.toUByte(COMMAND_ID));
+};
+let pingDisplay = document.getElementById("pingDisplay");
+let pingClock;
+let pingRequestSendTime;
+function pinger() { 
+    communicator.sendPingRequest();
+    pingRequestSendTime = window.performance.now();
+}
+
 socket.onopen = function() {
     connected = true;
     socket.onmessage = serverCommandHandler;
+    pinger();
 };
 
 socket.onclose = function() {
     connected = false;
+    clearTimeout(pingClock);
 };
 
 communicator.getLobbyJoinInfo = function(data) {
@@ -98,23 +113,13 @@ function serverCommandHandler(event) {
     } else if (commandID === 5) { // Palette update
         palette = communicator.getPalette(data);
         updatePalette();
+    } else if (commandID === 255) { // Ping
+        let roundTripTime = Math.ceil(window.performance.now() - pingRequestSendTime);
+        
+        pingDisplay.innerHTML = roundTripTime + "ms";
+        pingClock = setTimeout(pinger, Math.max(500, 1000 - roundTripTime));
     }
 }
-
-/*function serverCommandHandler(event) {
-    let data = JSON.parse(event.data);
-
-    if (data[0] === 0) { // Line instruction
-        handleLineInstruction(data[1]);
-    } else if (data[0] === 1) { // Player update
-        handlePlayerUpdate(data[1]);
-    } else if (data[0] === 2) { // Player disconnect
-        delete playerData[data[1][0]];
-    } else if (data[0] === 3) { // Palette updatejk
-        palette = data[1];
-        updatePalette();
-    }
-}*/
 
 communicator.getPlayerUpdateInfo = function(data) {
     return {

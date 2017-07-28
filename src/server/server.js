@@ -188,6 +188,8 @@ function handleCommand(command, socket) {
             if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20); // Cap size at 20 colors
             
             lobby.sendMsgToMembers(communicator.generatePalette(lobby.palette));
+        } else if (commandID === 255) { // Ping
+            socket.send(formatter.toUByte(communicator.pingCommandID));
         }
     } catch (e) {
         console.error(e);

@@ -453,3 +453,12 @@ canvas {
     margin-top: 5px;
     margin-bottom: -5px;
 }
+#pingDisplay {
+    position: fixed;
+    margin: 0;
+    right: 2px;
+    top: 2px;
+    font-size: 12px;
+    text-align: right;
+    opacity: 0.5;
+}

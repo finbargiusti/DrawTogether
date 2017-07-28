@@ -1,5 +1,6 @@
 var communicator = {
     incorrectIDCommandID: 1,
+    pingCommandID: 255,
     getLobbyCreationInfo: function(data) {
         return {
             width: formatter.fromUShort(data.slice(0, 2)),
