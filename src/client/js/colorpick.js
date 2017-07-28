@@ -55,6 +55,11 @@ document.addEventListener("mousemove", function() {
 
 colorSlider.addEventListener("mousedown", function() {
     justPickedPalette = false;
+    colorUpdate(true);
+});
+alphaSlider.addEventListener("mousedown", function() {
+    justPickedPalette = false;
+    colorUpdate(true);
 });
 
 eyeDropSelect.addEventListener("click", function() {
@@ -139,13 +144,14 @@ function colorUpdate(forceRerender) { // Updates all the stuff
     }
     oldHueValue = colorSlider.value;
     
+    updateColorPicker();
+    
     if (forceRerender || newRGB) {
         newRGB = true;
         document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
         circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
     }
     
-    updateColorPicker();
 	updateCanvas();
 }
 function updatePalette() {
