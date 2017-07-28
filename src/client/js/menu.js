@@ -46,8 +46,6 @@ function createLobbyRequest(width, height, bgColor) {
         connectingToLobby = true;
 
         communicator.sendCreateLobbyRequest(width, height, bgColor);
-
-        socket.onmessage = lobbyJoinHandler;
     }
 }
 
@@ -63,7 +61,5 @@ function joinLobbyRequest(ID) {
         connectingToLobby = true;
 
         communicator.sendJoinLobbyRequest(ID);
-
-        socket.onmessage = lobbyJoinHandler;
     }
 }

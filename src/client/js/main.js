@@ -40,6 +40,25 @@ let palette = [];
 
 colorPickContainer.style.display = "none";
 
+communicator.sendCursorUpdate = function(x, y, type, size, color) {
+    var COMMAND_ID = 2;
+    
+    var message = formatter.toSShort(x) + formatter.toSShort(y) + formatter.toUByte(type) + formatter.toUByte(size) + communicator.getBinRGBA(color);
+    
+    socket.send(formatter.toUByte(COMMAND_ID) + message);
+};
+communicator.sendLineUpdate = function(x, y) {
+    var COMMAND_ID = 4;
+    
+    var message = formatter.toSShort(x) + formatter.toSShort(y);
+    
+    socket.send(formatter.toUByte(COMMAND_ID) + message);
+};
+communicator.sendColorUpdate = function(color) {
+    var COMMAND_ID = 6;
+    
+    socket.send(formatter.toUByte(COMMAND_ID) + communicator.getBinRGBA(color));
+};
 document.addEventListener("mousemove", function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
@@ -50,17 +69,17 @@ document.addEventListener("mousemove", function(event) {
     };
 
     if (connected && lobbyID) { // Send cursor information
-        socket.send(JSON.stringify([9, r(thisPosition.x), r(thisPosition.y), (eyeDropperSelected)?currEyeDropperColor:currColor, getCursorType(), brushSize]));
+        communicator.sendCursorUpdate(thisPosition.x, thisPosition.y, getCursorType(), brushSize, (eyeDropperSelected) ? currEyeDropperColor : currColor);
     }
 
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
         if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
             currentLines["localLine"].extendLine(thisPosition);
         }
-        socket.send(JSON.stringify([11, r(thisPosition.x), r(thisPosition.y)]));
+        communicator.sendLineUpdate(thisPosition.x, thisPosition.y);
         
         if (usingNewColor && (pencilRadio.checked || brushRadio.checked)) { // Send new color for palette update
-            socket.send(JSON.stringify([50, currColor]));
+            communicator.sendColorUpdate(currColor);
             usingNewColor = false;
         }
     }
@@ -91,25 +110,32 @@ document.addEventListener("mousedown", function() {
         openColorPickButton.style.backgroundColor = currColor;
     }
 });
+communicator.sendLineCreation = function(x, y, type, size, color) {
+    let COMMAND_ID = 3;
+    
+    let message = formatter.toSShort(x) + formatter.toSShort(y) + formatter.toUByte(type) + formatter.toUByte(size) + communicator.getBinRGBA(color);
+    
+    socket.send(formatter.toUByte(COMMAND_ID) + message);
+};
 canvas.addEventListener("mousedown", function() {
     isDrawing = true;
     
-    let lineType;
-    if (pencilRadio.checked) lineType = "pencil";
-    if (rubberRadio.checked) lineType = "rubber";
-    if (brushRadio.checked) lineType = "brush";
-    
-    if (!currentLines["localLine"]) { // If there's no localline
-        addLine("localLine", lastPosition, lineType, brushSize, currColor);
-        socket.send(JSON.stringify([10, r(lastPosition.x), r(lastPosition.y), lineType, brushSize, currColor]));
+    if (!currentLines["localLine"] && !eyeDropperSelected && currentUI == "draw") { // If there's no localline
+        addLine("localLine", lastPosition, getCursorType(), brushSize, currColor);
+        communicator.sendLineCreation(lastPosition.x, lastPosition.y, getCursorType(), brushSize, currColor);
     }
 });
+communicator.sendLineEnd = function() {
+    var COMMAND_ID = 5;
+    
+    socket.send(formatter.toUByte(COMMAND_ID));
+};
 document.addEventListener("mouseup", function() {
     isDrawing = false;
     if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
         currentLines["localLine"].locallyBlocked = true;
         currentLines["localLine"].evolve();
-        socket.send(JSON.stringify([12]));
+        communicator.sendLineEnd();
     }
     
     setTimeout(function() {
