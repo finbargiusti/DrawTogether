@@ -29,8 +29,6 @@ server.on("connection", function(ws) {
         };
         
         ws.on("message", function(message) {
-            console.log(formatter.binToNumArr(message));
-
             handleCommand(message, ws);
         });
 
@@ -149,8 +147,6 @@ function handleCommand(command, socket) {
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             var info = communicator.getLineStartInfo(data);
             
-            console.log(info);
-            
             // Send new line creation to everybody EXCEPT sender
             lobby.sendMsgToMembers(communicator.generateLineStart(lobby, data), socket);
             // Send sender their line's ID
@@ -159,7 +155,6 @@ function handleCommand(command, socket) {
             var newLine = new Line(lobby.currentLineID, [info.x, info.y], info.type, info.size, info.color);
             socket.appData.currentLine = newLine;
             lobby.lines.push(newLine);
-            console.log(newLine);
             
             lobby.currentLineID++;
         } else if (commandID === 4) { // Extend line
@@ -172,7 +167,6 @@ function handleCommand(command, socket) {
             lobby.sendMsgToMembers(communicator.generateLineExtension(socket, data), socket);
         } else if (commandID === 5) { // End line
             socket.appData.currentLine.completed = true;
-            console.log(socket.appData.currentLine);
             
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             lobby.sendMsgToMembers(communicator.generateEndLine(socket));
