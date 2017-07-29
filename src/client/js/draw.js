@@ -172,15 +172,19 @@ function Line(id, points, type, size, color) {
             tangents.push([0, 0]);
 
             let lineLength = 0;
+            var distances = [];
 
-            for (let i = 0; i < (this.points.length-1); ++i) {
-                lineLength += Math.hypot(this.points[i + 1].x - this.points[i].x, this.points[i + 1].y - this.points[i].y);
+            for (let i = 0; i < this.points.length - 1; i++) {
+                let dist = Math.hypot(this.points[i + 1].x - this.points[i].x, this.points[i + 1].y - this.points[i].y);
+                
+                lineLength += dist;
+                if (this.type === 2) distances.push(dist);
             }
 
             let intervalCount = lineLength / 5;
             let intervalSize = 1 /intervalCount;
 
-            for (let t = 0; t < 1; t += intervalSize) {
+            for (let t = 0; t <= 1; t += intervalSize) {
                 calcedPoints.push(hermite(t, points, tangents));
             }
         }
@@ -192,7 +196,22 @@ function Line(id, points, type, size, color) {
                 context.beginPath();
                 context.moveTo(calcedPoints[i+1][0], calcedPoints[i+1][1]);
                 context.lineTo(calcedPoints[i][0], calcedPoints[i][1]);
-                context.lineWidth = (Math.max(1, Math.pow(0.935, 5*Math.hypot(calcedPoints[i][0] - calcedPoints[i+1][0], calcedPoints[i][1] - calcedPoints[i+1][1])) * this.size));
+                
+                let percentage = i / (calcedPoints.length - 2);
+                let respectivePoint = percentage * (this.points.length - 1);
+                let currentDist;
+                if (respectivePoint < 0.5) {
+                    currentDist = distances[0];
+                } else if (respectivePoint > (this.points.length - 1) - 0.5) {
+                    currentDist = distances[distances.length - 1];
+                } else {
+                    let midpoint = respectivePoint - 0.5;
+                    let lower = Math.floor(midpoint);
+                    currentDist = distances[lower] * (1 - (midpoint - lower)) + distances[Math.ceil(midpoint)] * (midpoint - lower); // Linear interpolation
+                }
+                
+                
+                context.lineWidth = Math.max(1, Math.pow(0.935, currentDist) * this.size);
                 context.stroke();
             }
         } else if (this.type === 0 || this.type === 1) {
