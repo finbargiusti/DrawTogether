@@ -127,11 +127,9 @@ function Line(id, points, type, size, color) {
         } else if (this.type === 2) {
             if (this.points.length >= 2) {
                 let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y); 
-            } else {
-                doNothing();
+                context.strokeStyle = color;
+                context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size);
             }
-            context.strokeStyle = color;
-            context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size*0.8);
         }
     }
     

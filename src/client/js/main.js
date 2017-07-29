@@ -1,5 +1,3 @@
-function doNothing() {}
-
 let controls = document.getElementById("controls");
 let createLobbyBtn = document.getElementById("createLobby");
 let writingUtensils = document.getElementById("writingUtensils");
@@ -45,6 +43,7 @@ colorPickContainer.style.display = "none";
 communicator.sendCursorUpdate = function(x, y, type, size, color) {
     var COMMAND_ID = 2;
     
+    if (!color) color = "rbga(0,0,0,1)"; // Incase something goes wrong somewhere
     var message = formatter.toSShort(x) + formatter.toSShort(y) + formatter.toUByte(type) + formatter.toUByte(size) + communicator.getBinRGBA(color);
     
     socket.send(formatter.toUByte(COMMAND_ID) + message);
@@ -70,10 +69,6 @@ document.addEventListener("mousemove", function(event) {
         y: r(mouseYElement(canvas))
     };
 
-    if (connected && lobbyID) { // Send cursor information
-        communicator.sendCursorUpdate(thisPosition.x, thisPosition.y, getCursorType(), brushSize, (eyeDropperSelected) ? currEyeDropperColor : currColor);
-    }
-
     if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
         if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
             currentLines["localLine"].extendLine(thisPosition);
@@ -90,6 +85,11 @@ document.addEventListener("mousemove", function(event) {
         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let currentIndex = (Math.clamp(thisPosition.x, 0, canvas.width)*4)+Math.clamp(thisPosition.y, 0, canvas.height)*canvas.width*4;
         currEyeDropperColor = "rgba("+imageData.data[currentIndex] +","+ imageData.data[currentIndex+1] + "," + imageData.data[currentIndex+2] + ",1)";
+        console.log(currEyeDropperColor);
+    }
+    
+    if (connected && lobbyID) { // Send cursor information
+        communicator.sendCursorUpdate(thisPosition.x, thisPosition.y, getCursorType(), brushSize, (eyeDropperSelected) ? currEyeDropperColor : currColor);
     }
     
     lastPosition = {
@@ -149,7 +149,7 @@ let popupCloseButtons = document.getElementsByClassName("fa fa-window-close fa-l
 for (let i = 0; i < popupCloseButtons.length; i++) {
     popupCloseButtons[i].addEventListener("click", function() {
         popupCloseButtons[i].parentNode.parentNode.style.display = "none";
-    })
+    });
 }
 createLobbyClose.addEventListener("click", function() {
     clearInterval(validationClock);
