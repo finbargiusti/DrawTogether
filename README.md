@@ -21,7 +21,7 @@ There are many different drawing tools such as:
 
 - The brush tool, a utensil whose width is proprtional to the stroke speed, emulating a paintbrush
 
-``!FIXME Add brush tool pic``
+![Brush stroke](https://image.ibb.co/hr1D75/Screenshot_from_2017_07_30_13_36_31.png)
 
 There are also two different color tools:
 - The color palette, a window that allows you to pick the hue, saturation, lightness and opacity of your next color, as well as diplaying the past used colors
