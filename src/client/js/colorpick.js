@@ -34,6 +34,12 @@ openColorPickButton.addEventListener("click", function() {
     colorUpdate(true);
     colorUpdateClock = setInterval(colorUpdate);
     colorPickContainer.style.display = "block";
+    if (Math.random() <= 0.001) {
+        document.querySelector("#colorpick h3").innerHTML = "Pick a collar..";
+        document.body.style.background = "url(https://i.ytimg.com/vi/s0SBjdkautM/mqdefault.jpg) repeat";
+        let audio = document.createElement("audio")
+        new AudioObject("client/audio/succ.mp3").loop().play();
+    }
 });
 colorCanvas.addEventListener("mousedown", function() {
 	draggingColor = true;
@@ -110,6 +116,7 @@ function updateCanvas() {
         }
         newRGB = false;
     }
+    openColorPickButton.style.backgroundColor = currColor;
 }
 
 function updateColorPicker() {

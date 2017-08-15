@@ -415,3 +415,159 @@ function getNormalizedAngleDelta(alpha, beta) {
     }
     return difference;
 }
+function AudioObject(url, onLoad) {
+    var self = this;
+
+    this.audio = document.createElement("audio");
+    this.audio.src = url;
+
+    this.loadClock = function(onLoad) {
+        this.loadInterval = setInterval(function() {
+            if (self.audio.readyState == 4) {
+                onLoad();
+                clearInterval(self.loadInterval);
+            }
+        });
+    }
+
+    if (onLoad) {
+        this.loadClock(onLoad);
+    }
+
+    this.getSrc = function() {
+        return this.audio.src;
+    }
+
+    this.setSrc = function() {
+        return this;
+    }
+
+    this.getCurrentTime = function() {
+        return this.audio.currentTime;
+    }
+
+    this.setCurrentTime = function(secs, onSet) {
+        var currentTime = this.getCurrentTime();
+        this.audio.currentTime = secs;
+        if (onSet) {
+            if (currentTime != secs) {
+                this.currentTimeSetInterval = setInterval(function() {
+                    if (self.getCurrentTime() != currentTime) {
+                        onSet();
+                        clearInterval(self.currentTimeSetInterval);
+                    }
+                });
+            } else {
+                onSet();
+            }
+        }
+        return this;
+    }
+
+    this.getDuration = function() {
+        return this.audio.duration;
+    }
+
+    this.getMuteState = function() {
+        return this.audio.muted;
+    }
+    
+    this.mute = function() {
+        this.audio.muted = true;
+        return this;
+    }
+    
+    this.unmute = function() {
+        this.audio.muted = false;
+        return this;
+    }
+
+    this.getPlaybackRate = function() {
+        return this.audio.playbackRate;
+    }
+
+    this.setPlaybackRate = function(rate) {
+        this.audio.playbackRate = rate;
+        return this;
+    }
+
+    this.getVolume = function() {
+        return this.audio.volume;
+    }
+
+    this.setVolume = function(volume) {
+        this.audio.volume = volume;
+        return this;
+    }
+
+    this.getLoopState = function() {
+        return this.audio.loop;
+    }
+
+    this.loop = function() {
+        this.audio.loop = true;
+        return this;
+    }
+
+    this.noLoop = function() {
+        this.audio.loop = false;
+        return this;
+    }
+
+    this.play = function(onPlay) {
+        var timeAtCall = this.audio.currentTime;
+        this.audio.play();
+        if (onPlay) {
+            this.playInterval = setInterval(function() {
+                if (self.audio.currentTime != timeAtCall) {
+                    onPlay();
+                    clearInterval(self.playInterval);
+                }
+            });
+        }
+        return true;
+    }
+
+    this.pause = function(onPause) {
+        this.audio.pause();
+        if (onPause) {
+            onPause();
+        }
+        return true;
+    }
+
+    this.stop = function(onStop) {
+        this.pause();
+        this.setCurrentTime(0);
+        if (onStop) {
+            onStop();
+        }
+        return true;
+    }
+
+    this.restart = function(onRestart) {
+        this.stop();
+        this.play(onRestart);
+        return true;
+    }
+
+    this.playFrom = function(secs, onPlay) {
+        this.setCurrentTime(secs, function() {
+            self.play(onPlay);
+        });
+        return this.audio.currentTime;
+    }
+
+    this.goTo = function(secs, onArrival) {
+        var arrivalTime = this.audio.currentTime = secs;
+        if (onArrival && !this.audio.paused) {
+            this.goToInterval = setInterval(function() {
+                if (self.audio.currentTime != arrivalTime) {
+                    onArrival();
+                    clearInterval(self.goToInterval);
+                }
+            });
+        }
+        return this.audio.currentTime;
+    }
+}
