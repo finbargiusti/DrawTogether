@@ -1,5 +1,8 @@
 # DrawTogether
 A site allowing you to Draw with friends in real time!
+
+Example of what you could draw together, a picture drawn by co-creator Davidskanal and his friend:
+![Masterpiece](https://preview.ibb.co/bJmRCF/Draw_Together46780_9.png)
 ## Features
 ### Make and join lobbies
 ![Make and join buttons](https://image.ibb.co/kaAFZk/Screenshot_from_2017_07_27_18_24_45.png)
