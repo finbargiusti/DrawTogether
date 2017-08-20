@@ -8,7 +8,9 @@
     "serve-static": "^1.12.3",
     "ws": "^3.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server/server.js"
