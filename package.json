@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server/server.js"
+    "start": "./node_modules/babel-cli/bin/babel.js --watch src/client/js --out-file src/client/bundle.js; node src/server/server.js"
   },
   "repository": {
     "type": "git",
