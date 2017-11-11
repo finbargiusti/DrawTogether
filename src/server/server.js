@@ -42,16 +42,20 @@ server.on("connection", function(ws) {
     }
 });
 
-function Lobby(id, width, height, bgColor) {
+function Lobby(id, width, height, bgColor, playersallowed, spectatorsbool) {
     this.id = id;
     this.width = width;
     this.height = height;
     this.bgColor = bgColor;
+    this.playersallowed = Number(playersallowed);
+    this.spectatorsAllowed = spectatorsbool;
     this.instructions = [];
     this.palette = [new Color(0, 0, 0, 255)];
     this.currentLineID = 0;
     this.lines = [];
-    
+    this.players = 1;
+    this.drawers = [];
+
     this.sendMsgToMembers = function(msg, excludedSocket) {
         for (var sckt in sockets) {
             if (sockets[sckt].appData.lobbyID === this.id && ((excludedSocket) ? sockets[sckt] !== excludedSocket : true)) {
@@ -105,7 +109,13 @@ function Line(id, startPoint, type, size, color) {
 
 function onPlayerDisconnect(socket) {
     try {
-        Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(communicator.createPlayerDisconnect(socket), socket);
+        var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+        lobby.sendMsgToMembers(communicator.createPlayerDisconnect(socket), socket);
+        for (var i = 0; i < lobby.drawers.length; i++) {
+            if (lobby.drawers[i] === socket.appData.id) {
+                lobby.drawers.splice(i, 1);
+            }
+        }
     } catch(e) {}
 }
 
@@ -127,67 +137,104 @@ function handleCommand(command, socket) {
             
             var info = communicator.getLobbyCreationInfo(data);
 
-            var newLobby = new Lobby(newLobbyID, info.width, info.height, info.color);
+            console.log(info);
+
+            var newLobby = new Lobby(newLobbyID, info.width, info.height, info.color, info.playersallowed, info.spectatorsOn);
             lobbies.push(newLobby);
             socket.appData.lobbyID = newLobbyID;
+            newLobby.drawers.push(socket.appData.id);
             newLobby.sendJoinInstruction(socket);
         } else if (commandID === 1) { // Join lobby
             var requestedID = formatter.fromUTribyte(data.slice(0, 3));
             var lobby = Lobby.prototype.getLobbyByID(requestedID);
-            
+
+            console.log(lobby);
+
             if (lobby) {
-                socket.appData.lobbyID = requestedID;
-                lobby.sendJoinInstruction(socket);
+                if (lobby.players < lobby.playersallowed) {
+                    lobby.players = lobby.players + 1;
+                    lobby.drawers.push(socket.appData.id);
+                    socket.appData.lobbyID = requestedID;
+                    socket.appData.spectator = false;
+                    lobby.sendJoinInstruction(socket);
+                } else if (lobby.spectatorsAllowed) {
+                    socket.appData.lobbyID = requestedID;
+                    socket.appData.spectator = true;
+                    lobby.sendJoinInstruction(socket);
+                } else {
+                    socket.send(formatter.toUByte(communicator.maxPlayersReached));
+                }
             } else {
                 socket.send(formatter.toUByte(communicator.incorrectIDCommandID));
             }
         } else if (commandID === 2) { // Player update
-            Lobby.prototype.getLobbyByID(socket.appData.lobbyID).sendMsgToMembers(communicator.generatePlayerUpdate(socket, data), socket);
-        } else if (commandID === 3) { // Start line
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            var info = communicator.getLineStartInfo(data);
-            
-            // Send new line creation to everybody EXCEPT sender
-            lobby.sendMsgToMembers(communicator.generateLineStart(lobby, data), socket);
-            // Send sender their line's ID
-            socket.send(communicator.generateLineIDUpdate(lobby));
-            
-            var newLine = new Line(lobby.currentLineID, [info.x, info.y], info.type, info.size, info.color);
-            socket.appData.currentLine = newLine;
-            lobby.lines.push(newLine);
-            
-            lobby.currentLineID++;
-        } else if (commandID === 4) { // Extend line
-            var info = communicator.getLineExtensionInfo(data);
-            
-            socket.appData.currentLine.points.push([info.x, info.y]);
-            
-            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            
-            lobby.sendMsgToMembers(communicator.generateLineExtension(socket, data), socket);
-        } else if (commandID === 5) { // End line
-            socket.appData.currentLine.completed = true;
-            
-            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            lobby.sendMsgToMembers(communicator.generateEndLine(socket));
-            lobby.tryLineCollapse();
-            
-            socket.appData.currentLine = null;
-        } else if (commandID === 6) { // New color
-            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            var newColor = communicator.generateRGBAFromBin(data);
-            var newColorString = JSON.stringify(newColor);
-            
-            lobby.palette.unshift(newColor);
-            for (var i = 1; i < lobby.palette.length; i++) { // Remove duplicate color
-                if (JSON.stringify(lobby.palette[i]) === newColorString) {
-                    lobby.palette.splice(i, 1);
-                    break;
+            for (var i = 0; i < lobby.drawers.length; ++i) {
+                if (lobby.drawers[i] === socket.appData.id) {
+                    lobby.sendMsgToMembers(communicator.generatePlayerUpdate(socket, data), socket);
                 }
             }
-            if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20); // Cap size at 20 colors
-            
-            lobby.sendMsgToMembers(communicator.generatePalette(lobby.palette));
+        } else if (commandID === 3) { // Start line
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            for (var i = 0; i < lobby.drawers.length; ++i) {
+                if (lobby.drawers[i] === socket.appData.id) {
+                    var info = communicator.getLineStartInfo(data);
+                    
+                    // Send new line creation to everybody EXCEPT sender
+                    lobby.sendMsgToMembers(communicator.generateLineStart(lobby, data), socket);
+                    // Send sender their line's ID
+                    socket.send(communicator.generateLineIDUpdate(lobby));
+                    
+                    var newLine = new Line(lobby.currentLineID, [info.x, info.y], info.type, info.size, info.color);
+                    socket.appData.currentLine = newLine;
+                    lobby.lines.push(newLine);
+                    
+                    lobby.currentLineID++;
+                }
+            }
+        } else if (commandID === 4) { // Extend line
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+
+            for (var i = 0; i < lobby.drawers.length; ++i) {
+                if (lobby.drawers[i] === socket.appData.id) {
+                    var info = communicator.getLineExtensionInfo(data);
+                    
+                    socket.appData.currentLine.points.push([info.x, info.y]);
+                    
+                    lobby.sendMsgToMembers(communicator.generateLineExtension(socket, data), socket);
+                }
+            }
+        } else if (commandID === 5) { // End line
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            for (var i = 0; i < lobby.drawers.length; ++i) {
+                if (lobby.drawers[i] === socket.appData.id) {
+                    socket.appData.currentLine.completed = true;
+                    
+                    lobby.sendMsgToMembers(communicator.generateEndLine(socket));
+                    lobby.tryLineCollapse();
+                    
+                    socket.appData.currentLine = null;
+                }
+            }
+        } else if (commandID === 6) { // New color
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            for (var i = 0; i < lobby.drawers.length; ++i) {
+                if (lobby.drawers[i] === socket.appData.id) {
+                    var newColor = communicator.generateRGBAFromBin(data);
+                    var newColorString = JSON.stringify(newColor);
+                    
+                    lobby.palette.unshift(newColor);
+                    for (var i = 1; i < lobby.palette.length; i++) { // Remove duplicate color
+                        if (JSON.stringify(lobby.palette[i]) === newColorString) {
+                            lobby.palette.splice(i, 1);
+                            break;
+                        }
+                    }
+                    if (lobby.palette.length > 20) lobby.palette = lobby.palette.slice(0, 20); // Cap size at 20 colors
+                    
+                    lobby.sendMsgToMembers(communicator.generatePalette(lobby.palette));
+                }
+            }
         } else if (commandID === 255) { // Ping
             socket.send(formatter.toUByte(communicator.pingCommandID));
         }

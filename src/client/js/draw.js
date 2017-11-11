@@ -65,10 +65,12 @@ function processRedrawingInstructions(instructions) {
 }
 
 function addLine(id, startPoint, type, size, color) {
-    let newLine = new Line(id, [startPoint], type, size, color);
-    newLine.createCanavs();
-    
-    currentLines[id] = newLine;
+    if (!amspectator) {
+        let newLine = new Line(id, [startPoint], type, size, color);
+        newLine.createCanavs();
+        
+        currentLines[id] = newLine;
+    }
 }
 
 function Line(id, points, type, size, color) {
@@ -107,29 +109,46 @@ function Line(id, points, type, size, color) {
     }
     
     this.drawLastSegment = function() {        
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.points[this.points.length - 2].x, this.points[this.points.length - 2].y);
-        this.ctx.lineTo(this.points[this.points.length - 1].x, this.points[this.points.length - 1].y);
-        this.setLineStyle(this.ctx, this.RGB);
-        this.ctx.stroke();
+        if (this.type === 4) {
+            this.ctx.beginPath();
+            var width = this.size;
+            xDist = this.points[this.points.length - 2].x - this.points[this.points.length - 1].x;
+            yDist = this.points[this.points.length - 2].y - this.points[this.points.length - 1].y;
+            console.log(Math.hypot(xDist, yDist)*20)
+            for (var n = 0; n < Math.hypot(xDist, yDist)*20; n++) {
+                this.ctx.moveTo((this.points[this.points.length - 1].x)+(xDist/n)-width, this.points[this.points.length - 1].y+(yDist/n)-width);
+                this.ctx.lineTo(this.points[this.points.length - 1].x+(xDist/n)+width, this.points[this.points.length - 1].y+(yDist/n)+width);
+                this.setLineStyle(this.ctx, this.RGB);
+                this.ctx.stroke();
+            }
+        } else {
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.points[this.points.length - 2].x, this.points[this.points.length - 2].y);
+            this.ctx.lineTo(this.points[this.points.length - 1].x, this.points[this.points.length - 1].y);
+            this.setLineStyle(this.ctx, this.RGB);
+            this.ctx.stroke();
+        }
     }
     
     this.setLineStyle = function(context, color) {
         context.lineCap = "round";
         context.lineJoin = "round";
         
-        if (this.type === 0) {
+        if (this.type === 0) { // pencil
             context.strokeStyle = color;
             context.lineWidth = this.size;
-        } else if (this.type === 1) {
+        } else if (this.type === 1) { // rubber
             context.strokeStyle = bgColor;
             context.lineWidth = this.size * 2;
-        } else if (this.type === 2) {
+        } else if (this.type === 2) { // brush
             if (this.points.length >= 2) {
                 let dist = Math.hypot(this.points[this.points.length - 2].x - this.points[this.points.length - 1].x, this.points[this.points.length - 2].y - this.points[this.points.length - 1].y); 
                 context.strokeStyle = color;
                 context.lineWidth = Math.max(1, Math.pow(0.935, dist) * this.size);
             }
+        } else if (this.type === 4) { // pen
+            context.strokeStyle = color;
+            context.lineWidth = 2;
         }
     }
     
@@ -219,6 +238,16 @@ function Line(id, points, type, size, color) {
             context.moveTo(calcedPoints[0][0], calcedPoints[0][1]);
             for (let i = 1; i < calcedPoints.length; i++) {
                 context.lineTo(calcedPoints[i][0], calcedPoints[i][1]);
+            }
+            context.stroke();
+        } else if (this.type === 3) {
+            console.log("aperape");
+            context.beginPath();
+            lineDiff = this.size;
+            context.moveTo(calcedPoints[0][0]-lineDiff, calcedPoints[0][1]-lineDiff)
+            for (let i = 1; i < calcedPoints.length; i+2) {
+                context.lineTo(calcedPoints[i][0]+lineDiff, calcedPoints[i][1]+lineDiff);
+                context.lineTo(calcedPoints[i][0]-lineDiff, calcedPoints[i][1]-lineDiff);
             }
             context.stroke();
         }

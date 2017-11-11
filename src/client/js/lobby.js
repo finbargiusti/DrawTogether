@@ -15,6 +15,8 @@ function getCursorType() {
         type = 1;
     } else if (brushRadio.checked) {
         type = 2;
+    } else if (penRadio.checked) {
+        type = 4;
     }
     if (eyeDropperSelected) {
         type = 3;

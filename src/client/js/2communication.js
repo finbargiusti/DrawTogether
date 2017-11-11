@@ -28,21 +28,33 @@ socket.onclose = function() {
 };
 
 communicator.getLobbyJoinInfo = function(data) {
+
+    console.log(data);
+
     let info = {
-        lobbyID: formatter.fromUTribyte(data.slice(0, 3)),
-        width: formatter.fromUShort(data.slice(3, 5)),
-        height: formatter.fromUShort(data.slice(5, 7))
+        lobbyID: formatter.fromUTribyte(data.slice(1, 4)),
+        width: formatter.fromUShort(data.slice(4, 6)),
+        height: formatter.fromUShort(data.slice(6, 8)),
+        candraw: data.slice(0, 1)
     };
+
+    if (info.candraw == "t") {
+        console.log("fucccboi");
+        amspectator = false;
+    } else {
+        amspectator = true;
+        document.getElementById("utensils").style.display = "none";
+    }
     
-    let redrawInstructionsLength = formatter.fromUTribyte(data.slice(7, 10));
-    let redrawInstructionsRaw = data.slice(10, 10 + redrawInstructionsLength);
+    let redrawInstructionsLength = formatter.fromUTribyte(data.slice(8, 11));
+    let redrawInstructionsRaw = data.slice(11, 11 + redrawInstructionsLength);
     let redrawInstructions = [];
     
     while (redrawInstructionsRaw.length) {
         let redrawInstructionLength = formatter.fromUTribyte(redrawInstructionsRaw.slice(0, 3));
         let redrawInstructionRaw = redrawInstructionsRaw.slice(3, 3 + redrawInstructionLength);
         let redrawInstruction = [formatter.fromUByte(redrawInstructionRaw.slice(0, 1)), formatter.fromUByte(redrawInstructionRaw.slice(1, 2)), communicator.getRGBAStr(redrawInstructionRaw.slice(2, 6))];
-        
+         
         let points = [];
         for (let i = 0; i < (redrawInstructionLength - 6) / 4; i++) {
             points.push([formatter.fromSShort(redrawInstructionRaw.slice(6 + i * 4, 6 + i * 4 + 2)), formatter.fromSShort(redrawInstructionRaw.slice(8 + i * 4, 8 + i * 4 + 2))]);
@@ -54,7 +66,7 @@ communicator.getLobbyJoinInfo = function(data) {
     }
     
     info.redrawInstructions = redrawInstructions;
-    data = data.slice(7 + redrawInstructionsLength + 3);
+    data = data.slice(8 + redrawInstructionsLength + 3);
     
     let paletteLength = formatter.fromUByte(data.slice(0, 1));
     let paletteRaw = data.slice(1, 1 + paletteLength * 4);
@@ -113,6 +125,9 @@ function serverCommandHandler(event) {
     } else if (commandID === 5) { // Palette update
         palette = communicator.getPalette(data);
         updatePalette();
+    } else if (commandID === 6) {
+        alert("Lobby Full")
+        connectingToLobby = false;
     } else if (commandID === 255) { // Ping
         let roundTripTime = Math.ceil(window.performance.now() - pingRequestSendTime);
         

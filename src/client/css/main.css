@@ -177,6 +177,11 @@ input[type="radio"]:checked + #Lbrush{
     padding:    5px 10px;
     transition: 0.5s all;
 }
+input[type="radio"]:checked + #Lpen{
+    background-color:#2ECC40;
+    padding:    5px 10px;
+    transition: 0.5s all;
+}
 input[type="range"] {
     -webkit-appearance:none;
     width:70px;
@@ -312,7 +317,7 @@ canvas {
 }
 #optionsmenu {
     width:400px;
-    height:200px;
+    height:270px;
 }
 #colorpickmenu {
     width:400px;

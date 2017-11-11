@@ -24,6 +24,8 @@
                 <span >Width: </span><input type="number" id="createLobbyWidth"/ value="800"><br/>
                 <span >Height: </span><input type="number" id="createLobbyHeight" value="550" /><br>
                 <span>Background color: </span><input type="text" id="createLobbyBgColor" value="ghostwhite"/>
+                <span>Max Players: </span><input max=12 min=1 type="number" id="createLobbyPlayers" name="" value="" placeholder="" />
+                <span>Allow Spectators: </span><input type="checkbox" id="spectatorsBool"/>
                 <button id="createLobbyConfirm">Done</button>
             </div>
         </div>
@@ -43,6 +45,10 @@
                 <input type="radio" name="dank" id="brush"/>
                 <label for="brush" id="Lbrush">
                     <i class="fa fa-paint-brush"></i>
+                </label>
+                <input type="radio" name="dank" id="pen"/>
+                <label for="pen" id="Lpen">
+                    <i class="fa fa-pencil"></i>
                 </label>
                 <div class="seperator"></div>
                 <div id="openColorPickMenu"></div>
@@ -80,6 +86,16 @@
             </div>
         </div>
         <script src="universal/formatter.js"></script>
+        <!-- Dev mode
         <script src="client/bundle.js"></script>
+        -->
+        <script src="client/js/1lib.js" ></script>
+        <script src="client/js/2communication.js" ></script>
+        <script src="client/js/3main.js" ></script>
+        <script src="client/js/colorpick.js" ></script>
+        <script src="client/js/drag.js" ></script>
+        <script src="client/js/draw.js" ></script>
+        <script src="client/js/lobby.js" ></script>
+        <script src="client/js/menu.js" ></script>
     </body>
 </html>

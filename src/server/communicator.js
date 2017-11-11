@@ -1,11 +1,20 @@
 var communicator = {
     incorrectIDCommandID: 1,
+    maxPlayersReached: 6,
     pingCommandID: 255,
     getLobbyCreationInfo: function(data) {
+        let simpleSpectators;
+        if (data.slice(6, 7) == "t") {
+            simpleSpectators = true;
+        } else {
+            simpleSpectators = false;
+        }
         return {
             width: formatter.fromUShort(data.slice(0, 2)),
             height: formatter.fromUShort(data.slice(2, 4)),
-            color: data.slice(4)
+            playersallowed: formatter.fromUShort(data.slice(4, 6)),
+            spectatorsOn: simpleSpectators,
+            color: data.slice(7)
         };
     },
     generateJoinInstruction: function(lobby) {
@@ -27,8 +36,16 @@ var communicator = {
         for (var i = 0; i < lobby.palette.length; i++) {
             paletteData += this.generateRGBAData(lobby.palette[i]);
         }
+
+        let canjoindrawing;
+
+        if (lobby.playersallowed > lobby.players) {
+            canjoindrawing = "t";
+        } else {
+            canjoindrawing = "f";
+        }
         
-        return formatter.toUByte(COMMAND_ID) + formatter.toUTribyte(lobby.id) + formatter.toUShort(lobby.width) + formatter.toUShort(lobby.height) + formatter.toUTribyte(redrawingInstructions.length) + redrawingInstructions + formatter.toUByte(paletteData.length / 4) + paletteData + lobby.bgColor;
+        return formatter.toUByte(COMMAND_ID) + canjoindrawing + formatter.toUTribyte(lobby.id) + formatter.toUShort(lobby.width) + formatter.toUShort(lobby.height) + formatter.toUTribyte(redrawingInstructions.length) + redrawingInstructions + formatter.toUByte(paletteData.length / 4) + paletteData + lobby.bgColor;
     },
     generateRGBAData: function(rgba) {
         return formatter.toUByte(rgba.r) + formatter.toUByte(rgba.g) + formatter.toUByte(rgba.b) + formatter.toUByte(rgba.a);

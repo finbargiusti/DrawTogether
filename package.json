@@ -4,6 +4,7 @@
   "description": "The server that allows you to draw together",
   "main": "src/server.js",
   "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
     "connect": "^3.6.2",
     "serve-static": "^1.12.3",
     "ws": "^3.0.0"
