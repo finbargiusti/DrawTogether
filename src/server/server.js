@@ -53,7 +53,7 @@ function Lobby(id, width, height, bgColor, playersallowed, spectatorsbool) {
     this.palette = [new Color(0, 0, 0, 255)];
     this.currentLineID = 0;
     this.lines = [];
-    this.players = 1;
+    this.players = 0;
     this.drawers = [];
 
     this.sendMsgToMembers = function(msg, excludedSocket) {
@@ -116,7 +116,7 @@ function onPlayerDisconnect(socket) {
                 lobby.drawers.splice(i, 1);
             }
         }
-    } catch(e) {}
+   } catch(e) {}
 }
 
 function handleCommand(command, socket) {
@@ -152,7 +152,7 @@ function handleCommand(command, socket) {
 
             if (lobby) {
                 if (lobby.players < lobby.playersallowed) {
-                    lobby.players = lobby.players + 1;
+                    lobby.players += 1;
                     lobby.drawers.push(socket.appData.id);
                     socket.appData.lobbyID = requestedID;
                     socket.appData.spectator = false;

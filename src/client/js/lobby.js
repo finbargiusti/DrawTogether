@@ -83,5 +83,14 @@ function renderPlayer(isLocal, x, y, type, brushSize, color) {
         playerCtx.strokeStyle = color;
         playerCtx.lineWidth = 6;
         playerCtx.stroke();
+    } else if (type === 4) {
+        playerCtx.beginPath();
+        playerCtx.moveTo(x, y - brushSize/2);
+        playerCtx.lineTo(x + brushSize/2, y - brushSize/2);
+        playerCtx.lineTo(x, y + brushSize/2);
+        playerCtx.lineTo(x-brushSize/2, y+ brushSize/2);
+        playerCtx.closePath();
+        playerCtx.fillStyle = color;
+        playerCtx.fill()
     }
 }

@@ -122,10 +122,12 @@ function serverCommandHandler(event) {
         delete playerData[formatter.fromUInt(data)];
     } else if (commandID === 4) { // Line instruction
         handleLineInstruction(data);
+        updatePlayerCanvas();
     } else if (commandID === 5) { // Palette update
         palette = communicator.getPalette(data);
         updatePalette();
     } else if (commandID === 6) {
+        // Lobby full
         alert("Lobby Full")
         connectingToLobby = false;
     } else if (commandID === 255) { // Ping
@@ -150,6 +152,7 @@ function handlePlayerUpdate(updateData) {
     let info = communicator.getPlayerUpdateInfo(updateData);
     
     playerData[info.playerID] = info;
+    updatePlayerCanvas()
 }
 
 function joinLobby(width, height, backgroundColor) {

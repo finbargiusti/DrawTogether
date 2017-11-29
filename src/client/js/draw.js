@@ -48,6 +48,7 @@ function handleLineInstruction(instruction) {
         
         currentLines[lineID].combine();
     }
+    updatePlayerCanvas();
 }
 
 function processRedrawingInstructions(instructions) {
@@ -67,7 +68,7 @@ function processRedrawingInstructions(instructions) {
 function addLine(id, startPoint, type, size, color) {
     if (!amspectator) {
         let newLine = new Line(id, [startPoint], type, size, color);
-        newLine.createCanavs();
+        newLine.createCanvas();
         
         currentLines[id] = newLine;
     }
@@ -82,7 +83,7 @@ function Line(id, points, type, size, color) {
     this.alpha = getAlphaFromRGBA(color);
     this.locallyBlocked = false;
     
-    this.createCanavs = function() {
+    this.createCanvas = function() {
         this.canvas = document.createElement("canvas");
         this.canvas.setAttribute("width", canvas.width);
         this.canvas.setAttribute("height", canvas.height);
@@ -110,17 +111,17 @@ function Line(id, points, type, size, color) {
     
     this.drawLastSegment = function() {        
         if (this.type === 4) {
+            let width = this.size;
+            this.setLineStyle(this.ctx, this.RGB);
+            const p1 = this.points[this.points.length - 1];
+            const p2 = this.points[this.points.length - 2];
             this.ctx.beginPath();
-            var width = this.size;
-            xDist = this.points[this.points.length - 2].x - this.points[this.points.length - 1].x;
-            yDist = this.points[this.points.length - 2].y - this.points[this.points.length - 1].y;
-            console.log(Math.hypot(xDist, yDist)*20)
-            for (var n = 0; n < Math.hypot(xDist, yDist)*20; n++) {
-                this.ctx.moveTo((this.points[this.points.length - 1].x)+(xDist/n)-width, this.points[this.points.length - 1].y+(yDist/n)-width);
-                this.ctx.lineTo(this.points[this.points.length - 1].x+(xDist/n)+width, this.points[this.points.length - 1].y+(yDist/n)+width);
-                this.setLineStyle(this.ctx, this.RGB);
-                this.ctx.stroke();
-            }
+            this.ctx.moveTo(p1.x, p1.y - width/2);
+            this.ctx.lineTo(p1.x, p1.y + width/2);
+            this.ctx.lineTo(p2.x, p2.y + width/2);
+            this.ctx.lineTo(p2.x, p2.y - width/2);
+            this.ctx.closePath() 
+            this.ctx.fill();
         } else {
             this.ctx.beginPath();
             this.ctx.moveTo(this.points[this.points.length - 2].x, this.points[this.points.length - 2].y);
@@ -148,7 +149,6 @@ function Line(id, points, type, size, color) {
             }
         } else if (this.type === 4) { // pen
             context.strokeStyle = color;
-            context.lineWidth = 2;
         }
     }
     
@@ -164,7 +164,7 @@ function Line(id, points, type, size, color) {
     
     this.drawFinalLine = function(context) {
         let calcedPoints = [];
-        if (this.type === 1) { // Special treatment, as rubber shouldn't receive the hermite line modelling
+        if (this.type === 1 || this.type === 4) { // Special treatment, as rubber shouldn't receive the hermite line modelling
             for (let i = 0; i < this.points.length; i++) {
                 calcedPoints.push([this.points[i].x, this.points[i].y]);
             }
@@ -185,6 +185,7 @@ function Line(id, points, type, size, color) {
                     let b = Math.hypot(this.points[i].x - this.points[i - 1].x, this.points[i].y - this.points[i - 1].y);
                     let dist = (a + b) / 2;
 
+                    
                     tangents.push([Math.cos(pheta) * dist, Math.sin(pheta) * dist]);
                 }
             }
@@ -233,6 +234,20 @@ function Line(id, points, type, size, color) {
                 context.lineWidth = Math.max(1, Math.pow(0.935, currentDist) * this.size);
                 context.stroke();
             }
+        } else if (this.type === 4) {
+            let width = this.size;
+            for (let i = 0; i < calcedPoints.length-1; i++) {
+                let p1 = calcedPoints[i];
+                let p2 = calcedPoints[i + 1];
+                context.beginPath();
+                context.moveTo(p1[0], p1[1]- width/2);
+                context.lineTo(p1[0], p1[1] + width/2);
+                context.lineTo(p2[0], p2[1] + width/2);
+                context.lineTo(p2[0], p2[1] - width/2);
+                context.closePath();
+                context.fill();
+            }
+
         } else if (this.type === 0 || this.type === 1) {
             context.beginPath();
             context.moveTo(calcedPoints[0][0], calcedPoints[0][1]);
@@ -241,7 +256,6 @@ function Line(id, points, type, size, color) {
             }
             context.stroke();
         } else if (this.type === 3) {
-            console.log("aperape");
             context.beginPath();
             lineDiff = this.size;
             context.moveTo(calcedPoints[0][0]-lineDiff, calcedPoints[0][1]-lineDiff)

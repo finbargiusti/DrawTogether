@@ -64,7 +64,7 @@ if (!amspectator) {
         justPickedPalette = false;
         colorUpdate(true);
     });
-    alphaSlider.addEventListener("mousedown", function() {
+    alphaSlider.addEventListener("touchend", function() {
         justPickedPalette = false;
         colorUpdate(true);
     });
