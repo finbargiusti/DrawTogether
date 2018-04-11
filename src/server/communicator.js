@@ -2,6 +2,10 @@ var communicator = {
     incorrectIDCommandID: 1,
     maxPlayersReached: 6,
     pingCommandID: 255,
+    generateMsg: function(data) {
+        COMMAND_ID = 7;
+        return formatter.toUByte(COMMAND_ID) + data;
+    },
     getLobbyCreationInfo: function(data) {
         let simpleSpectators;
         if (data.slice(6, 7) == "t") {
@@ -17,7 +21,7 @@ var communicator = {
             color: data.slice(7)
         };
     },
-    generateJoinInstruction: function(lobby) {
+    generateJoinInstruction: function(lobby, socket) {
         var COMMAND_ID = 0;
         
         var redrawingInstructions = "";
@@ -39,7 +43,7 @@ var communicator = {
 
         let canjoindrawing;
 
-        if (lobby.playersallowed > lobby.players) {
+        if (!socket.appData.spectator) {
             canjoindrawing = "t";
         } else {
             canjoindrawing = "f";

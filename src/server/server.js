@@ -53,7 +53,6 @@ function Lobby(id, width, height, bgColor, playersallowed, spectatorsbool) {
     this.palette = [new Color(0, 0, 0, 255)];
     this.currentLineID = 0;
     this.lines = [];
-    this.players = 0;
     this.drawers = [];
 
     this.sendMsgToMembers = function(msg, excludedSocket) {
@@ -65,7 +64,7 @@ function Lobby(id, width, height, bgColor, playersallowed, spectatorsbool) {
     }
     
     this.sendJoinInstruction = function(socket) {
-        socket.send(communicator.generateJoinInstruction(this));
+        socket.send(communicator.generateJoinInstruction(this, socket));
     }
     
     this.tryLineCollapse = function() {
@@ -151,8 +150,7 @@ function handleCommand(command, socket) {
             console.log(lobby);
 
             if (lobby) {
-                if (lobby.players < lobby.playersallowed) {
-                    lobby.players += 1;
+                if (lobby.drawers.length < lobby.playersallowed) {
                     lobby.drawers.push(socket.appData.id);
                     socket.appData.lobbyID = requestedID;
                     socket.appData.spectator = false;
@@ -161,9 +159,10 @@ function handleCommand(command, socket) {
                     socket.appData.lobbyID = requestedID;
                     socket.appData.spectator = true;
                     lobby.sendJoinInstruction(socket);
-                } else {
+                } else if (!lobby.spectatorsAllowed) {
                     socket.send(formatter.toUByte(communicator.maxPlayersReached));
                 }
+                console.log(socket.appData)
             } else {
                 socket.send(formatter.toUByte(communicator.incorrectIDCommandID));
             }
@@ -176,8 +175,8 @@ function handleCommand(command, socket) {
             }
         } else if (commandID === 3) { // Start line
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
-            for (var i = 0; i < lobby.drawers.length; ++i) {
-                if (lobby.drawers[i] === socket.appData.id) {
+            if (!socket.appData.spectator) {
+                console.log(lobby.drawers[i], socket.appData.id)
                     var info = communicator.getLineStartInfo(data);
                     
                     // Send new line creation to everybody EXCEPT sender
@@ -191,7 +190,6 @@ function handleCommand(command, socket) {
                     
                     lobby.currentLineID++;
                 }
-            }
         } else if (commandID === 4) { // Extend line
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
 
@@ -235,6 +233,9 @@ function handleCommand(command, socket) {
                     lobby.sendMsgToMembers(communicator.generatePalette(lobby.palette));
                 }
             }
+        } else if (commandID === 7) {
+            var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
+            lobby.sendMsgToMembers(communicator.generateMsg(data))
         } else if (commandID === 255) { // Ping
             socket.send(formatter.toUByte(communicator.pingCommandID));
         }

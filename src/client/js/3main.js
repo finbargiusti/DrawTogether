@@ -41,6 +41,7 @@ let currentUI = "menu";
 let currEyeDropperColor = null;
 let palette = [];
 let amspectator;
+let chatBox = document.getElementById("chatSection")
 
 
 
@@ -67,6 +68,10 @@ communicator.sendColorUpdate = function(color) {
     
     socket.send(formatter.toUByte(COMMAND_ID) + communicator.getBinRGBA(color));
 };
+
+let addMessage = function(message) {
+    document.getElementById("messages").innerHTML += "<p>" + message + "</p>";
+}
 
 if (!amspectator) {
     document.addEventListener("mousemove", function(event) {

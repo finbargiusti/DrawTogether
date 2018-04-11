@@ -29,6 +29,10 @@
                 <button id="createLobbyConfirm">Done</button>
             </div>
         </div>
+        <div id="chatSection">
+            <input type="text" id="chatText"></input><span><button onclick="communicator.sendChat(document.getElementById('chatText').value)">Send chat</button></span>
+            <div id="messages"></div>
+        </div>
         <div id="writingUtensils">
             <p id="idDisplay" ></p>
             <div id="utensils">

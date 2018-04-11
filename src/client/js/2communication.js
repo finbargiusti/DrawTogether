@@ -3,6 +3,12 @@ let connected = false;
 let communicator = {};
 let socket = new WebSocket("ws://"+window.location.hostname+":1337/");
 
+communicator.sendChat = function(message) {
+    let COMMAND_ID = 7;
+
+    socket.send(formatter.toUByte(COMMAND_ID) + message)  
+};
+
 communicator.sendPingRequest = function() {
     let COMMAND_ID = 255;
     
@@ -39,7 +45,6 @@ communicator.getLobbyJoinInfo = function(data) {
     };
 
     if (info.candraw == "t") {
-        console.log("fucccboi");
         amspectator = false;
     } else {
         amspectator = true;
@@ -130,6 +135,8 @@ function serverCommandHandler(event) {
         // Lobby full
         alert("Lobby Full")
         connectingToLobby = false;
+    } else if (commandID === 7) {
+       addMessage(data);
     } else if (commandID === 255) { // Ping
         let roundTripTime = Math.ceil(window.performance.now() - pingRequestSendTime);
         
@@ -160,6 +167,7 @@ function joinLobby(width, height, backgroundColor) {
 
     controls.style.display = "none";
     writingUtensils.style.display = "inline-block";
+    chatBox.style.display = "block";
     optionPanel.style.display = "none";
 
     canvas.setAttribute("width", width);

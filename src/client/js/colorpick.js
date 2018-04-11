@@ -1,3 +1,4 @@
+let usingNewColor = false;
 if (!amspectator) {
     let colorCanvas = document.getElementById("colorpickcanvas");
     let colorCtx = colorCanvas.getContext("2d");
@@ -10,7 +11,6 @@ if (!amspectator) {
     let alphaSliderCanvas = document.getElementById("alphaslidercanvas");
     let alphaSliderCtx = alphaSliderCanvas.getContext("2d");
     let draggingColor = false;
-    let usingNewColor = false;
     let justPickedPalette = false;
     let circleX = 0;
     let circleY = colorCanvas.height;
@@ -197,4 +197,6 @@ if (!amspectator) {
         let rgbaArr = rgba.slice(5).slice(0, -1).split(",");
         return rgbaArr[3];
     }
+} else {
+    document.getElementById("utensils").style.display = "none";
 }

@@ -10,11 +10,12 @@
     "ws": "^3.0.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0"
+    "babel-cli": "^6.26.0",
+    "nodemon": "^1.17.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/babel-cli/bin/babel.js src/client/js --out-file src/client/bundle.js; node src/server/server.js"
+    "start": "nodemon src/server/server.js"
   },
   "repository": {
     "type": "git",

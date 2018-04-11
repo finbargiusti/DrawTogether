@@ -38,7 +38,8 @@ function handleLineInstruction(instruction) {
     } else if (lineCommandID === 3) {
         var lineID = formatter.fromUTribyte(data);
         
-        if (currentLines["localLine"] && currentLines["localLine"] === currentLines[lineID]) {
+        if (currentLines["localLine"] &&
+         currentLines["localLine"] === currentLines[lineID]) {
             delete currentLines["localLine"];
         } else {
             currentLines[lineID].evolve();
