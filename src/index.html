@@ -30,7 +30,8 @@
             </div>
         </div>
         <div id="chatSection">
-            <input type="text" id="chatText"></input><span><button onclick="communicator.sendChat(document.getElementById('chatText').value)">Send chat</button></span>
+            <input type="text" id="chatText" onkeypress="if (event.keyCode == 13) {communicator.sendChat(document.getElementById('chatText').value);document.getElementById('chatText').value = ''}"></input>
+            <span><button onclick="communicator.sendChat(document.getElementById('chatText').value);document.getElementById('chatText').value = ''">Send chat</button></span>
             <div id="messages"></div>
         </div>
         <div id="writingUtensils">
