@@ -116,10 +116,18 @@ function Line(id, points, type, size, color) {
             const p1 = this.points[this.points.length - 1];
             const p2 = this.points[this.points.length - 2];
             this.ctx.beginPath();
-            this.ctx.moveTo(p1.x, p1.y - width/2);
-            this.ctx.lineTo(p1.x, p1.y + width/2);
-            this.ctx.lineTo(p2.x, p2.y + width/2);
-            this.ctx.lineTo(p2.x, p2.y - width/2);
+            let diff = p1.x - p2.x;
+            if (Math.abs(diff) == 0) {
+                this.ctx.moveTo(p1.x-1, p1.y - width/2);
+                this.ctx.lineTo(p1.x-1, p1.y + width/2);
+                this.ctx.lineTo(p2.x+1, p2.y + width/2);
+                this.ctx.lineTo(p2.x+1, p2.y - width/2);
+            } else {
+                this.ctx.moveTo(p1.x, p1.y - width/2);
+                this.ctx.lineTo(p1.x, p1.y + width/2);
+                this.ctx.lineTo(p2.x, p2.y + width/2);
+                this.ctx.lineTo(p2.x, p2.y - width/2);
+            }
             this.ctx.fillStyle = this.RGB;
             this.ctx.closePath() 
             this.ctx.fill();
@@ -241,10 +249,18 @@ function Line(id, points, type, size, color) {
                 let p1 = calcedPoints[i];
                 let p2 = calcedPoints[i + 1];
                 context.beginPath();
-                context.moveTo(p1[0], p1[1]- width/2);
-                context.lineTo(p1[0], p1[1] + width/2);
-                context.lineTo(p2[0], p2[1] + width/2);
-                context.lineTo(p2[0], p2[1] - width/2);
+                let diff = Math.round(p1[0]) - Math.round(p2[0]);
+                if (Math.abs(diff) == 0) {
+                    context.moveTo(p1[0]-1, p1[1]- width/2);
+                    context.lineTo(p1[0]-1, p1[1] + width/2);
+                    context.lineTo(p2[0]+1, p2[1] + width/2);
+                    context.lineTo(p2[0]+1, p2[1] - width/2);
+                } else {
+                    context.moveTo(p1[0], p1[1]- width/2);
+                    context.lineTo(p1[0], p1[1] + width/2);
+                    context.lineTo(p2[0], p2[1] + width/2);
+                    context.lineTo(p2[0], p2[1] - width/2);
+                }
                 context.closePath();
                 context.fill();
             }
