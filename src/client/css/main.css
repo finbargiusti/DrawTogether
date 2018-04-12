@@ -468,15 +468,35 @@ canvas {
     opacity: 0.5;
 }
 #chatSection {
-    position:absolute;
-    top:10px;
+    position:fixed;
+    bottom:10px;
     left:10px;
-    display:none;
+    /* display:none; */
     z-index: 10000000000000000000000000000000;
+    width:300px;
+    max-height:250px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: white;
+}
+#chatSection input{
+    padding:5px;
+    box-sizing: border-box;
+    width:100%;
+    margin: 0;
+    border:none;
+}
+#chatSection span{
+    display:none;
+    width:20%;
+    box-sizing: border-box;
 }
 #messages p{
+    text-indent: 10px;
     font-size:80%;
     margin:0;
+    width:100%;
+    word-wrap: break-word;
 }
 #messages p:nth-child(odd) {
     background-color: rgb(170, 170, 170)
@@ -484,7 +504,7 @@ canvas {
 #messages {
     display:flex;
     flex-direction: column-reverse;
-    width:300px;
-    max-height:80vh;
-    overflow-y:scroll;
+    max-height:100%;
+    width:100%;
+    overflow-y: hidden;
 }
