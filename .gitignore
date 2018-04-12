@@ -6,5 +6,5 @@ package-lock.json
 *.log
 *.vimrc
 fakeCommit
-src/client/bundle.js
+/src/client/bundle.js
 *.sublime*
