@@ -113,7 +113,6 @@ function Line(id, points, type, size, color) {
     this.drawLastSegment = function() {        
         if (this.type === 4) {
             let width = this.size;
-            this.setLineStyle(this.ctx, this.RGB);
             const p1 = this.points[this.points.length - 1];
             const p2 = this.points[this.points.length - 2];
             this.ctx.beginPath();
@@ -121,6 +120,7 @@ function Line(id, points, type, size, color) {
             this.ctx.lineTo(p1.x, p1.y + width/2);
             this.ctx.lineTo(p2.x, p2.y + width/2);
             this.ctx.lineTo(p2.x, p2.y - width/2);
+            this.ctx.fillStyle = this.RGB;
             this.ctx.closePath() 
             this.ctx.fill();
         } else {
