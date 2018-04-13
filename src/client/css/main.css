@@ -471,7 +471,7 @@ canvas {
     position:fixed;
     bottom:10px;
     left:10px;
-    /* display:none; */
+    display:none;
     z-index: 10000000000000000000000000000000;
     width:300px;
     max-height:250px;
