@@ -19,19 +19,19 @@ if (!amspectator) {
     let newRGB = true;
     let oldHueValue = 0;
 
-    communicator.getRGBAStr = function(str) {
+    communicator.getRGBAStr = function (str) {
         return "rgba(" + str.charCodeAt(0) + "," + str.charCodeAt(1) + "," + str.charCodeAt(2) + "," + (str.charCodeAt(3) / 255) + ")";
     };
-    communicator.getBinRGBA = function(str) {
+    communicator.getBinRGBA = function (str) {
         let rgbaArr = str.slice(5).slice(0, -1).split(",");
         return formatter.toUByte(rgbaArr[0]) + formatter.toUByte(rgbaArr[1]) + formatter.toUByte(rgbaArr[2]) + formatter.toUByte(Math.round(rgbaArr[3] * 255));
     };
 
-    closeColorPickButton.addEventListener("click", function() {
+    closeColorPickButton.addEventListener("click", function () {
         clearInterval(colorUpdateClock);
         openColorPickButton.style.backgroundColor = currColor;
     });
-    openColorPickButton.addEventListener("click", function() {
+    openColorPickButton.addEventListener("click", function () {
         colorUpdate(true);
         colorUpdateClock = setInterval(colorUpdate);
         colorPickContainer.style.display = "block";
@@ -42,34 +42,34 @@ if (!amspectator) {
             new AudioObject("client/audio/succ.mp3").loop().play();
         }
     });
-    colorCanvas.addEventListener("mousedown", function() {
-    	draggingColor = true;
-    	circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
-    	circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
-    	updateColorPicker();
+    colorCanvas.addEventListener("mousedown", function () {
+        draggingColor = true;
+        circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
+        circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
+        updateColorPicker();
     });
 
-    window.addEventListener("mouseup", function() {
-    	draggingColor = false;
+    window.addEventListener("mouseup", function () {
+        draggingColor = false;
     });
-    document.addEventListener("mousemove", function() {
-    	if (draggingColor) {
+    document.addEventListener("mousemove", function () {
+        if (draggingColor) {
             justPickedPalette = false;
-    		circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
-    		circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
-    	}
+            circleX = Math.min(colorCanvas.width, Math.max(0, mouseXElement(colorCanvas)));
+            circleY = Math.min(colorCanvas.height, Math.max(0, mouseYElement(colorCanvas)));
+        }
     });
 
-    colorSlider.addEventListener("mousedown", function() {
+    colorSlider.addEventListener("mousedown", function () {
         justPickedPalette = false;
         colorUpdate(true);
     });
-    alphaSlider.addEventListener("touchend", function() {
+    alphaSlider.addEventListener("touchend", function () {
         justPickedPalette = false;
         colorUpdate(true);
     });
 
-    eyeDropSelect.addEventListener("click", function() {
+    eyeDropSelect.addEventListener("click", function () {
         if (!justDisabledEyedropper) {
             eyeDropSelect.style.border = "3px solid #2ECC40";
             eyeDropSelect.style.textShadow = "0px 0px 10px white";
@@ -80,28 +80,29 @@ if (!amspectator) {
     for (let i = 0; i < sliderCanvas.width; ++i) {
         sliderCtx.beginPath();
         sliderCtx.rect(i, 0, 1, sliderCanvas.height);
-        sliderCtx.fillStyle = "hsl(" + (i/sliderCanvas.width*360) + ", 100%, 50%)";
+        sliderCtx.fillStyle = "hsl(" + (i / sliderCanvas.width * 360) + ", 100%, 50%)";
         sliderCtx.fill();
     }
+
     function updateCanvas() {
         if (newHue) {
             let imageData = colorCtx.getImageData(0, 0, colorCanvas.width, colorCanvas.height);
-            let rgbval = hslToRgb(colorSlider.value/360, 1, 0.5);
+            let rgbval = hslToRgb(colorSlider.value / 360, 1, 0.5);
             for (let y = 0; y < colorCanvas.height; ++y) {
                 for (let x = 0; x < colorCanvas.width; ++x) {
-                    let index = x*4+y*colorCanvas.width*4;
-                    let darknessFactor = 1-(y/colorCanvas.height);
-                    let lightnessFactor = 1-(x/colorCanvas.width);
-                    imageData.data[index] = (rgbval[0]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-                    imageData.data[index+1] = (rgbval[1]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-                    imageData.data[index+2] = (rgbval[2]*(1-lightnessFactor) + 255*lightnessFactor) * darknessFactor;
-                    imageData.data[index+3] = 255;
+                    let index = x * 4 + y * colorCanvas.width * 4;
+                    let darknessFactor = 1 - (y / colorCanvas.height);
+                    let lightnessFactor = 1 - (x / colorCanvas.width);
+                    imageData.data[index] = (rgbval[0] * (1 - lightnessFactor) + 255 * lightnessFactor) * darknessFactor;
+                    imageData.data[index + 1] = (rgbval[1] * (1 - lightnessFactor) + 255 * lightnessFactor) * darknessFactor;
+                    imageData.data[index + 2] = (rgbval[2] * (1 - lightnessFactor) + 255 * lightnessFactor) * darknessFactor;
+                    imageData.data[index + 3] = 255;
                 }
             }
             colorCtx.putImageData(imageData, 0, 0);
             newHue = false;
-        } 
-        
+        }
+
         if (newRGB) {
             alphaSliderCtx.globalAlpha = 1;
             for (let x = 0; x < Math.ceil((alphaSliderCanvas.width - 2) / 6) + 1; x++) {
@@ -122,61 +123,63 @@ if (!amspectator) {
 
     function updateColorPicker() {
         let color = new Color();
-        color.setHSV(colorSlider.value, circleX/colorCanvas.width, 1 - circleY/colorCanvas.height);
+        color.setHSV(colorSlider.value, circleX / colorCanvas.width, 1 - circleY / colorCanvas.height);
 
         if (!justPickedPalette) {
             color.setAlpha(1 - alphaSlider.value / 100);
             let newColor = color.getRGBA();
-            
+
             if (newColor !== currColor) {
                 usingNewColor = true;
                 circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
-                document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
+                document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, " + currColor + " 0%, " + currColor + " 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%," + currColor + " 76%," + currColor + " 100%);");
             }
-            
+
             if (getRGBFromRGBA(newColor) !== getRGBFromRGBA(currColor)) {
                 newRGB = true;
             }
-            
+
             currColor = newColor;
         }
 
-        circleSelect.style.transform = "translate(calc(-50% + "+circleX+"px), calc(-50% + "+circleY+"px))";
+        circleSelect.style.transform = "translate(calc(-50% + " + circleX + "px), calc(-50% + " + circleY + "px))";
     }
 
     let colorUpdateClock;
+
     function colorUpdate(forceRerender) { // Updates all the stuff
         if (colorSlider.value != oldHueValue || newHue) {
             newHue = true;
             document.styleSheets[0].addRule('#colorSlider::-webkit-slider-thumb', "background-color: hsl(" + (colorSlider.value) + ", 100%, 50%);");
         }
         oldHueValue = colorSlider.value;
-        
+
         updateColorPicker();
-        
+
         if (forceRerender || newRGB) {
             newRGB = true;
-            document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, "+currColor+" 0%, "+currColor+" 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%,"+currColor+" 76%,"+currColor+" 100%);");
+            document.styleSheets[0].addRule('#alphaSlider input::-webkit-slider-thumb', "background: -webkit-linear-gradient(top, " + currColor + " 0%, " + currColor + " 24%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 75%," + currColor + " 76%," + currColor + " 100%);");
             circleSelect.style.backgroundColor = getRGBFromRGBA(currColor);
         }
-        
-    	updateCanvas();
+
+        updateCanvas();
     }
+
     function updatePalette() {
-    	recentColorContainer.innerHTML = "";
-    	for (let i = 0; i < palette.length; i++) {
-    		let newPaletteEntry = document.createElement("div");
-    		newPaletteEntry.className = "recentColor";
-    		newPaletteEntry.style.backgroundColor = palette[i];
-            newPaletteEntry.addEventListener("click", function() {
+        recentColorContainer.innerHTML = "";
+        for (let i = 0; i < palette.length; i++) {
+            let newPaletteEntry = document.createElement("div");
+            newPaletteEntry.className = "recentColor";
+            newPaletteEntry.style.backgroundColor = palette[i];
+            newPaletteEntry.addEventListener("click", function () {
                 currColor = palette[i];
                 updateColorPickerFromRGB(palette[i]);
                 usingNewColor = true;
                 justPickedPalette = true;
                 newHue = newRGB = true; // Hehe nice syntax
             });
-    		paletteContainer.appendChild(newPaletteEntry);
-    	}
+            paletteContainer.appendChild(newPaletteEntry);
+        }
     }
 
     function updateColorPickerFromRGB(rgb) {

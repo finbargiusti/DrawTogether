@@ -1,8 +1,9 @@
-sizeSlider.addEventListener("change", function() {
+sizeSlider.addEventListener("change", function () {
     brushSize = Number(sizeSlider.value);
 });
 
 dl.addEventListener("click", dlCanvas);
+
 function dlCanvas() {
     var dt = canvas.toDataURL('image/png');
     this.download = "DrawTogether@" + lobbyID;
@@ -37,9 +38,9 @@ function updatePlayerCanvas() {
 
 function renderPlayer(isLocal, x, y, type, brushSize, color) {
     if (!isLocal) {
-      playerCtx.globalAlpha = 0.5;
-    } else  {
-      playerCtx.globalAlpha = 1;
+        playerCtx.globalAlpha = 0.5;
+    } else {
+        playerCtx.globalAlpha = 1;
     }
     if (type === 0) {
         playerCtx.beginPath();
@@ -85,10 +86,10 @@ function renderPlayer(isLocal, x, y, type, brushSize, color) {
         playerCtx.stroke();
     } else if (type === 4) {
         playerCtx.beginPath();
-        playerCtx.moveTo(x, y - brushSize/2);
-        playerCtx.lineTo(x + brushSize/2, y - brushSize/2);
-        playerCtx.lineTo(x, y + brushSize/2);
-        playerCtx.lineTo(x-brushSize/2, y+ brushSize/2);
+        playerCtx.moveTo(x, y - brushSize / 2);
+        playerCtx.lineTo(x + brushSize / 2, y - brushSize / 2);
+        playerCtx.lineTo(x, y + brushSize / 2);
+        playerCtx.lineTo(x - brushSize / 2, y + brushSize / 2);
         playerCtx.closePath();
         playerCtx.fillStyle = color;
         playerCtx.fill()

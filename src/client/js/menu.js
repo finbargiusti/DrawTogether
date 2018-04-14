@@ -1,10 +1,10 @@
-createLobbyBtn.addEventListener("click", function() {
+createLobbyBtn.addEventListener("click", function () {
     optionPanel.style.display = "block";
     optionPanel.getElementsByClassName("popup")[0].style.left = "50%";
     optionPanel.getElementsByClassName("popup")[0].style.top = "50%";
     validationClock = setInterval(validateCreateLobby, 0);
 });
-createLobbyConfirm.addEventListener("click", function() {
+createLobbyConfirm.addEventListener("click", function () {
     if (validateCreateLobby()) {
         let spectatorsSendable;
         if (spectatorsBool.checked) {
@@ -16,14 +16,15 @@ createLobbyConfirm.addEventListener("click", function() {
         clearInterval(validationClock);
     }
 });
-submitIDBtn.addEventListener("click", function() {
+submitIDBtn.addEventListener("click", function () {
     joinLobbyRequest(Number(lobbyIDInput.value));
 });
-createLobbyBgColor.addEventListener("keydown", function() {
-    setTimeout(function() {
+createLobbyBgColor.addEventListener("keydown", function () {
+    setTimeout(function () {
         createLobbyBgColor.style.borderColor = createLobbyBgColor.value;
     }, 16);
 });
+
 function validateCreateLobby() {
     if (Number(createLobbyWidth.value) >= 256 && Number(createLobbyHeight.value) >= 256 && Number(createLobbyWidth.value) <= 16384 && Number(createLobbyHeight.value) <= 16384 && Number(createLobbyPlayers.value) <= 12 && Number(createLobbyPlayers.value) >= 1) {
         createLobbyConfirm.disabled = false;
@@ -40,14 +41,15 @@ function validateCreateLobby() {
     }
 }
 
-communicator.sendCreateLobbyRequest = function(width, height, bgColor, playernumber, spectators) {
+communicator.sendCreateLobbyRequest = function (width, height, bgColor, playernumber, spectators) {
     let COMMAND_ID = 0;
-    
+
     let message = formatter.toUByte(COMMAND_ID) + formatter.toUShort(width) + formatter.toUShort(height) + formatter.toUShort(playernumber) + spectators + bgColor;
     console.log(message)
-    
+
     socket.send(message);
 };
+
 function createLobbyRequest(width, height, bgColor, playernumber, spectators) {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
@@ -56,13 +58,14 @@ function createLobbyRequest(width, height, bgColor, playernumber, spectators) {
     }
 }
 
-communicator.sendJoinLobbyRequest = function(lobbyID) {
+communicator.sendJoinLobbyRequest = function (lobbyID) {
     let COMMAND_ID = 1;
-    
+
     let message = formatter.toUByte(COMMAND_ID) + formatter.toUTribyte(lobbyID);
-    
+
     socket.send(message);
 };
+
 function joinLobbyRequest(ID) {
     if (connected && !connectingToLobby) {
         connectingToLobby = true;
