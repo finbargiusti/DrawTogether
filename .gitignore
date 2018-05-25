@@ -8,3 +8,4 @@ package-lock.json
 fakeCommit
 /src/client/bundle.js
 *.sublime*
+.vscode/launch.json

@@ -175,3 +175,16 @@ for (let i = 0; i < popupCloseButtons.length; i++) {
 createLobbyClose.addEventListener("click", function () {
     clearInterval(validationClock);
 });
+
+
+// Tick system
+
+let tickrate = 60;
+
+setInterval(function(){
+    for (let i  = 0; i < commandlist.length; i++) {
+        serverCommandHandler(commandlist[i])
+    }
+    commandlist = []
+    console.log()
+}, 1000 / tickrate);

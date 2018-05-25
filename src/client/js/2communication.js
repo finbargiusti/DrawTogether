@@ -1,6 +1,7 @@
 let connectingToLobby = false;
 let connected = false;
 let communicator = {};
+let commandlist = [];
 let socket = new WebSocket("ws://" + window.location.hostname + ":1337/");
 
 communicator.sendChat = function (message) {
@@ -25,7 +26,9 @@ function pinger()  { 
 
 socket.onopen = function () {
     connected = true;
-    socket.onmessage = serverCommandHandler;
+    socket.onmessage = function(event){
+        commandlist.push(event);
+    };
     pinger();
 };
 

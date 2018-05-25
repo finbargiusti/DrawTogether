@@ -138,7 +138,6 @@ function handleCommand(command, socket) {
 
             var info = communicator.getLobbyCreationInfo(data);
 
-            console.log(info);
 
             var newLobby = new Lobby(newLobbyID, info.width, info.height, info.color, info.playersallowed, info.spectatorsOn);
             lobbies.push(newLobby);
@@ -148,8 +147,6 @@ function handleCommand(command, socket) {
         } else if (commandID === 1) { // Join lobby
             var requestedID = formatter.fromUTribyte(data.slice(0, 3));
             var lobby = Lobby.prototype.getLobbyByID(requestedID);
-
-            console.log(lobby);
 
             if (lobby) {
                 if (lobby.drawers.length < lobby.playersallowed) {
@@ -164,7 +161,6 @@ function handleCommand(command, socket) {
                 } else if (!lobby.spectatorsAllowed) {
                     socket.send(formatter.toUByte(communicator.maxPlayersReached));
                 }
-                console.log(socket.appData)
             } else {
                 socket.send(formatter.toUByte(communicator.incorrectIDCommandID));
             }
@@ -178,7 +174,6 @@ function handleCommand(command, socket) {
         } else if (commandID === 3) { // Start line
             var lobby = Lobby.prototype.getLobbyByID(socket.appData.lobbyID);
             if (!socket.appData.spectator) {
-                console.log(lobby.drawers[i], socket.appData.id)
                 var info = communicator.getLineStartInfo(data);
 
                 // Send new line creation to everybody EXCEPT sender
