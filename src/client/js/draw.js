@@ -77,12 +77,16 @@ function processRedrawingInstructions(instructions) {
 }
 
 function addLine(id, startPoint, type, size, color) {
-    if (!amspectator) {
+        if (amspectator) {
+            if (id == "localLine") {
+                return
+            }
+        }
+
         let newLine = new Line(id, [startPoint], type, size, color);
         newLine.createCanvas();
 
         currentLines[id] = newLine;
-    }
 }
 
 function Line(id, points, type, size, color) {
