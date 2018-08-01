@@ -1,0 +1,11 @@
+node_modules
+package-lock.json
+*.swp
+*.swo
+*.tool
+*.log
+*.vimrc
+fakeCommit
+/src/client/bundle.js
+*.sublime*
+.vscode/launch.json
