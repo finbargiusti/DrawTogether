@@ -1,4 +1,6 @@
-# DrawTogether
+<p align="center"><img src="https://i.imgur.com/jQk2c2V.png"></p>
+
+# 
 A site allowing you to Draw with friends in real time!
 
 Example of what you could draw together, a picture drawn by co-creator Davidskanal and his friend:
