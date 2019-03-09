@@ -1,0 +1,7 @@
+.join {
+  position: absolute;
+  text-align: center;
+  transform: translateY(-50%);
+  top: 50%;
+  width: 100%;
+}

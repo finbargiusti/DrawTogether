@@ -1,7 +1,3 @@
-import React from "react";
-
-const Join = () => {
-  return <p>Hello World, Join</p>;
-};
+import Join from "./Join";
 
 export default Join;
