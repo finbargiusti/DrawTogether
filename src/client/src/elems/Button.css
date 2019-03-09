@@ -1,0 +1,22 @@
+.button {
+  box-sizing: border-box;
+  display: inline-block;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.button p {
+  transition: all 0.2s;
+  background-color: var(--primary);
+  box-sizing: border-box;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px 10px 20px;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+.button p:hover {
+  transition: all 0.2s;
+  padding: 12px 22px 12px 22px;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
+}

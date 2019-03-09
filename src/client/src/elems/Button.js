@@ -1,7 +1,8 @@
 import React from "react";
+import "./Button.css";
 
 const Button = ({ children, onclick }) => (
-  <div className="splash__button">
+  <div className="button">
     <p onClick={onclick}>{children}</p>
   </div>
 );
