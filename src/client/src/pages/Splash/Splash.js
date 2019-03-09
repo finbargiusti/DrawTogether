@@ -4,13 +4,25 @@ import Button from "./elems/Button";
 
 import "./Splash.css";
 
-let Splash = () => {
+let Splash = ({ setCurrPage }) => {
   return (
     <div className="splash">
-      <img src={logo} className="splash__logo" />
+      <img src={logo} className="splash__logo" alt="DrawTogether logo" />
       <div className="splash__button__wrapper">
-        <Button href="#">Create Lobby</Button>
-        <Button href="#">Join Lobby</Button>
+        <Button
+          onclick={() => {
+            setCurrPage("Create");
+          }}
+        >
+          Create Lobby
+        </Button>
+        <Button
+          onclick={() => {
+            setCurrPage("Join");
+          }}
+        >
+          Join Lobby
+        </Button>
       </div>
     </div>
   );

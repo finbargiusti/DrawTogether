@@ -18,7 +18,7 @@
   margin-right: 20px;
 }
 
-.splash__button a {
+.splash__button p {
   transition: all 0.2s;
   background-color: var(--primary);
   box-sizing: border-box;
@@ -28,7 +28,7 @@
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
 }
 
-.splash__button a:hover {
+.splash__button p:hover {
   transition: all 0.2s;
   padding: 12px 22px 12px 22px;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);

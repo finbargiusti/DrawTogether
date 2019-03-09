@@ -1,8 +1,8 @@
 import React from "react";
 
-const Button = ({ children, href }) => (
+const Button = ({ children, onclick }) => (
   <div className="splash__button">
-    <a href={href}>{children}</a>
+    <p onClick={onclick}>{children}</p>
   </div>
 );
 
