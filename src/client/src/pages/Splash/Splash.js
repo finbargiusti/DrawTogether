@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "./logo.png";
-import Button from "./elems/Button";
+import Button from "../../elems/Button";
 
 import "./Splash.css";
 
