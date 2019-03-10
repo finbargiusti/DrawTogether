@@ -22,7 +22,7 @@ const Join = ({ setCurrLobbyId, setCurrPage }) => {
   const submitLobby = () => {};
 
   return (
-    <div className="join">
+    <div className="center-wrapper">
       <Input changeValue={setLobbyId} propsObject={propsObject} />
       <div>
         <Button onclick={submitLobby}>Join Lobby</Button>

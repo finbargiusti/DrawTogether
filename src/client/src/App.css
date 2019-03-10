@@ -3,3 +3,11 @@
   top: 0px;
   right: 15px;
 }
+
+.center-wrapper {
+  position: absolute;
+  text-align: center;
+  transform: translateY(-50%);
+  top: 50%;
+  width: 100%;
+}

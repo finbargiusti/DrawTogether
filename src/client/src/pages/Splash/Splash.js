@@ -6,7 +6,7 @@ import "./Splash.css";
 
 let Splash = ({ setCurrPage }) => {
   return (
-    <div className="splash">
+    <div className="center-wrapper">
       <img src={logo} className="splash__logo" alt="DrawTogether logo" />
       <div className="splash__button__wrapper">
         <Button
