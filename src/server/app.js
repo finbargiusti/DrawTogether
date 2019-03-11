@@ -1,41 +1,67 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require("express");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const app = express();
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Lobby
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+const Lobbies = [];
+
+class Lobby {
+  constructor(LobbyId, height, width, maxPlayers, spectators) {
+    this.LobbyId = LobbyId;
+    this.height = height;
+    this.width = width;
+    this.maxPlayers = maxPlayers;
+    this.spectators = spectators;
+  }
+
+  get id() {
+    return this.LobbyId;
+  }
+}
+
+const assignLobby = (data, id) => {
+  if (
+    Lobbies.filter(lobby => {
+      return (lobby.id = id);
+    }) === 0
+  ) {
+    Lobbies.push(
+      new Lobby(id, data.height, data.width, data.maxPlayers, data.spectators)
+    );
+    return true;
+  }
+  return false;
+};
+
+const generateId = () => {
+  const min = 11111;
+  const max = 99999;
+
+  return Math.floor(Math.random() * (max - min)) + min;
+};
+
+app.post("/api/create-lobby", (req, res) => {
+  const query = req.body;
+
+  let trialId;
+
+  if (query.height !== undefined) {
+    do {
+      trialId = generateId();
+    } while (!trialId);
+  } else {
+    res.send("Error");
+  }
+
+  res.json({
+    success: true,
+    id: trialId
+  });
+
+  // if (app.get("env") === "development") console.log(err.stack);
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
+app.listen(process.env.PORT || 3001);
