@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Input from "../../elems/Input";
 import Button from "../../elems/Button";
 
-import "./Join.css";
-
 const getLobbyInfo = lobbyId => {
   if (lobbyId > 10) return true;
   else return false;
