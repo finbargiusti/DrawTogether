@@ -6,7 +6,11 @@ const Input = ({ changeValue, propsObject, label }) => {
 
   const props = {
     onChange: e => {
-      changeValue(e.target.value);
+      if (propsObject.type === "checkbox") {
+        changeValue(checkboxState);
+      } else {
+        changeValue(e.target.value);
+      }
     },
     className: "input",
     id: { label }
@@ -17,7 +21,6 @@ const Input = ({ changeValue, propsObject, label }) => {
       className="inputWrapper"
       onMouseDown={() => {
         setCheckboxState(!checkboxState);
-        console.log(checkboxState);
       }}
     >
       {propsObject.type === "checkbox" && (
