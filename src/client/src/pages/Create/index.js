@@ -1,7 +1,3 @@
-import React from "react";
-
-const Create = () => {
-  return <p>Hello World, Create</p>;
-};
+import Create from "./Create";
 
 export default Create;
