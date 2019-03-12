@@ -19,7 +19,7 @@ const Create = ({ setCurrPage }) => {
       if (response.success) {
         console.log(response.id);
         setCurrPage("Splash");
-      } else if (response == "Error") {
+      } else if (response === "Error") {
         console.log("Whoops");
       }
     });
