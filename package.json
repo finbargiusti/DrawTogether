@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "dev": "npm --prefix src/client start; nodemon src/server/bin/app.js"
+    "dev": "npm --prefix src/client start & nodemon src/server/app.js"
   },
   "repository": {
     "type": "git",
