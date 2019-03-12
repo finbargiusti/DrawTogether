@@ -15,7 +15,9 @@ const App = () => {
       {currPage === "Create" && (
         <Create setCurrPage={setCurrPage} setCurrLobbyId={setLobbyId} />
       )}
-      {currPage === "Join" && <Join />}
+      {currPage === "Join" && (
+        <Join setCurrPage={setCurrPage} setCurrLobbyId={setLobbyId} />
+      )}
     </div>
   );
 };
