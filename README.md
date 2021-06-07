@@ -9,7 +9,7 @@ Example of what you could draw together, a picture drawn by co-creator Davidskan
 ### Make and join lobbies
 ![Make and join buttons](https://image.ibb.co/kaAFZk/Screenshot_from_2017_07_27_18_24_45.png)
 
-You can easily make lobbbies with options by clicking the "Create Lobby" button and selecting the option in the options window.
+You can easily make lobbies with options by clicking the "Create Lobby" button and selecting the option in the options window.
 
 ![Options menu](https://image.ibb.co/dgJNfQ/Screenshot_from_2017_07_27_18_28_28.png)
 ### Utensils and colors
@@ -24,7 +24,7 @@ There are many different drawing tools such as:
 
 ![Rubber Stroke](https://image.ibb.co/hoBKS5/Screenshot_from_2017_07_27_18_40_22.png)
 
-- The brush tool, a utensil whose width is proprtional to the stroke speed, emulating a paintbrush
+- The brush tool, a utensil whose width is proportional to the stroke speed, emulating a paintbrush
 
 ![Brush stroke](https://image.ibb.co/hr1D75/Screenshot_from_2017_07_30_13_36_31.png)
 
@@ -41,7 +41,7 @@ Last but not least, there is the sizeslider:
 
 ![Size slider](https://image.ibb.co/fgatLQ/Screenshot_from_2017_07_27_19_00_07.png)
 ## Prerequisites
-You must have the follwing installed to use this project:
+You must have the following installed to use this project:
 - Node
 - Node Package manager
 ## Installation
@@ -49,7 +49,7 @@ To install, first clone the git repository as so:
 
 ``git clone http://github.com/finbargiusti/DrawTogether.git``
 
-Then install all the dependancies as so:
+Then install all the dependencies as so:
 
 ``npm install``
 ## Usage
