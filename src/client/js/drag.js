@@ -9,9 +9,15 @@ function addListeners() {
     elements[i].addEventListener('mousedown', function (event) {
       mouseDown(elements[i], event);
     }, false);
+    elements[i].addEventListener('touchstart', function (event) {
+      mouseDown(elements[i], event);
+    }, false);
   }
   window.addEventListener('mouseup', mouseUp, true);
+  window.addEventListener('touchend', mouseUp, false)
   window.addEventListener("mousemove", mouseMove, false);
+  window.addEventListener('touchmove', mouseMove, false);
+
 }
 
 function mouseUp() {

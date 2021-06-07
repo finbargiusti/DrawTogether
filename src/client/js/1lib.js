@@ -5,6 +5,13 @@ function mouseXElement(element) {
 function mouseYElement(element) {
     return (mouseY - element.getBoundingClientRect().top);
 }
+function touchXElement(element) {
+    return (mouseX - element.getBoundingClientRect().left - window.scrollX);
+}
+
+function touchYElement(element) {
+    return (mouseY - element.getBoundingClientRect().top - window.scrollY);
+}
 Math.clamp = function (value, min, max) {
     if (value < min) {
         return min;

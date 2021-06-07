@@ -79,14 +79,29 @@ let addMessage = function (message) {
 }
 
 if (!amspectator) {
-    document.addEventListener("mousemove", function (event) {
-        mouseX = event.clientX;
-        mouseY = event.clientY;
+    const moveLine = function (event) {
+        event.preventDefault()
 
-        let thisPosition = {
-            x: r(mouseXElement(canvas)),
-            y: r(mouseYElement(canvas))
-        };
+        let thisPosition;
+
+        if (event.changedTouches) {
+            mouseX = event.changedTouches[0].pageX
+            mouseY = event.changedTouches[0].pageY
+
+            thisPosition = {
+                x: r(touchXElement(canvas)),
+                y: r(touchYElement(canvas))
+            };
+        } else {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+
+            thisPosition = {
+                x: r(mouseXElement(canvas)),
+                y: r(mouseYElement(canvas))
+            };
+        }
+
 
         if (isDrawing && !eyeDropperSelected && currentUI == "draw") {
             if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
@@ -108,6 +123,10 @@ if (!amspectator) {
         }
 
         if (connected && lobbyID) { // Send cursor information
+            if (event.changedTouches) {
+                communicator.sendCursorUpdate(thisPosition.x, mouseY, getCursorType(), brushSize, (eyeDropperSelected) ? currEyeDropperColor : currColor);
+
+            }
             communicator.sendCursorUpdate(thisPosition.x, thisPosition.y, getCursorType(), brushSize, (eyeDropperSelected) ? currEyeDropperColor : currColor);
         }
 
@@ -115,8 +134,12 @@ if (!amspectator) {
             x: mouseXElement(canvas),
             y: mouseYElement(canvas)
         };
-    });
-    document.addEventListener("mousedown", function () {
+    }
+
+    canvas.addEventListener("touchmove", moveLine, false);
+    canvas.addEventListener("mousemove", moveLine, false);
+
+    const startEyeDrop = function () {
         if (eyeDropperSelected) {
             if (lastPosition.x >= 0 && lastPosition.x <= canvas.width && lastPosition.y >= 0 && lastPosition.y <= canvas.height) {
                 if (currEyeDropperColor !== currColor) usingNewColor = true;
@@ -130,7 +153,9 @@ if (!amspectator) {
             eyeDropSelect.style.textShadow = "none";
             openColorPickButton.style.backgroundColor = currColor;
         }
-    });
+    }
+    document.addEventListener("mousedown", startEyeDrop);
+    document.addEventListener("touchstart", startEyeDrop);
     communicator.sendLineCreation = function (x, y, type, size, color) {
         let COMMAND_ID = 3;
 
@@ -138,20 +163,22 @@ if (!amspectator) {
 
         socket.send(formatter.toUByte(COMMAND_ID) + message);
     };
-    canvas.addEventListener("mousedown", function () {
+    const startDraw = function () {
         isDrawing = true;
 
         if (!currentLines["localLine"] && !eyeDropperSelected && currentUI == "draw") { // If there's no localline
             addLine("localLine", lastPosition, getCursorType(), brushSize, currColor);
             communicator.sendLineCreation(lastPosition.x, lastPosition.y, getCursorType(), brushSize, currColor);
         }
-    });
+    }
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("touchstart", startDraw);
     communicator.sendLineEnd = function () {
         var COMMAND_ID = 5;
 
         socket.send(formatter.toUByte(COMMAND_ID));
     };
-    document.addEventListener("mouseup", function () {
+    const endDraw = function () {
         isDrawing = false;
         if (currentLines["localLine"] && !currentLines["localLine"].locallyBlocked) {
             currentLines["localLine"].locallyBlocked = true;
@@ -162,7 +189,10 @@ if (!amspectator) {
         setTimeout(function () {
             justDisabledEyedropper = false;
         });
-    });
+    }
+    document.addEventListener("mouseup", endDraw);
+    document.addEventListener("touchend", endDraw);
+
 
 }
 // Makes popups be closable
