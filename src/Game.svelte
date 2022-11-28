@@ -3,7 +3,6 @@
   import ChatBox from './lib/ChatBox.svelte';
   // import type { ChatMessage } from './logic/message';
   import PlayerList from './lib/PlayerList.svelte';
-  import type { LobbyMessage } from './logic/connection';
 
   export let lobby: Lobby;
 </script>
