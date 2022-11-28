@@ -3,7 +3,7 @@ import type { DataConnection } from 'peerjs';
 import { hashName } from './hashname';
 import type { ChatMessage, Message, PeerUpdateMessage } from './message';
 
-export type LobbyMessage = ChatMessage;
+export type LobbyMessage = ChatMessage & { from: string };
 
 export default class Connection {
   isHost: boolean;
@@ -34,6 +34,9 @@ export default class Connection {
 
       this.p.on('open', () => {
         this.host = this.p.connect(hashName(id));
+        this.host.on('open', () => {
+          this.updatePlayerList();
+        });
         this.addMessageListeners(this.host);
         this.updatePlayerList();
       });
@@ -43,8 +46,6 @@ export default class Connection {
 
     this.p.on('connection', (d) => {
       this.addPeer(d);
-      this.addMessageListeners(d);
-      if (this.isHost) this.propogatePeerInfo();
     });
   }
 
@@ -55,10 +56,9 @@ export default class Connection {
       d.on('data', (bin) => {
         const m = bin as Message;
         if (m.title == 'update-peers') {
-          console.log(m.data);
           this.updatePeers(m.data);
         } else {
-          this.onMessage(m);
+          this.onMessage({ ...m, from: d.peer });
         }
       });
     });
@@ -67,8 +67,7 @@ export default class Connection {
   private updatePeers(peerList: string[]) {
     peerList.forEach((id) => {
       if (!this.peers.map((d) => d.peer).includes(id)) {
-        this.peers.push(this.p.connect('d'));
-        this.updatePlayerList();
+        this.addPeer(this.p.connect(id));
       }
     });
   }
@@ -81,7 +80,9 @@ export default class Connection {
     this.peers.forEach((peer) => {
       const m: PeerUpdateMessage = {
         title: 'update-peers',
-        data: this.peers.map((p) => p.peer),
+        data: this.peers
+          .map((p) => p.peer)
+          .filter((id) => id != peer.peer /* name of peer connected */),
       };
 
       peer.send(m);
@@ -98,6 +99,13 @@ export default class Connection {
     }
 
     this.peers.push(d);
+
+    d.on('open', () => {
+      this.updatePlayerList();
+    });
+
+    this.addMessageListeners(d);
+    if (this.isHost) this.propogatePeerInfo();
 
     // notify peer update
     this.updatePlayerList();

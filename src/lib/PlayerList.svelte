@@ -17,9 +17,12 @@
 </script>
 
 <Draggable title="Player List">
-  <ul>
+  <ul class="player-list">
     {#each playerlist as player}
-      <li>
+      <li
+        class={(player.active ? 'active' : 'inactive') +
+          (player.you ? ' you' : '')}
+      >
         {player.id.substring(0, 5)}
         {player.host ? '(host)' : ''}
         {player.you ? '(you)' : ''}
@@ -27,3 +30,29 @@
     {/each}
   </ul>
 </Draggable>
+
+<style lang="sass">
+.player-list
+  list-style-type: none
+  padding: 0
+  margin: 0
+  
+  li
+    padding: 4px 8px 4px 8px
+    background-color: #434343
+    box-sizing: border-box
+    margin: 0
+
+    &:nth-child(odd)
+      background-color: #535353,
+
+    &.active
+      color: lightgreen
+
+    &.inactive
+      color: #ff4444
+
+    &.you
+      font-weight: bold
+
+</style>

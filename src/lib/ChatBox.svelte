@@ -1,15 +1,27 @@
 <script lang="ts">
+  import type { LobbyMessage } from '../logic/connection';
+  import type Lobby from '../logic/lobby';
   import Draggable from './Draggable.svelte';
 
-  export let sendChat: (message: string) => void;
+  export let lobby: Lobby;
 
-  export let chats: string[];
+  let messages: LobbyMessage[] = [];
+
+  lobby.onMessage = (m) => {
+    if (m.title == 'chat') {
+      messages = [...messages, m];
+    }
+  };
 
   let chatInput = '';
 
   let handleKeypress = (e: KeyboardEvent) => {
     if (e.key == 'Enter') {
-      sendChat(chatInput);
+      messages = [
+        ...messages,
+        { title: 'chat', data: chatInput, from: lobby.conn.p.id },
+      ];
+      lobby.sendChat(chatInput);
       chatInput = '';
     }
   };
@@ -17,8 +29,8 @@
 
 <Draggable title="messages">
   <ul class="chats">
-    {#each chats as chat}
-      <li>{chat}</li>
+    {#each messages as chat}
+      <li>from {chat.from.substring(0, 5)}: {chat.data}</li>
     {/each}
   </ul>
   <input

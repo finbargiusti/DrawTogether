@@ -1,29 +1,17 @@
 <script lang="ts">
   import type Lobby from './logic/lobby';
   import ChatBox from './lib/ChatBox.svelte';
-  import type { ChatMessage } from './logic/message';
+  // import type { ChatMessage } from './logic/message';
   import PlayerList from './lib/PlayerList.svelte';
+  import type { LobbyMessage } from './logic/connection';
 
   export let lobby: Lobby;
-
-  let messages = [];
-
-  lobby.onMessage = (m: ChatMessage) => {
-    if (m.title == 'chat') {
-      messages = [...messages, m.data];
-    }
-  };
-
-  let addMessage = (m: string) => {
-    messages = [...messages, m];
-    lobby.sendChat(m);
-  };
 </script>
 
 <div class="game">
   <div class="tools">
     <PlayerList {lobby} />
-    <ChatBox sendChat={addMessage} chats={messages} />
+    <ChatBox {lobby} />
   </div>
   <p>{lobby.hostId}</p>
 </div>

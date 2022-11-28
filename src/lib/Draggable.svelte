@@ -6,7 +6,12 @@
 
 <div class="draggable">
   <div class="title">{title}</div>
-  <div class="content">
+  <div
+    class="content"
+    style={pos
+      ? `position: absolute; left: ${pos.x}px; right: ${pos.y}px;`
+      : ''}
+  >
     <slot />
   </div>
 </div>
