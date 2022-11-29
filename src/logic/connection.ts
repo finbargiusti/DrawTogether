@@ -41,6 +41,7 @@ export default class Connection {
           this.updatePlayerList();
         });
         this.addMessageListeners(this.host);
+        this.addErrorListeners(this.host);
         this.updatePlayerList();
       });
     }
@@ -71,6 +72,12 @@ export default class Connection {
     });
   }
 
+  private addErrorListeners(d: DataConnection) {
+    d.on('error', (er) => {
+      console.error(er);
+    });
+  }
+
   private updatePeers(peerList: string[]) {
     peerList.forEach((id) => {
       if (!this.peers.map((d) => d.peer).includes(id)) {
@@ -92,7 +99,7 @@ export default class Connection {
           .filter((id) => id != peer.peer /* name of peer connected */),
       };
 
-      peer.send(m);
+      this.sendToPeer(peer, m);
     });
   }
 
@@ -113,7 +120,22 @@ export default class Connection {
       this.updatePlayerList();
     });
 
+    d.peerConnection.oniceconnectionstatechange = () => {
+      if (d.peerConnection.iceConnectionState == 'disconnected') {
+        setTimeout(() => {
+          // TODO: make an option for this
+
+          // closes connection if timed out for 5s
+          d.close();
+          this.peers.splice(this.peers.indexOf(d), 1);
+          this.updatePlayerList();
+        }, 5000);
+      }
+      this.updatePlayerList();
+    };
+
     this.addMessageListeners(d);
+    this.addErrorListeners(d);
     if (this.isHost) this.propogatePeerInfo();
 
     // notify peer update
@@ -125,7 +147,7 @@ export default class Connection {
     if (d.open) {
       d.send(m);
     } else {
-      throw new Error('Peer not open..');
+      d.on('open', () => this.sendToPeer(d, m)); // retry when open
     }
   }
 
@@ -134,7 +156,10 @@ export default class Connection {
       this.host.send(m);
     }
 
-    this.peers.forEach((p) => this.sendToPeer(p, m));
+    this.peers.forEach((p) => {
+      console.log(p.peer, m);
+      this.sendToPeer(p, m);
+    });
   }
 
   public onPlayerListUpdate: (
@@ -168,7 +193,7 @@ export default class Connection {
       list.push({ id: this.p.id, active: true, you: true, host: false });
       list.push({
         id: this.host.peer,
-        active: this.host.open,
+        active: this.host.peerConnection.iceConnectionState == 'connected',
         host: true,
         you: false,
       });
@@ -177,8 +202,8 @@ export default class Connection {
     list = [
       ...list,
       ...this.peers.map((d) => ({
-        id: d.peer.substring(0, 5),
-        active: d.open,
+        id: d.peer,
+        active: d.peerConnection.iceConnectionState == 'connected',
         you: false,
         host: false,
       })),
