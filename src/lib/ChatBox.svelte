@@ -1,14 +1,14 @@
 <script lang="ts">
   import type { ChatMessage } from '../logic/message';
   import type Lobby from '../logic/lobby';
-  import Draggable from './Draggable.svelte';
 
   export let lobby: Lobby;
 
   let messages: (ChatMessage & { from: string })[] = [];
 
   lobby.on('chat', (m) => {
-    messages = [...messages, m];
+    let c = m as ChatMessage & { from: string };
+    messages = [...messages, c];
   });
 
   let chatInput = '';
