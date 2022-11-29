@@ -43,7 +43,8 @@
 />
 
 <style lang="sass">
-
+.canvas
+  cursor: none
 
 
 </style>

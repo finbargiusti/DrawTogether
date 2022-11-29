@@ -1,4 +1,4 @@
-import type { CanvasOptions } from './canvas';
+import type { CanvasOptions, Cursor } from './canvas';
 
 export interface ChatMessage {
   title: 'chat';
@@ -15,8 +15,18 @@ export interface CanvasDefinitionMessage {
   data: CanvasOptions;
 }
 
-export type Message = ChatMessage | PeerUpdateMessage | CanvasDefinitionMessage;
+export interface CursorUpdateMessage {
+  title: 'cursor-move';
+  data: Cursor;
+}
 
 export type LobbyMessage =
   | (ChatMessage & { from: string })
-  | CanvasDefinitionMessage;
+  | CanvasDefinitionMessage
+  | CursorUpdateMessage;
+
+export type Message =
+  | ChatMessage
+  | PeerUpdateMessage
+  | CanvasDefinitionMessage
+  | CursorUpdateMessage;

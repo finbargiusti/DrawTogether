@@ -9,7 +9,7 @@
 <div class="game">
   <Tools {lobby} />
   <div class="canvas">
-    <p>{lobby.hostId}</p>
+    <p>Lobby id: {lobby.hostId}</p>
     <Painting {lobby} />
   </div>
 </div>
@@ -25,5 +25,6 @@
 
   .canvas
     grid-area: "canvas"
+    padding: 20px 40px 20px 40px
 
 </style>

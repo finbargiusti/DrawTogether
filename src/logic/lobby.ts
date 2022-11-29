@@ -1,8 +1,9 @@
-import type { CanvasOptions } from './canvas';
+import type { CanvasOptions, Cursor } from './canvas';
 import Connection from './connection';
 import type {
   CanvasDefinitionMessage,
   ChatMessage,
+  CursorUpdateMessage,
   LobbyMessage,
 } from './message';
 import Painting from './painting';
@@ -41,7 +42,7 @@ export default class Lobby {
     if (!this.canvas) {
       throw new Error('Canvas not found!');
     }
-    this.painting = new Painting(this.canvas, options);
+    this.painting = new Painting(this.canvas, options, this.conn);
   }
 
   private listeners: {
@@ -55,13 +56,17 @@ export default class Lobby {
   public addMessageListener() {
     this.conn.onMessage = (m) => {
       if (m.title == 'canvas-definition') {
-        const c = m as CanvasDefinitionMessage;
-        this.createPainting(c.data);
+        const c = m.data as CanvasOptions;
+        this.createPainting(c);
+      }
+
+      if (m.title == 'cursor-move') {
+        const c = m.data as Cursor;
+        this.painting.updateCursor(c);
       }
 
       // call related callback (1 per message type)
-      console.log(this.listeners[m.title]);
-      this.listeners[m.title](m);
+      if (this.listeners[m.title]) this.listeners[m.title](m);
     };
 
     this.conn.onNewPeer = (p) => {
