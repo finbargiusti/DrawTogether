@@ -1,6 +1,5 @@
 <script lang="ts">
   import type Lobby from '../logic/lobby';
-  import Draggable from './Draggable.svelte';
 
   export let lobby: Lobby;
 
@@ -16,20 +15,18 @@
   };
 </script>
 
-<Draggable title="Player List">
-  <ul class="player-list">
-    {#each playerlist as player}
-      <li
-        class={(player.active ? 'active' : 'inactive') +
-          (player.you ? ' you' : '')}
-      >
-        {player.id.substring(0, 5)}
-        {player.host ? '(host)' : ''}
-        {player.you ? '(you)' : ''}
-      </li>
-    {/each}
-  </ul>
-</Draggable>
+<ul class="player-list">
+  {#each playerlist as player}
+    <li
+      class={(player.active ? 'active' : 'inactive') +
+        (player.you ? ' you' : '')}
+    >
+      {player.id.substring(0, 5)}
+      {player.host ? '(host)' : ''}
+      {player.you ? '(you)' : ''}
+    </li>
+  {/each}
+</ul>
 
 <style lang="sass">
 .player-list

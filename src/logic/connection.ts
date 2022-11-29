@@ -1,9 +1,12 @@
 import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
 import { hashName } from './hashname';
-import type { ChatMessage, Message, PeerUpdateMessage } from './message';
-
-export type LobbyMessage = ChatMessage & { from: string };
+import type {
+  ChatMessage,
+  LobbyMessage,
+  Message,
+  PeerUpdateMessage,
+} from './message';
 
 export default class Connection {
   isHost: boolean;
@@ -58,7 +61,11 @@ export default class Connection {
         if (m.title == 'update-peers') {
           this.updatePeers(m.data);
         } else {
-          this.onMessage({ ...m, from: d.peer });
+          if (m.title == 'chat') {
+            this.onMessage({ ...m, from: d.peer });
+          } else {
+            this.onMessage(m);
+          }
         }
       });
     });
@@ -89,6 +96,8 @@ export default class Connection {
     });
   }
 
+  public onNewPeer: (d: DataConnection) => void;
+
   private addPeer(d: DataConnection) {
     // delete peer obj of same name if exists
 
@@ -109,6 +118,15 @@ export default class Connection {
 
     // notify peer update
     this.updatePlayerList();
+    this.onNewPeer(d);
+  }
+
+  public sendToPeer(d: DataConnection, m: Message) {
+    if (d.open) {
+      d.send(m);
+    } else {
+      throw new Error('Peer not open..');
+    }
   }
 
   public sendToAllPeers(m: Message) {
@@ -116,9 +134,7 @@ export default class Connection {
       this.host.send(m);
     }
 
-    this.peers.forEach((p) => {
-      if (p.open) p.send(m);
-    });
+    this.peers.forEach((p) => this.sendToPeer(p, m));
   }
 
   public onPlayerListUpdate: (

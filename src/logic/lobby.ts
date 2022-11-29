@@ -1,11 +1,21 @@
-import Connection, { type LobbyMessage } from './connection';
-import type { ChatMessage } from './message';
+import type { CanvasOptions } from './canvas';
+import Connection from './connection';
+import type {
+  CanvasDefinitionMessage,
+  ChatMessage,
+  LobbyMessage,
+} from './message';
+import Painting from './painting';
 
 export default class Lobby {
   // id is equal to the peer id of the "host" peer when hasheod
   public hostId: string;
 
   public conn: Connection;
+
+  public canvas: HTMLCanvasElement;
+
+  public painting: Painting;
 
   constructor(id?: string) {
     if (!id) {
@@ -27,11 +37,44 @@ export default class Lobby {
     this.addMessageListener();
   }
 
-  public onMessage: (m: LobbyMessage) => void = (m) => alert(m.data);
+  public createPainting(options: CanvasOptions) {
+    if (!this.canvas) {
+      throw new Error('Canvas not found!');
+    }
+    this.painting = new Painting(this.canvas, options);
+  }
+
+  private listeners: {
+    [K in LobbyMessage['title']]?: (m: LobbyMessage) => void;
+  } = {};
+
+  public on(ev: LobbyMessage['title'], callback: (m: LobbyMessage) => void) {
+    this.listeners[ev] = callback;
+  }
 
   public addMessageListener() {
     this.conn.onMessage = (m) => {
-      this.onMessage(m);
+      if (m.title == 'canvas-definition') {
+        const c = m as CanvasDefinitionMessage;
+        this.createPainting(c.data);
+      }
+
+      // call related callback (1 per message type)
+      console.log(this.listeners[m.title]);
+      this.listeners[m.title](m);
+    };
+
+    this.conn.onNewPeer = (p) => {
+      if (this.painting.options && this.conn.isHost) {
+        p.on('open', () => {
+          // when this peer is open,
+          // send on our canvas definition
+          this.conn.sendToPeer(p, {
+            title: 'canvas-definition',
+            data: this.painting.options,
+          });
+        });
+      }
     };
   }
 

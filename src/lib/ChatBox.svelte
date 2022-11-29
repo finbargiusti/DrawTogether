@@ -1,17 +1,15 @@
 <script lang="ts">
-  import type { LobbyMessage } from '../logic/connection';
+  import type { ChatMessage } from '../logic/message';
   import type Lobby from '../logic/lobby';
   import Draggable from './Draggable.svelte';
 
   export let lobby: Lobby;
 
-  let messages: LobbyMessage[] = [];
+  let messages: (ChatMessage & { from: string })[] = [];
 
-  lobby.onMessage = (m) => {
-    if (m.title == 'chat') {
-      messages = [...messages, m];
-    }
-  };
+  lobby.on('chat', (m) => {
+    messages = [...messages, m];
+  });
 
   let chatInput = '';
 
@@ -27,20 +25,18 @@
   };
 </script>
 
-<Draggable title="messages">
-  <ul class="chats">
-    {#each messages as chat}
-      <li>from {chat.from.substring(0, 5)}: {chat.data}</li>
-    {/each}
-  </ul>
-  <input
-    class="input"
-    type="text"
-    placeholder="enter message.."
-    bind:value={chatInput}
-    on:keypress={handleKeypress}
-  />
-</Draggable>
+<ul class="chats">
+  {#each messages as chat}
+    <li>from {chat.from.substring(0, 5)}: {chat.data}</li>
+  {/each}
+</ul>
+<input
+  class="input"
+  type="text"
+  placeholder="enter message.."
+  bind:value={chatInput}
+  on:keypress={handleKeypress}
+/>
 
 <style lang="sass">
 .chats
@@ -49,6 +45,7 @@
   margin: 0
   padding: 0
   max-height: 100px
+  overflow-y: scroll
   li
     padding: 4px 8px 4px 8px
     background-color: #434343

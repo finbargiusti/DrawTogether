@@ -1,3 +1,5 @@
+import type { CanvasOptions } from './canvas';
+
 export interface ChatMessage {
   title: 'chat';
   data: string;
@@ -8,4 +10,13 @@ export interface PeerUpdateMessage {
   data: string[];
 }
 
-export type Message = ChatMessage | PeerUpdateMessage;
+export interface CanvasDefinitionMessage {
+  title: 'canvas-definition';
+  data: CanvasOptions;
+}
+
+export type Message = ChatMessage | PeerUpdateMessage | CanvasDefinitionMessage;
+
+export type LobbyMessage =
+  | (ChatMessage & { from: string })
+  | CanvasDefinitionMessage;

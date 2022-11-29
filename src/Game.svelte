@@ -1,18 +1,17 @@
 <script lang="ts">
   import type Lobby from './logic/lobby';
-  import ChatBox from './lib/ChatBox.svelte';
-  // import type { ChatMessage } from './logic/message';
-  import PlayerList from './lib/PlayerList.svelte';
+  import Tools from './lib/Tools.svelte';
+  import Painting from './lib/Painting.svelte';
 
   export let lobby: Lobby;
 </script>
 
 <div class="game">
-  <div class="tools">
-    <PlayerList {lobby} />
-    <ChatBox {lobby} />
+  <Tools {lobby} />
+  <div class="canvas">
+    <p>{lobby.hostId}</p>
+    <Painting {lobby} />
   </div>
-  <p>{lobby.hostId}</p>
 </div>
 
 <style lang="sass">
@@ -24,10 +23,7 @@
   grid-template-rows: 1fr
   grid-template-areas: "tools canvas"
 
-  .tools
-    grid-area: tools
-    display: flex
-    flex-direction: column
-    align-items: stretch
-    justify-content: stretch
+  .canvas
+    grid-area: "canvas"
+
 </style>
