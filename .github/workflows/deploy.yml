@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build with vite
-        run: yarn run bulid
+        run: yarn run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
