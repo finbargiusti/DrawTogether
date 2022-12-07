@@ -1,4 +1,5 @@
 import type { CanvasOptions, Cursor } from './canvas';
+import type { Line } from './line';
 
 export interface ChatMessage {
   title: 'chat';
@@ -20,13 +21,24 @@ export interface CursorUpdateMessage {
   data: Cursor;
 }
 
-export type LobbyMessage =
-  | (ChatMessage & { from: string })
+export interface FrameUpdateMessage {
+  title: 'frame-update';
+  data: {
+    id: number;
+    line: Line;
+  };
+}
+
+export type LobbyMessage = (
+  | ChatMessage
   | CanvasDefinitionMessage
-  | CursorUpdateMessage;
+  | CursorUpdateMessage
+  | FrameUpdateMessage
+) & { from: string };
 
 export type Message =
   | ChatMessage
   | PeerUpdateMessage
   | CanvasDefinitionMessage
-  | CursorUpdateMessage;
+  | CursorUpdateMessage
+  | FrameUpdateMessage;

@@ -62,11 +62,7 @@ export default class Connection {
         if (m.title == 'update-peers') {
           this.updatePeers(m.data);
         } else {
-          if (m.title == 'chat') {
-            this.onMessage({ ...m, from: d.peer });
-          } else {
-            this.onMessage(m);
-          }
+          this.onMessage({ ...m, from: d.peer });
         }
       });
     });

@@ -1,30 +1,53 @@
 import type { CanvasOptions, Cursor } from './canvas';
-import type Connection from './connection';
+import Frame from './frame';
+import type { Line } from './line';
+import type Lobby from './lobby';
+import type { FrameUpdateMessage } from './message';
 
 export default class Painting {
   canv: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  conn: Connection;
+  lobby: Lobby;
 
   options: CanvasOptions;
 
+  frames: Frame[] = [];
+
+  drawingFrame: Frame;
+
+  currentColor: `#${string}`;
+
   cursors: { [id: string]: Cursor } = {};
 
-  constructor(
-    canv: HTMLCanvasElement,
-    options: CanvasOptions,
-    conn: Connection
-  ) {
+  constructor(canv: HTMLCanvasElement, options: CanvasOptions, lobby: Lobby) {
     this.canv = canv;
-    this.ctx = canv.getContext('2d');
 
     this.options = options;
-    this.conn = conn;
 
-    this.addMouseMoveListener();
+    this.lobby = lobby;
+
+    this.addMouseListeners();
   }
 
-  addMouseMoveListener() {
+  addMouseListeners() {
+    this.canv.addEventListener('mousedown', (ev) => {
+      const r = this.canv.getBoundingClientRect();
+
+      // get relative position
+
+      const x = ev.pageX - r.x;
+      const y = ev.pageY - r.y;
+
+      this.drawingFrame = new Frame(this.canv.parentElement, this.options);
+      this.drawingFrame.setLine({
+        color: this.currentColor,
+        points: [{ x, y }],
+        width: 5,
+      });
+      this.lobby.conn;
+    });
+
+    let debounce = false;
+
     this.canv.addEventListener('mousemove', (ev) => {
       const r = this.canv.getBoundingClientRect();
 
@@ -35,15 +58,66 @@ export default class Painting {
 
       this.updateCursor({
         username: 'you',
-        x: x,
-        y: y,
+        x,
+        y,
       });
 
-      this.conn.sendToAllPeers({
+      this.lobby.conn.sendToAllPeers({
         title: 'cursor-move',
-        data: { username: this.conn.p.id, x: x, y: y },
+        data: { username: this.lobby.conn.p.id, x: x, y: y },
       });
+      if (this.drawingFrame) {
+        // we are currently drawing
+        if (!debounce) {
+          debounce = true;
+
+          let l: Line;
+
+          if (!this.drawingFrame.line) {
+            // this is the first point in the line
+          } else {
+            l = this.drawingFrame.line;
+            l.points.push({ x, y });
+          }
+
+          this.drawingFrame.setLine(l);
+          const m: FrameUpdateMessage = {
+            title: 'frame-update',
+            data: {
+              id: this.drawingFrame.id,
+              line: this.drawingFrame.line,
+            },
+          };
+
+          this.lobby.conn.sendToAllPeers(m);
+
+          setTimeout(() => (debounce = false), 5);
+        }
+      }
     });
+
+    let finishFrame = (ev: MouseEvent) => {
+      if (this.drawingFrame && this.drawingFrame.line) {
+        const r = this.canv.getBoundingClientRect();
+
+        // get relative position
+
+        const x = ev.pageX - r.x;
+        const y = ev.pageY - r.y;
+
+        let l = this.drawingFrame.line;
+
+        l.points.push({ x, y });
+
+        this.drawingFrame.setLine(l);
+
+        this.frames.push(this.drawingFrame);
+
+        this.drawingFrame = undefined;
+      }
+    };
+
+    this.canv.addEventListener('mouseup', finishFrame);
 
     this.canv.addEventListener('mouseleave', (ev) => {
       this.updateCursor({
@@ -52,10 +126,23 @@ export default class Painting {
         y: -20,
       }); // hacky way to hide the cursor for all
 
-      this.conn.sendToAllPeers({
+      this.lobby.conn.sendToAllPeers({
         title: 'cursor-move',
-        data: { username: this.conn.p.id, x: -20, y: -20 },
+        data: { username: this.lobby.conn.p.id, x: -20, y: -20 },
       });
+
+      finishFrame(ev);
+    });
+  }
+
+  addFrameUpdateListener() {
+    this.lobby.on('frame-update', (m) => {
+      const f = m as FrameUpdateMessage;
+      this.frames
+        .find((v) => {
+          v.owner == m.from && v.id == f.data.id;
+        })
+        .setLine(f.data.line);
     });
   }
 
@@ -66,23 +153,26 @@ export default class Painting {
   }
 
   renderCursors() {
+    let ctx = this.canv.getContext('2d');
     Object.keys(this.cursors).forEach((name) => {
       const c = this.cursors[name];
 
-      this.ctx.save();
-      this.ctx.beginPath();
-      this.ctx.arc(c.x, c.y, 5, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      this.ctx.fill();
-      this.ctx.font = '12px serif';
-      this.ctx.textAlign = 'center';
-      this.ctx.fillText(name.substring(0, 6), c.x, c.y - 20);
-      this.ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fill();
+      ctx.font = '12px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(name.substring(0, 6), c.x, c.y - 20);
+      ctx.restore();
     });
   }
 
   render() {
-    this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
+    this.canv
+      .getContext('2d')
+      .clearRect(0, 0, this.canv.width, this.canv.height);
     this.renderCursors();
   }
 }

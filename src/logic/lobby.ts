@@ -1,9 +1,11 @@
 import type { CanvasOptions, Cursor } from './canvas';
 import Connection from './connection';
+import Frame from './frame';
 import type {
   CanvasDefinitionMessage,
   ChatMessage,
   CursorUpdateMessage,
+  FrameUpdateMessage,
   LobbyMessage,
 } from './message';
 import Painting from './painting';
@@ -42,7 +44,7 @@ export default class Lobby {
     if (!this.canvas) {
       throw new Error('Canvas not found!');
     }
-    this.painting = new Painting(this.canvas, options, this.conn);
+    this.painting = new Painting(this.canvas, options, this);
   }
 
   private listeners: {
@@ -63,6 +65,20 @@ export default class Lobby {
       if (m.title == 'cursor-move') {
         const c = m.data as Cursor;
         this.painting.updateCursor(c);
+      }
+
+      if (m.title == 'frame-update') {
+        const i = this.painting.frames.findIndex(
+          (f) => f.id == m.data.id && m.from == f.owner
+        );
+
+        if (i == -1) {
+          const f = new Frame(this.canvas.parentElement, this.painting.options);
+          f.setLine(m.data.line);
+          this.painting.frames.push(f);
+        } else {
+          this.painting.frames[i].setLine(m.data.line);
+        }
       }
 
       // call related callback (1 per message type)
