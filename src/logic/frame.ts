@@ -1,6 +1,8 @@
 import type { CanvasOptions } from './canvas';
 import type { Line } from './line';
 
+import smooth from 'chaikin-smooth';
+
 // to generate unique ids
 import { v1 as genuuid } from 'uuid';
 
@@ -71,7 +73,15 @@ export default class Frame {
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    if (this.line.points.length < 3) {
+    // use chaikin-smooth to smooth our points.
+    // this is a HUGE bonus to networking speeds
+    // since we can predictably generate smooth lines
+    // from shorter arrrays
+    const smoothed: [number, number][] = smooth(
+      this.line.points.map((p) => [p.x, p.y])
+    );
+
+    if (smoothed.length < 3) {
       // Line is too short to properly render using quadraticCurveTo
 
       ctx.fillStyle = this.line.color;
@@ -79,8 +89,8 @@ export default class Frame {
       // Draw a point to represent the start of the line for visual feedback
       ctx.beginPath();
       ctx.arc(
-        this.line.points[0].x,
-        this.line.points[0].y,
+        smoothed[0][0],
+        smoothed[0][1],
         this.line.width / 2,
         0,
         Math.PI * 2
@@ -98,25 +108,25 @@ export default class Frame {
 
     ctx.beginPath();
 
-    ctx.moveTo(this.line.points[0].x, this.line.points[0].y);
+    ctx.moveTo(smoothed[0][0], this.line.points[0][1]);
 
     let i;
 
-    for (i = 1; i < this.line.points.length - 2; i++) {
-      let nextPoint = this.line.points[i + 1];
-      let thisPoint = this.line.points[i];
+    for (i = 1; i < smoothed.length - 2; i++) {
+      let nextPoint = smoothed[i + 1];
+      let thisPoint = smoothed[i];
 
-      const c = (nextPoint.x + thisPoint.x) / 2;
-      const d = (nextPoint.y + thisPoint.y) / 2;
+      const c = (nextPoint[0] + thisPoint[0]) / 2;
+      const d = (nextPoint[1] + thisPoint[1]) / 2;
 
-      ctx.quadraticCurveTo(nextPoint.x, nextPoint.y, c, d);
+      ctx.quadraticCurveTo(nextPoint[0], nextPoint[1], c, d);
     }
 
     ctx.quadraticCurveTo(
-      this.line.points[i].x,
-      this.line.points[i].y,
-      this.line.points[i + 1].x,
-      this.line.points[i + 1].y
+      smoothed[i][0],
+      smoothed[i][1],
+      smoothed[i + 1][0],
+      smoothed[i + 1][1]
     );
 
     ctx.stroke();

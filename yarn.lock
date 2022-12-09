@@ -363,6 +363,13 @@ camelcase@^5.3.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
+chaikin-smooth@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/chaikin-smooth/-/chaikin-smooth-1.0.4.tgz#1cbd7683d97b5d8c75c8e9217e50ca7840510ead"
+  integrity sha512-52KK2w5es7ZoAQxZMinBdMKXvd2qTfbHHdDXTxlcylA2QLSkaGAFKBuCXnn+SbFHOJKsQx6AC5R6VEczxiV9PA==
+  dependencies:
+    vec2-copy "^1.0.0"
+
 chalk@^2.0.0:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -2046,6 +2053,11 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
+
+vec2-copy@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/vec2-copy/-/vec2-copy-1.0.0.tgz#c6eec1d8dad54625194e5f71f8433b62d2f20a7a"
+  integrity sha512-jeitylCmqqyM4Z2blr4vLpScsROaiJfhN2dFOjn1VK01cM4fi5GNt60L0Zxhm0OT1vYYiv7BKDOZch0YfPA8qw==
 
 vite@^3.2.3:
   version "3.2.4"

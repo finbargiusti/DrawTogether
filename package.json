@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@types/uuid": "^9.0.0",
+    "chaikin-smooth": "^1.0.4",
     "interactjs": "^1.10.17",
     "node-sass": "^8.0.0",
     "peerjs": "^1.4.7",
