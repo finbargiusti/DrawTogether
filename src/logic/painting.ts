@@ -4,6 +4,8 @@ import type { Line } from './line';
 import type Lobby from './lobby';
 import type { FrameUpdateMessage } from './message';
 
+const MAX_FRAME_LEN = 5;
+
 export default class Painting {
   canv: HTMLCanvasElement;
   lobby: Lobby;
@@ -46,8 +48,6 @@ export default class Painting {
       this.lobby.conn;
     });
 
-    let debounce = false;
-
     this.canv.addEventListener('mousemove', (ev) => {
       const r = this.canv.getBoundingClientRect();
 
@@ -68,31 +68,26 @@ export default class Painting {
       });
       if (this.drawingFrame) {
         // we are currently drawing
-        if (!debounce) {
-          debounce = true;
 
-          let l: Line;
+        let l: Line;
 
-          if (!this.drawingFrame.line) {
-            // this is the first point in the line
-          } else {
-            l = this.drawingFrame.line;
-            l.points.push({ x, y });
-          }
-
-          this.drawingFrame.setLine(l);
-          const m: FrameUpdateMessage = {
-            title: 'frame-update',
-            data: {
-              id: this.drawingFrame.id,
-              line: this.drawingFrame.line,
-            },
-          };
-
-          this.lobby.conn.sendToAllPeers(m);
-
-          setTimeout(() => (debounce = false), 5);
+        if (!this.drawingFrame.line) {
+          // this is the first point in the line
+        } else {
+          l = this.drawingFrame.line;
+          l.points.push({ x, y });
         }
+
+        this.drawingFrame.setLine(l);
+        const m: FrameUpdateMessage = {
+          title: 'frame-update',
+          data: {
+            id: this.drawingFrame.id,
+            line: this.drawingFrame.line,
+          },
+        };
+
+        this.lobby.conn.sendToAllPeers(m);
       }
     });
 
@@ -111,7 +106,7 @@ export default class Painting {
 
         this.drawingFrame.setLine(l);
 
-        this.frames.push(this.drawingFrame);
+        this.addFrame(this.drawingFrame);
 
         this.drawingFrame = undefined;
       }
@@ -149,11 +144,12 @@ export default class Painting {
   updateCursor(c: Cursor) {
     // own cursor name is "you"
     this.cursors[c.username] = c;
-    this.render();
+    this.renderCursors();
   }
 
   renderCursors() {
-    let ctx = this.canv.getContext('2d');
+    let ctx = this.lobby.mouseCanvas.getContext('2d');
+    ctx.clearRect(0, 0, this.options.width, this.options.height);
     Object.keys(this.cursors).forEach((name) => {
       const c = this.cursors[name];
 
@@ -169,10 +165,24 @@ export default class Painting {
     });
   }
 
-  render() {
-    this.canv
-      .getContext('2d')
-      .clearRect(0, 0, this.canv.width, this.canv.height);
-    this.renderCursors();
+  // adds a frame to the currently drawing frame stack
+  addFrame(f: Frame) {
+    this.frames.push(f);
+    if (this.frames.length > MAX_FRAME_LEN) {
+      const oldFrame = this.frames.shift();
+      this.mergeToCanvas(oldFrame);
+    }
+  }
+
+  // Consolidates last frame to the main canvas, to reduce lag
+  mergeToCanvas(f: Frame) {
+    // TODO: Better way to do this?
+    f.canv.toBlob((blob) => {
+      f.destroy();
+      console.log(f.canv);
+      createImageBitmap(blob).then((img) => {
+        this.canv.getContext('2d').drawImage(img, 0, 0);
+      });
+    });
   }
 }

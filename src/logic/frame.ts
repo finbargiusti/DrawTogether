@@ -1,26 +1,40 @@
 import type { CanvasOptions } from './canvas';
 import type { Line } from './line';
 
+// to generate unique ids
+import { v1 as genuuid } from 'uuid';
+
 /**
  * A frame represents one continuous line drawn by any user
  *
  * @class
  */
-
-let since_creation = 0;
-
 export default class Frame {
-  id: number;
+  // uuid string
+  id: string;
+
+  // owner peer id string
   owner: string;
 
+  // canvas belonging to this frame
   canv: HTMLCanvasElement;
 
+  // line this frame is drawing
   line: Line;
 
-  constructor(parent: HTMLElement, options: CanvasOptions) {
+  /**
+   * @param {HTMLElement} parent Container of the canvasses in the app
+   * @param {CanvasOptions} options Options Object
+   */
+  constructor(
+    parent: HTMLElement,
+    options: CanvasOptions,
+    owner?: string,
+    id?: string
+  ) {
     this.canv = document.createElement('canvas');
 
-    this.id = ++since_creation;
+    this.id = id ?? genuuid();
 
     this.canv.height = options.height;
     this.canv.width = options.width;
@@ -30,23 +44,39 @@ export default class Frame {
     this.canv.style.pointerEvents = 'none';
 
     parent.appendChild(this.canv);
+
+    if (owner) this.owner = owner;
   }
 
+  /**
+   * Sets the current line, and updates the canvas
+   * @param {Line} l
+   */
   public setLine(l: Line) {
     this.line = l;
     this.render();
   }
 
+  /**
+   * Renders this frame
+   * @returns void
+   */
   render() {
-    let ctx = this.canv.getContext('2d');
+    const ctx = this.canv.getContext('2d');
 
+    // Clear whole canvas
     ctx.clearRect(0, 0, this.canv.width, this.canv.height);
 
+    // Makes ilnes appear more smooth
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
     if (this.line.points.length < 3) {
+      // Line is too short to properly render using quadraticCurveTo
+
       ctx.fillStyle = this.line.color;
+
+      // Draw a point to represent the start of the line for visual feedback
       ctx.beginPath();
       ctx.arc(
         this.line.points[0].x,
@@ -90,5 +120,10 @@ export default class Frame {
     );
 
     ctx.stroke();
+  }
+
+  // destroy this canvas.
+  public destroy() {
+    this.canv.parentElement.removeChild(this.canv);
   }
 }

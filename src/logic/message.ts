@@ -24,7 +24,7 @@ export interface CursorUpdateMessage {
 export interface FrameUpdateMessage {
   title: 'frame-update';
   data: {
-    id: number;
+    id: string; // uuid
     line: Line;
   };
 }

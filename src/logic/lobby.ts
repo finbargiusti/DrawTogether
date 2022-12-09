@@ -17,6 +17,7 @@ export default class Lobby {
   public conn: Connection;
 
   public canvas: HTMLCanvasElement;
+  public mouseCanvas: HTMLCanvasElement;
 
   public painting: Painting;
 
@@ -68,12 +69,17 @@ export default class Lobby {
       }
 
       if (m.title == 'frame-update') {
-        const i = this.painting.frames.findIndex(
-          (f) => f.id == m.data.id && m.from == f.owner
-        );
+        const i = this.painting.frames.findIndex((f) => {
+          return f.id == m.data.id && m.from == f.owner;
+        });
 
         if (i == -1) {
-          const f = new Frame(this.canvas.parentElement, this.painting.options);
+          const f = new Frame(
+            this.canvas.parentElement,
+            this.painting.options,
+            m.from,
+            m.data.id
+          );
           f.setLine(m.data.line);
           this.painting.frames.push(f);
         } else {
