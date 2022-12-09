@@ -41,7 +41,8 @@
           move(event) {
             pos.x += event.dx;
             pos.y += event.dy;
-            pos = pos;
+            pos.x = Math.max(Math.min(pos.x, window.innerWidth - size.x), 0);
+            pos.y = Math.max(Math.min(pos.y, window.innerHeight - size.y), 0);
           },
         },
       })
