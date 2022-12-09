@@ -1,10 +1,21 @@
 <script lang="ts">
   import type { ChatMessage } from '../logic/message';
   import type Lobby from '../logic/lobby';
+  import { afterUpdate } from 'svelte';
 
   export let lobby: Lobby;
 
   let messages: (ChatMessage & { from: string })[] = [];
+
+  let chatBox: HTMLUListElement;
+
+  afterUpdate(() => {
+    // scroll box to bottom on update of messages
+    chatBox.scrollTo({
+      top: chatBox.scrollHeight,
+      behavior: 'smooth',
+    });
+  });
 
   lobby.on('chat', (m) => {
     let c = m as ChatMessage & { from: string };
@@ -14,7 +25,7 @@
   let chatInput = '';
 
   let handleKeypress = (e: KeyboardEvent) => {
-    if (e.key == 'Enter') {
+    if (e.key == 'Enter' && chatInput) {
       messages = [
         ...messages,
         { title: 'chat', data: chatInput, from: lobby.conn.p.id },
@@ -25,7 +36,7 @@
   };
 </script>
 
-<ul class="chats">
+<ul class="chats" bind:this={chatBox}>
   {#each messages as chat}
     <li>from {chat.from.substring(0, 5)}: {chat.data}</li>
   {/each}
