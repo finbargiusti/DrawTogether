@@ -45,7 +45,7 @@ export default class Painting {
         points: [{ x, y }],
         width: 5,
       });
-      this.lobby.conn;
+      this.propogateDrawUpdate();
     });
 
     this.canv.addEventListener('mousemove', (ev) => {
@@ -71,23 +71,12 @@ export default class Painting {
 
         let l: Line;
 
-        if (!this.drawingFrame.line) {
-          // this is the first point in the line
-        } else {
-          l = this.drawingFrame.line;
-          l.points.push({ x, y });
-        }
+        l = this.drawingFrame.line;
+        l.points.push({ x, y });
 
         this.drawingFrame.setLine(l);
-        const m: FrameUpdateMessage = {
-          title: 'frame-update',
-          data: {
-            id: this.drawingFrame.id,
-            line: this.drawingFrame.line,
-          },
-        };
 
-        this.lobby.conn.sendToAllPeers(m);
+        this.propogateDrawUpdate();
       }
     });
 
@@ -128,6 +117,18 @@ export default class Painting {
 
       finishFrame(ev);
     });
+  }
+
+  propogateDrawUpdate() {
+    const m: FrameUpdateMessage = {
+      title: 'frame-update',
+      data: {
+        id: this.drawingFrame.id,
+        line: this.drawingFrame.line,
+      },
+    };
+
+    this.lobby.conn.sendToAllPeers(m);
   }
 
   addFrameUpdateListener() {
