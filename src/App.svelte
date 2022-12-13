@@ -1,6 +1,7 @@
 <script lang="ts">
   import Game from './Game.svelte';
   import Lobby from './logic/lobby';
+  import { setLobby } from './logic/state';
 
   export let lobby: Lobby | false = false;
 
@@ -8,6 +9,7 @@
 
   export let createLobby = () => {
     lobby = new Lobby();
+    setLobby(lobby);
   };
 
   export let joinLobby = () => {

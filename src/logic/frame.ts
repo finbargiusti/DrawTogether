@@ -1,4 +1,4 @@
-import type { CanvasOptions } from './canvas';
+import { createCanvas, type CanvasOptions } from './canvas';
 import type { Line } from './line';
 
 import smooth from 'chaikin-smooth';
@@ -34,18 +34,9 @@ export default class Frame {
     owner?: string,
     id?: string
   ) {
-    this.canv = document.createElement('canvas');
+    this.canv = createCanvas(parent, options, true);
 
     this.id = id ?? genuuid();
-
-    this.canv.height = options.height;
-    this.canv.width = options.width;
-
-    this.canv.style.marginTop = `-${options.height}px`;
-    this.canv.style.display = 'block';
-    this.canv.style.pointerEvents = 'none';
-
-    parent.appendChild(this.canv);
 
     if (owner) this.owner = owner;
   }

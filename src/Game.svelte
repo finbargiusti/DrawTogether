@@ -7,24 +7,31 @@
 </script>
 
 <div class="game">
-  <Tools {lobby} />
   <div class="canvas">
-    <p>Lobby id: {lobby.hostId}</p>
     <Painting {lobby} />
+  </div>
+  <div class="tools">
+    <Tools {lobby} />
   </div>
 </div>
 
 <style lang="sass">
 .game
-  display: grid
   height: 100%
   width: 100%
-  grid-template-columns: 400px 1fr
-  grid-template-rows: 1fr
-  grid-template-areas: "tools canvas"
 
   .canvas
-    grid-area: "canvas"
-    padding: 20px 40px 20px 40px
+    height: 100%
+    width: 100%
+    position: relative
+    margin-top: 0
+
+  .tools
+    position: absolute
+    width: 500px
+    height: 100%
+    top: 0px
+    pointer-events: none
+
 
 </style>

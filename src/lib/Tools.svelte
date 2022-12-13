@@ -2,6 +2,7 @@
   import type Lobby from '../logic/lobby';
   import ChatBox from './ChatBox.svelte';
   import PlayerList from './PlayerList.svelte';
+  import LobbyId from './LobbyId.svelte';
 
   import interact from 'interactjs';
   import type { Interactable, DropEvent } from '@interactjs/types/index';
@@ -33,6 +34,9 @@
 </script>
 
 <div class={'tools' + (active ? ' active' : '')} bind:this={toolbox}>
+  <Draggable titleName="Lobby ID">
+    <LobbyId {lobby} />
+  </Draggable>
   <Draggable titleName="Player List">
     <PlayerList {lobby} />
   </Draggable>

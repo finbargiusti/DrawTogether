@@ -7,7 +7,6 @@ import type { FrameUpdateMessage } from './message';
 const MAX_FRAME_LEN = 5;
 
 export default class Painting {
-  canv: HTMLCanvasElement;
   lobby: Lobby;
 
   options: CanvasOptions;
@@ -20,26 +19,39 @@ export default class Painting {
 
   cursors: { [id: string]: Cursor } = {};
 
-  constructor(canv: HTMLCanvasElement, options: CanvasOptions, lobby: Lobby) {
-    this.canv = canv;
+  // require canvases to be chosen at creation. makes more sense.
+  canvas: { main: HTMLCanvasElement; mouse: HTMLCanvasElement };
 
+  constructor(
+    options: CanvasOptions,
+    lobby: Lobby,
+    canvas: {
+      main: HTMLCanvasElement;
+      mouse: HTMLCanvasElement;
+    }
+  ) {
     this.options = options;
 
     this.lobby = lobby;
+
+    this.canvas = canvas;
 
     this.addMouseListeners();
   }
 
   addMouseListeners() {
-    this.canv.addEventListener('mousedown', (ev) => {
-      const r = this.canv.getBoundingClientRect();
+    this.canvas.main.addEventListener('mousedown', (ev) => {
+      const r = this.canvas.main.getBoundingClientRect();
 
       // get relative position
 
       const x = ev.pageX - r.x;
       const y = ev.pageY - r.y;
 
-      this.drawingFrame = new Frame(this.canv.parentElement, this.options);
+      this.drawingFrame = new Frame(
+        this.canvas.main.parentElement,
+        this.options
+      );
       this.drawingFrame.setLine({
         color: this.currentColor,
         points: [{ x, y }],
@@ -48,8 +60,8 @@ export default class Painting {
       this.propogateDrawUpdate();
     });
 
-    this.canv.addEventListener('mousemove', (ev) => {
-      const r = this.canv.getBoundingClientRect();
+    this.canvas.main.addEventListener('mousemove', (ev) => {
+      const r = this.canvas.main.getBoundingClientRect();
 
       // get relative position
 
@@ -82,7 +94,7 @@ export default class Painting {
 
     let finishFrame = (ev: MouseEvent) => {
       if (this.drawingFrame && this.drawingFrame.line) {
-        const r = this.canv.getBoundingClientRect();
+        const r = this.canvas.main.getBoundingClientRect();
 
         // get relative position
 
@@ -101,9 +113,9 @@ export default class Painting {
       }
     };
 
-    this.canv.addEventListener('mouseup', finishFrame);
+    this.canvas.main.addEventListener('mouseup', finishFrame);
 
-    this.canv.addEventListener('mouseleave', (ev) => {
+    this.canvas.main.addEventListener('mouseleave', (ev) => {
       this.updateCursor({
         username: 'you',
         x: -20,
@@ -149,7 +161,7 @@ export default class Painting {
   }
 
   renderCursors() {
-    let ctx = this.lobby.mouseCanvas.getContext('2d');
+    let ctx = this.canvas.mouse.getContext('2d');
     ctx.clearRect(0, 0, this.options.width, this.options.height);
     Object.keys(this.cursors).forEach((name) => {
       const c = this.cursors[name];
@@ -175,6 +187,31 @@ export default class Painting {
     }
   }
 
+  /**
+   * Updates a frame from another user, or creates it.
+   * @param l Line data
+   * @param id Frame id
+   * @param from Frame owner
+   */
+  updateFrame(l: Line, id: string, from: string) {
+    const i = this.frames.findIndex((f) => {
+      return f.id == id && from == f.owner;
+    });
+
+    if (i == -1) {
+      const f = new Frame(
+        this.canvas.main.parentElement,
+        this.options,
+        from,
+        id
+      );
+      f.setLine(l);
+      this.addFrame(f);
+    } else {
+      this.frames[i].setLine(l);
+    }
+  }
+
   // Consolidates last frame to the main canvas, to reduce lag
   mergeToCanvas(f: Frame) {
     // TODO: Better way to do this?
@@ -182,7 +219,7 @@ export default class Painting {
       f.destroy();
       console.log(f.canv);
       createImageBitmap(blob).then((img) => {
-        this.canv.getContext('2d').drawImage(img, 0, 0);
+        this.canvas.main.getContext('2d').drawImage(img, 0, 0);
       });
     });
   }

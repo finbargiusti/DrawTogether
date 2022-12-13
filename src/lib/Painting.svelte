@@ -1,67 +1,95 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { CanvasOptions } from '../logic/canvas';
+  import { createCanvas, type CanvasOptions } from '../logic/canvas';
+  import type Frame from '../logic/frame';
   import type Lobby from '../logic/lobby';
-  import type { CanvasDefinitionMessage, LobbyMessage } from '../logic/message';
+  import type {
+    CanvasDefinitionMessage,
+    CursorUpdateMessage,
+    FrameUpdateMessage,
+    LobbyMessage,
+  } from '../logic/message';
+
+  import Painting from '../logic/painting';
 
   export let lobby: Lobby;
 
-  let options: CanvasOptions;
+  let loaded = false;
 
-  let canvasElement: HTMLCanvasElement;
-  let cursorCanvasElement: HTMLCanvasElement;
+  let container: HTMLDivElement;
+
+  let painting: Painting;
+
+  // TODO: make all other classes use this hierarchy model.
+  function addMessageListeners() {
+    lobby.on('cursor-move', (m) => {
+      const c = m as CursorUpdateMessage;
+      painting.updateCursor(c.data);
+    });
+
+    lobby.on('frame-update', (m) => {
+      const f = m as FrameUpdateMessage;
+      if (painting) {
+        painting.updateFrame(f.data.line, f.data.id, m.from);
+      }
+    });
+
+    lobby.onNewPeer(() => {
+      lobby.conn.sendToAllPeers({
+        title: 'canvas-definition',
+        data: painting.options,
+      });
+    });
+  }
 
   onMount(() => {
-    // TODO: CHANGE THIS DUMB ASS WAY OF DOING IT
-    lobby.canvas = canvasElement;
-    lobby.mouseCanvas = cursorCanvasElement;
-
     if (lobby.conn.isHost) {
-      options = { width: 500, height: 400, bgColor: '#ffffff' };
-      lobby.createPainting(options); // default values
+      // by default equal to the hosts screen size
+      // TODO: is this a good idea?
+
+      const default_options = {
+        height: window.innerHeight,
+        width: window.innerWidth,
+        bgColor: '#ffffff',
+      };
+
+      painting = new Painting(default_options, lobby, {
+        main: createCanvas(container, default_options),
+        mouse: createCanvas(container, default_options, true),
+      });
+
+      addMessageListeners();
+
+      // container.style.backgroundColor = default_options.bgColor;
     } else {
       lobby.on('canvas-definition', (m: LobbyMessage) => {
-        options = (m as CanvasDefinitionMessage).data;
+        let options = (m as CanvasDefinitionMessage).data;
+
+        // disallow canvas re-definition
+        // TODO: is this a good idea?
+        painting = new Painting(options, lobby, {
+          main: createCanvas(container, options),
+          mouse: createCanvas(container, options, true),
+        });
+
+        // container.style.backgroundColor = options.bgColor;
       });
     }
   });
 </script>
 
-{#if !options}
-  <p>Fetching canvas...</p>
-{/if}
-<div
-  class="background"
-  style={options
-    ? `width: ${options.width}px; height: ${options.height}px; background-color: ${options.bgColor}`
-    : ''}
-/>
-<canvas
-  style={options
-    ? `display: block;margin-top: -${options.height}px`
-    : 'display: none;'}
-  class="canvas"
-  bind:this={canvasElement}
-  width={options ? options.width : '0px'}
-  height={options ? options.height : '0px'}
-/>
-<canvas
-  style={options
-    ? `display: block;margin-top: -${options.height}px;z-index: 1000;`
-    : 'display: none;'}
-  class="cursorcanvas"
-  bind:this={cursorCanvasElement}
-  width={options ? options.width : '0px'}
-  height={options ? options.height : '0px'}
-/>
+<div class="background" bind:this={container}>
+  {#if !loaded}
+    <div class="loading">
+      <p>Fetching canvas...</p>
+    </div>
+  {/if}
+</div>
 
 <style lang="sass">
-.canvas
-  cursor: none
-
-.cursorcanvas
-  position: absolute
-  pointer-events: none
+.background
+  width: 100%
+  height: 100%
 
 
 </style>
