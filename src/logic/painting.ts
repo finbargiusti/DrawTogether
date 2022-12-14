@@ -37,14 +37,22 @@ export default class Painting {
     this.addMouseListeners();
   }
 
+  getMouseLocation(ev: MouseEvent) {
+    const r = this.canvas.main.getBoundingClientRect();
+    console.log(this.canvas.main.style.transform.slice(6).slice(0, -1));
+    const scale = +this.canvas.main.style.transform.slice(6).slice(0, -1);
+
+    // get relative position
+
+    const x = (ev.pageX - r.x) / scale;
+    const y = (ev.pageY - r.y) / scale;
+
+    return { x, y };
+  }
+
   addMouseListeners() {
     this.canvas.main.addEventListener('mousedown', (ev) => {
-      const r = this.canvas.main.getBoundingClientRect();
-
-      // get relative position
-
-      const x = ev.pageX - r.x;
-      const y = ev.pageY - r.y;
+      const { x, y } = this.getMouseLocation(ev);
 
       this.drawingFrame = new Frame(
         this.canvas.main.parentElement,
@@ -59,12 +67,7 @@ export default class Painting {
     });
 
     this.canvas.main.addEventListener('mousemove', (ev) => {
-      const r = this.canvas.main.getBoundingClientRect();
-
-      // get relative position
-
-      const x = ev.pageX - r.x;
-      const y = ev.pageY - r.y;
+      const { x, y } = this.getMouseLocation(ev);
 
       this.updateCursor({
         username: 'you',
@@ -92,12 +95,7 @@ export default class Painting {
 
     let finishFrame = (ev: MouseEvent) => {
       if (this.drawingFrame && this.drawingFrame.line) {
-        const r = this.canvas.main.getBoundingClientRect();
-
-        // get relative position
-
-        const x = ev.pageX - r.x;
-        const y = ev.pageY - r.y;
+        const { x, y } = this.getMouseLocation(ev);
 
         let l = this.drawingFrame.line;
 
