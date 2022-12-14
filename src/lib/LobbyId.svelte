@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type Lobby from '../logic/lobby';
-  import Draggable from './Draggable.svelte';
+  import { getLobby } from '../logic/state';
 
-  export let lobby: Lobby;
+  let lobby = getLobby();
 </script>
 
 <p class="id">{lobby.hostId}</p>

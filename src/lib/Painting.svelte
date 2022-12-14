@@ -11,8 +11,9 @@
   } from '../logic/message';
 
   import Painting from '../logic/painting';
+  import { getLobby } from '../logic/state';
 
-  export let lobby: Lobby;
+  let lobby = getLobby();
 
   let loaded = false;
 
@@ -53,7 +54,7 @@
         bgColor: '#ffffff',
       };
 
-      painting = new Painting(default_options, lobby, {
+      painting = new Painting(default_options, {
         main: createCanvas(container, default_options),
         mouse: createCanvas(container, default_options, true),
       });
@@ -67,7 +68,7 @@
 
         // disallow canvas re-definition
         // TODO: is this a good idea?
-        painting = new Painting(options, lobby, {
+        painting = new Painting(options, {
           main: createCanvas(container, options),
           mouse: createCanvas(container, options, true),
         });

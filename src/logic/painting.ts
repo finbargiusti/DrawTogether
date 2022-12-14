@@ -3,11 +3,12 @@ import Frame from './frame';
 import type { Line } from './line';
 import type Lobby from './lobby';
 import type { FrameUpdateMessage } from './message';
+import { getLobby } from './state';
 
 const MAX_FRAME_LEN = 5;
 
 export default class Painting {
-  lobby: Lobby;
+  lobby: Lobby = getLobby();
 
   options: CanvasOptions;
 
@@ -24,15 +25,12 @@ export default class Painting {
 
   constructor(
     options: CanvasOptions,
-    lobby: Lobby,
     canvas: {
       main: HTMLCanvasElement;
       mouse: HTMLCanvasElement;
     }
   ) {
     this.options = options;
-
-    this.lobby = lobby;
 
     this.canvas = canvas;
 

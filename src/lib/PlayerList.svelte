@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type Lobby from '../logic/lobby';
+  import { getLobby } from '../logic/state';
 
-  export let lobby: Lobby;
+  let lobby = getLobby();
 
   let playerlist: {
     id: string;

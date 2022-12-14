@@ -3,21 +3,22 @@
   import Lobby from './logic/lobby';
   import { setLobby } from './logic/state';
 
-  export let lobby: Lobby | false = false;
+  let loaded = false;
 
-  export let idInput: string = '';
+  let idInput: string = '';
 
-  export let createLobby = () => {
-    lobby = new Lobby();
-    setLobby(lobby);
+  let createLobby = () => {
+    setLobby(new Lobby());
+    loaded = true;
   };
 
-  export let joinLobby = () => {
-    lobby = new Lobby(idInput);
+  let joinLobby = () => {
+    setLobby(new Lobby(idInput));
+    loaded = true;
   };
 </script>
 
-{#if !lobby}
+{#if !loaded}
   <div class="container">
     <div class="logo" />
 
@@ -30,7 +31,7 @@
     <button on:click={joinLobby}>Join Lobby</button>
   </div>
 {:else}
-  <Game {lobby} />
+  <Game />
 {/if}
 
 <style lang="sass">
