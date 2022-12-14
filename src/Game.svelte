@@ -2,16 +2,14 @@
   import type Lobby from './logic/lobby';
   import Tools from './lib/Tools.svelte';
   import Painting from './lib/Painting.svelte';
-
-  export let lobby: Lobby;
 </script>
 
 <div class="game">
   <div class="canvas">
-    <Painting {lobby} />
+    <Painting />
   </div>
   <div class="tools">
-    <Tools {lobby} />
+    <Tools />
   </div>
 </div>
 

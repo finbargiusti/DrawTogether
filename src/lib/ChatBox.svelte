@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { ChatMessage } from '../logic/message';
-  import type Lobby from '../logic/lobby';
   import { afterUpdate } from 'svelte';
+  import { getLobby } from '../logic/state';
 
-  export let lobby: Lobby;
+  let lobby = getLobby();
 
   let messages: (ChatMessage & { from: string })[] = [];
 

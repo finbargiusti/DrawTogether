@@ -8,6 +8,7 @@
   import type { Interactable, DropEvent } from '@interactjs/types/index';
   import { onMount } from 'svelte';
   import Draggable from './Draggable.svelte';
+  import { getLobby } from '../logic/state';
 
   let toolbox: HTMLDivElement;
 
@@ -29,19 +30,17 @@
       },
     });
   });
-
-  export let lobby: Lobby;
 </script>
 
 <div class={'tools' + (active ? ' active' : '')} bind:this={toolbox}>
   <Draggable titleName="Lobby ID">
-    <LobbyId {lobby} />
+    <LobbyId />
   </Draggable>
   <Draggable titleName="Player List">
-    <PlayerList {lobby} />
+    <PlayerList />
   </Draggable>
   <Draggable titleName="Messages">
-    <ChatBox {lobby} />
+    <ChatBox />
   </Draggable>
 </div>
 
