@@ -15,11 +15,26 @@ function fitCanvasToWindow(c: HTMLCanvasElement) {
     return;
   }
 
-  const scaleFactor = Math.min(
-    c.height / window.innerHeight,
-    c.width / window.innerWidth
+  let scaleFactor: number;
+
+  console.log({
+    wh: window.innerHeight,
+    ww: window.innerWidth,
+    ch: c.height,
+    cw: c.width,
+  });
+
+  scaleFactor = Math.min(
+    window.innerHeight / c.height,
+    window.innerWidth / c.width
   );
 
+  console.log(scaleFactor);
+
+  c.style.left =
+    Math.max(0, (window.innerWidth - c.width * scaleFactor) / 2) + 'px';
+  c.style.top =
+    Math.max(0, (window.innerHeight - c.height * scaleFactor) / 2) + 'px';
   c.style.transform = `scale(${scaleFactor})`;
 }
 
@@ -36,6 +51,7 @@ export function createCanvas(
   c.style.top = '0';
 
   c.style.position = 'absolute';
+  c.style.transformOrigin = 'top left';
 
   fitCanvasToWindow(c);
 
