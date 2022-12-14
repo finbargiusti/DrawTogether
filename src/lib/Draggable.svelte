@@ -72,6 +72,9 @@
 <style lang="sass">
 .draggable
   pointer-events: all
+  opacity: 0.5
+  &:hover
+    opacity: 1
 
   .title
     background-color: #33ee33
