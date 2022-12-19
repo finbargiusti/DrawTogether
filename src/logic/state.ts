@@ -1,3 +1,4 @@
+import { writable } from 'svelte/store';
 import type Lobby from './lobby';
 
 let lobby: Lobby = null;
@@ -11,4 +12,10 @@ export function getLobby() {
     throw new Error('Lobby not set.');
   }
   return lobby;
+}
+
+export let drawing = writable<boolean>(false);
+
+export function setDrawing(s: boolean) {
+  drawing.set(s);
 }

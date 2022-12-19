@@ -1,6 +1,7 @@
 <script lang="ts">
   import interact from 'interactjs';
   import { onMount } from 'svelte';
+  import { drawing } from '../logic/state';
 
   export let titleName: string;
 
@@ -57,7 +58,7 @@
 </script>
 
 <div
-  class="draggable"
+  class={`draggable ${$drawing ? 'hidden' : ''}`}
   bind:this={container}
   style={pos && size
     ? `position: absolute; left: ${pos.x}px; top: ${pos.y}px; height: ${size.y}px; width: ${size.x}px;`
@@ -75,6 +76,9 @@
   opacity: 0.5
   &:hover
     opacity: 1
+  
+  &.hidden
+    opacity: 0
 
   .title
     background-color: #33ee33

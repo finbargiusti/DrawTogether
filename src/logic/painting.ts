@@ -3,7 +3,7 @@ import Frame from './frame';
 import type { Line } from './line';
 import type Lobby from './lobby';
 import type { FrameUpdateMessage } from './message';
-import { getLobby } from './state';
+import { getLobby, setDrawing } from './state';
 
 const MAX_FRAME_LEN = 5;
 
@@ -64,6 +64,8 @@ export default class Painting {
         width: 5,
       });
       this.propogateDrawUpdate();
+
+      setDrawing(true);
     });
 
     this.canvas.main.addEventListener('mousemove', (ev) => {
@@ -107,6 +109,8 @@ export default class Painting {
 
         this.drawingFrame = undefined;
       }
+
+      setDrawing(false);
     };
 
     this.canvas.main.addEventListener('mouseup', finishFrame);
