@@ -1,11 +1,15 @@
 <script lang="ts">
-  import type Lobby from './logic/lobby';
   import Tools from './lib/Tools.svelte';
   import Painting from './lib/Painting.svelte';
+  import { getConnection } from './logic/state';
+
+  const conn = getConnection();
+
+  // add peer propogation for host
 </script>
 
 <div class="game">
-  <div class="canvas">
+  <div class="painting">
     <Painting />
   </div>
   <div class="tools">
@@ -18,7 +22,7 @@
   height: 100%
   width: 100%
 
-  .canvas
+  .painting
     height: 100%
     width: 100%
     position: relative

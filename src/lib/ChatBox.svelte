@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { ChatMessage } from '../logic/message';
   import { afterUpdate } from 'svelte';
-  import { getLobby } from '../logic/state';
+  import { getConnection } from '../logic/state';
 
-  let lobby = getLobby();
+  const conn = getConnection();
 
-  let messages: (ChatMessage & { from: string })[] = [];
+  let messages: { text: string; from: string }[] = [];
 
   let chatBox: HTMLUListElement;
 
@@ -17,20 +16,18 @@
     });
   });
 
-  lobby.on('chat', (m) => {
-    let c = m as ChatMessage & { from: string };
-    messages = [...messages, c];
-  });
+  function addMessage(text: string, from: string) {
+    messages = [...messages, { text, from }];
+  }
+
+  conn.on('chat', addMessage);
 
   let chatInput = '';
 
   let handleKeypress = (e: KeyboardEvent) => {
     if (e.key == 'Enter' && chatInput) {
-      messages = [
-        ...messages,
-        { title: 'chat', data: chatInput, from: lobby.conn.p.id },
-      ];
-      lobby.sendChat(chatInput);
+      addMessage(chatInput, conn.self.id);
+      conn.sendToAll('chat', chatInput);
       chatInput = '';
     }
   };
@@ -38,7 +35,7 @@
 
 <ul class="chats" bind:this={chatBox}>
   {#each messages as chat}
-    <li>from {chat.from.substring(0, 5)}: {chat.data}</li>
+    <li>from {chat.from.substring(0, 5)}: {chat.text}</li>
   {/each}
 </ul>
 <input

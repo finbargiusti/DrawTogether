@@ -1,17 +1,17 @@
 import { writable } from 'svelte/store';
-import type Lobby from './lobby';
+import type { Connection } from './connection';
 
-let lobby: Lobby = null;
+let connection: Connection;
 
-export function setLobby(l: Lobby) {
-  lobby = l;
+export function setConnection(c: Connection) {
+  connection = c;
 }
 
-export function getLobby() {
-  if (lobby == null) {
-    throw new Error('Lobby not set.');
+export function getConnection() {
+  if (!connection) {
+    throw new Error('Connection not set! Should never happen');
   }
-  return lobby;
+  return connection;
 }
 
 export let drawing = writable<boolean>(false);

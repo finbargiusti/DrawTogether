@@ -1,44 +1,31 @@
-import type { CanvasOptions, Cursor } from './canvas';
+import type { CanvasOptions } from './canvas';
 import type { Line } from './line';
+import type { Node } from './node';
 
-export interface ChatMessage {
-  title: 'chat';
-  data: string;
-}
+export type Message = {
+  chat: string;
+  'new-peer': Node;
+  'update-peer': string;
+  'canvas-definition': CanvasOptions;
+  'cursor-move': { x: number; y: number };
+  'frame-update': { id: string; line: Line };
+};
 
-export interface PeerUpdateMessage {
-  title: 'update-peers';
-  data: string[];
-}
+export type MessageTitle = keyof Message;
 
-export interface CanvasDefinitionMessage {
-  title: 'canvas-definition';
-  data: CanvasOptions;
-}
+export type MessageData<T extends keyof Message> = Message[T];
 
-export interface CursorUpdateMessage {
-  title: 'cursor-move';
-  data: Cursor;
-}
+export type MessageObject<T extends keyof Message> = {
+  title: T;
+  data: MessageData<T>;
+};
 
-export interface FrameUpdateMessage {
-  title: 'frame-update';
-  data: {
-    id: string; // uuid
-    line: Line;
+export function toMessageObject<T extends MessageTitle>(
+  title: T,
+  data: MessageData<T>
+): MessageObject<T> {
+  return {
+    title,
+    data,
   };
 }
-
-export type LobbyMessage = (
-  | ChatMessage
-  | CanvasDefinitionMessage
-  | CursorUpdateMessage
-  | FrameUpdateMessage
-) & { from: string };
-
-export type Message =
-  | ChatMessage
-  | PeerUpdateMessage
-  | CanvasDefinitionMessage
-  | CursorUpdateMessage
-  | FrameUpdateMessage;

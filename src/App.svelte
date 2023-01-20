@@ -1,19 +1,27 @@
 <script lang="ts">
   import Game from './Game.svelte';
-  import Lobby from './logic/lobby';
-  import { setLobby } from './logic/state';
+  import { Connection } from './logic/connection';
+  import { setConnection } from './logic/state';
 
   let loaded = false;
 
   let idInput: string = '';
 
   let createLobby = () => {
-    setLobby(new Lobby());
+    const id = Math.random().toString(36).substring(2, 8);
+
+    const c = new Connection(id, true); // we are host
+
+    setConnection(c);
+
     loaded = true;
   };
 
   let joinLobby = () => {
-    setLobby(new Lobby(idInput));
+    const c = new Connection(idInput, false);
+
+    setConnection(c);
+
     loaded = true;
   };
 </script>

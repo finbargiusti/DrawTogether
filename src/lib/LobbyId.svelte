@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { getLobby } from '../logic/state';
+  import { getConnection } from '../logic/state';
 
-  let lobby = getLobby();
+  const conn = getConnection();
 </script>
 
-<p class="id">{lobby.hostId}</p>
+<!-- Not reactive for now -->
+<p class="id">{conn.lobbyID}</p>
 
 <style lang="sass">
 .id

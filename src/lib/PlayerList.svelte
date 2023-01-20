@@ -1,29 +1,13 @@
 <script lang="ts">
-  import { getLobby } from '../logic/state';
+  import { getConnection } from '../logic/state';
 
-  let lobby = getLobby();
-
-  let playerlist: {
-    id: string;
-    active: boolean;
-    you: boolean;
-    host: boolean;
-  }[] = [];
-
-  lobby.conn.onPlayerListUpdate = (l) => {
-    playerlist = l;
-  };
+  const playerList = getConnection().playerlist;
 </script>
 
 <ul class="player-list">
-  {#each playerlist as player}
-    <li
-      class={(player.active ? 'active' : 'inactive') +
-        (player.you ? ' you' : '')}
-    >
-      {player.id.substring(0, 5)}
-      {player.host ? '(host)' : ''}
-      {player.you ? '(you)' : ''}
+  {#each $playerList as player}
+    <li class={player.active ? 'active' : 'inactive'}>
+      {player.id ? player.id.substring(0, 5) : 'Loading...'}
     </li>
   {/each}
 </ul>
@@ -40,6 +24,12 @@
     box-sizing: border-box
     margin: 0
 
+    &:first-child
+      font-weight: bold 
+
+      &::after
+        content: " (you)"
+
     &:nth-child(odd)
       background-color: #535353,
 
@@ -49,7 +39,5 @@
     &.inactive
       color: #ff4444
 
-    &.you
-      font-weight: bold
 
 </style>

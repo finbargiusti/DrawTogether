@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type Lobby from '../logic/lobby';
   import ChatBox from './ChatBox.svelte';
   import PlayerList from './PlayerList.svelte';
   import LobbyId from './LobbyId.svelte';
@@ -8,7 +7,6 @@
   import type { Interactable, DropEvent } from '@interactjs/types/index';
   import { onMount } from 'svelte';
   import Draggable from './Draggable.svelte';
-  import { getLobby } from '../logic/state';
 
   let toolbox: HTMLDivElement;
 

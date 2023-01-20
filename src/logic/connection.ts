@@ -1,209 +1,129 @@
 import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
+import { writable } from 'svelte/store';
 import { hashName } from './hashname';
-import type {
-  ChatMessage,
-  LobbyMessage,
-  Message,
-  PeerUpdateMessage,
-} from './message';
+import type { Message, MessageData, MessageTitle } from './message';
+import { Node, type MessageListener } from './node';
 
-export default class Connection {
+export class Connection {
   isHost: boolean;
-  p: Peer;
-  host?: DataConnection;
-  peers: DataConnection[] = [];
+  self: Peer;
+  open = false;
 
-  public playerlist: { id: string; active: boolean }[] = [];
+  lobbyID: string;
 
-  constructor({ host, id }: { host: boolean; id: string }) {
-    if (host) {
-      // id is desired id for this peer
-      this.isHost = true;
+  nodes: Node[] = [];
 
-      this.p = new Peer(hashName(id));
+  addNode(d: DataConnection) {
+    const n = new Node(d, this.onMessage, this.updatePlayerList);
 
-      this.p.on('open', (id) => {
-        this.updatePlayerList();
-      });
+    this.nodes.push(n);
 
-      this.host = undefined;
-    } else {
-      // id is id of host for this lobby
+    this.updatePlayerList();
 
-      this.isHost = false;
+    n.onOpen(() => {
+      this.onMessage('new-peer', n, null);
+    });
+  }
 
-      this.p = new Peer();
+  constructor(id: string, host: boolean) {
+    this.lobbyID = id;
 
-      this.p.on('open', () => {
-        this.host = this.p.connect(hashName(id));
-        this.host.on('open', () => {
-          this.updatePlayerList();
-        });
-        this.addMessageListeners(this.host);
-        this.addErrorListeners(this.host);
-        this.updatePlayerList();
+    this.self = new Peer(host ? hashName(id) : undefined);
+
+    this.isHost = host;
+
+    this.addListeners();
+
+    if (!host) {
+      this.self.on('open', () => {
+        this.connectTo(hashName(id));
       });
     }
 
     this.updatePlayerList();
+  }
 
-    this.p.on('connection', (d) => {
-      this.addPeer(d);
+  addListeners() {
+    // When our peer opens
+    this.self.on('open', () => {
+      this.open = true;
+      this.updatePlayerList();
+    });
+
+    // When we get a new peer
+    this.self.on('connection', (dc) => {
+      this.addNode(dc);
+    });
+
+    this.addDefaultMessageListeners();
+  }
+
+  connectTo(id: string) {
+    this.addNode(this.self.connect(id));
+  }
+
+  sendToAll<T extends MessageTitle>(title: T, data: MessageData<T>) {
+    this.nodes.forEach((n) => {
+      n.send(title, data);
     });
   }
 
-  public onMessage: (m: LobbyMessage) => void;
+  sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
+    p.send(title, data);
+  }
 
-  private addMessageListeners(d: DataConnection) {
-    d.on('open', () => {
-      d.on('data', (bin) => {
-        const m = bin as Message;
-        if (m.title == 'update-peers') {
-          this.updatePeers(m.data);
-        } else {
-          this.onMessage({ ...m, from: d.peer });
+  listeners: {
+    title: MessageTitle;
+    callback: (data: MessageData<MessageTitle>, from: string) => void;
+  }[] = [];
+
+  onMessage: MessageListener = (
+    title: MessageTitle,
+    data: MessageData<MessageTitle>,
+    from: string
+  ) => {
+    this.listeners
+      .filter((l) => l.title == title)
+      .forEach((l) => {
+        l.callback(data, from);
+      });
+  };
+
+  on<T extends MessageTitle>(
+    title: T,
+    callback: (data: MessageData<T>, from: string) => void
+  ) {
+    this.listeners.push({
+      title,
+      callback,
+    });
+  }
+
+  addDefaultMessageListeners() {
+    if (this.isHost) {
+      this.on('new-peer', (n) => {
+        this.sendToAll('update-peer', n.net.peer);
+      });
+    } else {
+      this.on('update-peer', (id) => {
+        if (id != this.self.id) {
+          this.connectTo(id);
         }
       });
-    });
-  }
-
-  private addErrorListeners(d: DataConnection) {
-    d.on('error', (er) => {
-      console.error(er);
-    });
-  }
-
-  private updatePeers(peerList: string[]) {
-    peerList.forEach((id) => {
-      if (!this.peers.map((d) => d.peer).includes(id)) {
-        this.addPeer(this.p.connect(id));
-      }
-    });
-  }
-
-  private propogatePeerInfo() {
-    if (!this.isHost) {
-      return; // guard but should never happen
-    }
-
-    this.peers.forEach((peer) => {
-      const m: PeerUpdateMessage = {
-        title: 'update-peers',
-        data: this.peers
-          .map((p) => p.peer)
-          .filter((id) => id != peer.peer /* name of peer connected */),
-      };
-
-      this.sendToPeer(peer, m);
-    });
-  }
-
-  public onNewPeer: (d: DataConnection) => void;
-
-  private addPeer(d: DataConnection) {
-    // delete peer obj of same name if exists
-
-    const index = this.peers.findIndex((n) => n.peer == d.peer);
-
-    if (index != -1) {
-      this.peers.splice(index, 1);
-    }
-
-    this.peers.push(d);
-
-    d.on('open', () => {
-      this.updatePlayerList();
-    });
-
-    d.peerConnection.oniceconnectionstatechange = () => {
-      if (d.peerConnection.iceConnectionState == 'disconnected') {
-        setTimeout(() => {
-          // TODO: make an option for this
-
-          // closes connection if timed out for 5s
-          d.close();
-          this.peers.splice(this.peers.indexOf(d), 1);
-          this.updatePlayerList();
-        }, 5000);
-      }
-      this.updatePlayerList();
-    };
-
-    this.addMessageListeners(d);
-    this.addErrorListeners(d);
-    if (this.isHost) this.propogatePeerInfo();
-
-    // notify peer update
-    this.updatePlayerList();
-    this.onNewPeer(d);
-  }
-
-  public sendToPeer(d: DataConnection, m: Message) {
-    if (d.open) {
-      d.send(m);
-    } else {
-      d.on('open', () => this.sendToPeer(d, m)); // retry when open
     }
   }
 
-  public sendToAllPeers(m: Message) {
-    if (!this.isHost) {
-      this.host.send(m);
-    }
+  playerlist = writable<{ id: string; active: boolean }[]>([]);
 
-    this.peers.forEach((p) => {
-      console.log(p.peer, m);
-      this.sendToPeer(p, m);
-    });
-  }
+  updatePlayerList = () => {
+    const others = this.nodes.map((n) => ({
+      id: n.net.peer,
+      active: n.open,
+    }));
 
-  public onPlayerListUpdate: (
-    l: { id: string; active: boolean; you: boolean; host: boolean }[]
-  ) => void = () => {};
+    const list = [{ id: this.self.id, active: this.self.open }, ...others];
 
-  private updatePlayerList() {
-    if (!this.p.open) {
-      this.onPlayerListUpdate([
-        {
-          id: 'loading..',
-          active: false,
-          you: true,
-          host: this.isHost,
-        },
-      ]);
-      return;
-    }
-
-    let list: { id: string; active: boolean; you: boolean; host: boolean }[] =
-      [];
-
-    if (this.isHost) {
-      list.push({
-        id: this.p.id,
-        active: true,
-        host: true,
-        you: true,
-      });
-    } else {
-      list.push({ id: this.p.id, active: true, you: true, host: false });
-      list.push({
-        id: this.host.peer,
-        active: this.host.peerConnection.iceConnectionState == 'connected',
-        host: true,
-        you: false,
-      });
-    }
-
-    list = [
-      ...list,
-      ...this.peers.map((d) => ({
-        id: d.peer,
-        active: d.peerConnection.iceConnectionState == 'connected',
-        you: false,
-        host: false,
-      })),
-    ];
-    this.onPlayerListUpdate(list);
-  }
+    this.playerlist.set(list);
+  };
 }
