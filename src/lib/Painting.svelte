@@ -9,7 +9,7 @@
   import { onMount } from 'svelte';
   import type { CanvasOptions } from '../logic/canvas';
   import { drawLine, type Line } from '../logic/line';
-  import { drawing, getConnection, setDrawing } from '../logic/state';
+  import { drawing, getConnection, lineOpts, setDrawing } from '../logic/state';
   import Frame from './Frame.svelte';
   import { v1 as genuuid } from 'uuid';
 
@@ -117,9 +117,8 @@
     thisFrame = {
       id: genuuid(),
       line: {
-        color: '#000000',
-        width: 5,
         points: [pos],
+        opts: { ...$lineOpts }, // hopefullly works
       },
     };
 
@@ -170,19 +169,29 @@
     if (mouseCanvas) {
       const ctx = mouseCanvas.getContext('2d');
       ctx.clearRect(0, 0, opts.width, opts.height);
-      Object.keys(cursors).forEach((name) => {
+      for (const name in cursors) {
         const c = cursors[name];
+
+        console.log($lineOpts);
+
+        const { width, color } =
+          name == 'you'
+            ? $lineOpts
+            : {
+                width: 5,
+                color: '#000000',
+              };
 
         ctx.save();
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.arc(c.x, c.y, width, 0, 2 * Math.PI);
+        ctx.fillStyle = `${color}80`; // add transparency
         ctx.fill();
         ctx.font = '12px serif';
         ctx.textAlign = 'center';
-        ctx.fillText(name.substring(0, 6), c.x, c.y - 20);
+        ctx.fillText(name.substring(0, 6), c.x, c.y - 20 - width);
         ctx.restore();
-      });
+      }
     }
   }
 </script>

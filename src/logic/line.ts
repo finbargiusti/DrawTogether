@@ -5,7 +5,11 @@ import smooth from 'chaikin-smooth';
 export type Line = {
   // list of points in the line
   points: { x: number; y: number }[];
-  // width of the line
+  // line options
+  opts: LineOpts;
+};
+
+export type LineOpts = {
   width: number;
   color: `#${string}`;
 };
@@ -24,11 +28,11 @@ export async function drawLine(ctx: CanvasRenderingContext2D, l: Line) {
   if (smoothed.length < 3) {
     // Line is too short to properly render using quadraticCurveTo
 
-    ctx.fillStyle = l.color;
+    ctx.fillStyle = l.opts.color;
 
     // Draw a point to represent the start of the line for visual feedback
     ctx.beginPath();
-    ctx.arc(smoothed[0][0], smoothed[0][1], l.width / 2, 0, Math.PI * 2);
+    ctx.arc(smoothed[0][0], smoothed[0][1], l.opts.width / 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
 
@@ -37,8 +41,8 @@ export async function drawLine(ctx: CanvasRenderingContext2D, l: Line) {
 
   // quadratic curve to for each point, where the control point is the average of this points less the next
 
-  ctx.strokeStyle = l.color;
-  ctx.lineWidth = l.width;
+  ctx.strokeStyle = l.opts.color;
+  ctx.lineWidth = l.opts.width;
 
   ctx.beginPath();
 

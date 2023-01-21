@@ -7,6 +7,7 @@
   import type { Interactable, DropEvent } from '@interactjs/types/index';
   import { onMount } from 'svelte';
   import Draggable from './Draggable.svelte';
+  import BrushPicker from './BrushPicker.svelte';
 
   let toolbox: HTMLDivElement;
 
@@ -39,6 +40,9 @@
   </Draggable>
   <Draggable titleName="Messages">
     <ChatBox />
+  </Draggable>
+  <Draggable titleName="Brush Picker">
+    <BrushPicker />
   </Draggable>
 </div>
 

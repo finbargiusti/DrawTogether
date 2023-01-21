@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import type { Connection } from './connection';
+import type { LineOpts } from './line';
 
 let connection: Connection;
 
@@ -18,4 +19,13 @@ export let drawing = writable<boolean>(false);
 
 export function setDrawing(s: boolean) {
   drawing.set(s);
+}
+
+export let lineOpts = writable<LineOpts>({
+  color: '#000000',
+  width: 5,
+});
+
+export function setLineOpts(callback: (arg1: LineOpts) => LineOpts) {
+  lineOpts.update(callback);
 }
