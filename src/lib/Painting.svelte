@@ -12,12 +12,13 @@
   import { drawing, getConnection, lineOpts, setDrawing } from '../logic/state';
   import Frame from './Frame.svelte';
   import { v1 as genuuid } from 'uuid';
+  import { MessageQueue } from '../logic/message';
 
   let opts: CanvasOptions;
 
   const conn = getConnection();
 
-  const MAX_FRAMES = 10;
+  const MAX_FRAMES = 1;
 
   // Canvas sizes
 
@@ -62,20 +63,21 @@
   let thisFrame: FrameData;
 
   async function addFrame(f: FrameData) {
-    frames.push(f);
+    await frames.push(f);
     if (frames.length > MAX_FRAMES) {
       const old_frame = frames.shift();
 
       await drawLine(mainCanvas.getContext('2d'), old_frame.line);
     }
     frames = frames;
+    return;
   }
 
-  function updateFrame(id: string, line: Line) {
+  async function updateFrame(id: string, line: Line) {
     const f = frames.find((v) => v.id == id);
 
     if (!f) {
-      addFrame({
+      await addFrame({
         id,
         line,
       });
@@ -85,11 +87,17 @@
     f.line = line;
 
     frames = frames;
+
+    return;
   }
 
-  conn.on('frame-update', ({ id, line }) => {
-    updateFrame(id, line);
-  });
+  const frameUpdateQueue = new MessageQueue<'frame-update'>(
+    async ({ id, line }) => updateFrame(id, line)
+  );
+
+  $: if (mainCanvas != undefined) frameUpdateQueue.ready(); // let the queue know we're ready to receive the messages
+
+  conn.on('frame-update', frameUpdateQueue.add);
 
   let mainCanvas: HTMLCanvasElement;
   let mouseCanvas: HTMLCanvasElement;
@@ -118,13 +126,17 @@
       id: genuuid(),
       line: {
         points: [pos],
-        opts: { ...$lineOpts }, // hopefullly works
+        opts: { ...$lineOpts },
       },
     };
 
     addFrame(thisFrame);
 
     conn.sendToAll('frame-update', thisFrame);
+
+    if (conn.isHost) {
+      conn.framesSinceInception.push({ ...thisFrame });
+    }
   }
 
   function updateCursor(pos: { x: number; y: number }, from: string) {
@@ -147,6 +159,10 @@
     frames = frames;
 
     conn.sendToAll('frame-update', thisFrame);
+
+    if (conn.isHost) {
+      conn.framesSinceInception.push({ ...thisFrame });
+    }
   }
 
   function mouseUp(ev: MouseEvent) {

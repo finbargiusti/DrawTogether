@@ -4,6 +4,8 @@ import { writable } from 'svelte/store';
 import { hashName } from './hashname';
 import type { Message, MessageData, MessageTitle } from './message';
 import { Node, type MessageListener } from './node';
+import type { Line } from './line';
+import type { FrameData } from '../lib/Painting.svelte';
 
 export class Connection {
   isHost: boolean;
@@ -14,15 +16,17 @@ export class Connection {
 
   nodes: Node[] = [];
 
+  framesSinceInception: FrameData[] = [];
+
   addNode(d: DataConnection) {
-    const n = new Node(d, this.onMessage, this.updatePlayerList);
+    const n = new Node(d, this.propogateMessage, this.updatePlayerList);
 
     this.nodes.push(n);
 
     this.updatePlayerList();
 
     n.onOpen(() => {
-      this.onMessage('new-peer', n, null);
+      this.propogateMessage('new-peer', n, null);
     });
   }
 
@@ -65,7 +69,7 @@ export class Connection {
 
   sendToAll<T extends MessageTitle>(title: T, data: MessageData<T>) {
     this.nodes.forEach((n) => {
-      n.send(title, data);
+      this.sendToPeer(n, title, data);
     });
   }
 
@@ -78,11 +82,13 @@ export class Connection {
     callback: (data: MessageData<MessageTitle>, from: string) => void;
   }[] = [];
 
-  onMessage: MessageListener = (
-    title: MessageTitle,
-    data: MessageData<MessageTitle>,
+  propogateMessage = <T extends MessageTitle>(
+    title: T,
+    data: MessageData<T>,
     from: string
   ) => {
+    // This can only exist as lambda function since we need _this_ "this"
+    // (as in the Connection object to be in context.)
     this.listeners
       .filter((l) => l.title == title)
       .forEach((l) => {
@@ -104,6 +110,14 @@ export class Connection {
     if (this.isHost) {
       this.on('new-peer', (n) => {
         this.sendToAll('update-peer', n.net.peer);
+        // catch-up peer for frames
+        // TODO: add for chats too
+        this.framesSinceInception.forEach((fd) =>
+          this.sendToPeer(n, 'frame-update', fd)
+        );
+      });
+      this.on('frame-update', (fd) => {
+        this.framesSinceInception.push(fd);
       });
     } else {
       this.on('update-peer', (id) => {

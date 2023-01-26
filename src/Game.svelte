@@ -4,8 +4,6 @@
   import { getConnection } from './logic/state';
 
   const conn = getConnection();
-
-  // add peer propogation for host
 </script>
 
 <div class="game">

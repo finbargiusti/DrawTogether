@@ -7,9 +7,9 @@ import {
   type MessageTitle,
 } from './message';
 
-export type MessageListener = (
-  title: MessageTitle,
-  m: MessageData<MessageTitle>,
+export type MessageListener<T extends MessageTitle> = (
+  title: T,
+  m: MessageData<T>,
   from: string
 ) => void;
 
@@ -18,7 +18,7 @@ export type MessageListener = (
  */
 export class Node {
   net: DataConnection;
-  onMessage: MessageListener;
+  onMessage: MessageListener<MessageTitle>;
   onStateChange: () => void;
   open = false;
 
@@ -28,7 +28,7 @@ export class Node {
    */
   constructor(
     connection: DataConnection,
-    onMessage: MessageListener,
+    onMessage: MessageListener<MessageTitle>,
     onStateChange: () => void
   ) {
     this.net = connection;

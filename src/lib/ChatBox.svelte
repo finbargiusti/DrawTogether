@@ -1,10 +1,11 @@
 <script lang="ts">
   import { afterUpdate } from 'svelte';
+  import { MessageQueue, type MessageData } from '../logic/message';
   import { getConnection } from '../logic/state';
 
   const conn = getConnection();
 
-  let messages: { text: string; from: string }[] = [];
+  let messages: { text: string; from: string; time: number }[] = [];
 
   let chatBox: HTMLUListElement;
 
@@ -16,18 +17,28 @@
     });
   });
 
-  function addMessage(text: string, from: string) {
-    messages = [...messages, { text, from }];
+  function addMessage({ text, time }: MessageData<'chat'>, from: string) {
+    messages = [...messages, { text, from, time }];
+    if (time < messages[1].time) {
+      messages = messages.sort((a, b) => b.time - a.time);
+    }
   }
 
-  conn.on('chat', addMessage);
+  // is just one huge complication?
+  const chatQueue = new MessageQueue<'chat'>(addMessage);
+
+  conn.on('chat', chatQueue.add);
 
   let chatInput = '';
 
   let handleKeypress = (e: KeyboardEvent) => {
     if (e.key == 'Enter' && chatInput) {
-      addMessage(chatInput, conn.self.id);
-      conn.sendToAll('chat', chatInput);
+      const message: MessageData<'chat'> = {
+        text: chatInput,
+        time: new Date().getTime(),
+      };
+      addMessage(message, conn.self.id);
+      conn.sendToAll('chat', message);
       chatInput = '';
     }
   };
@@ -56,7 +67,6 @@
   overflow-y: scroll
   li
     padding: 4px 8px 4px 8px
-    background-color: #434343
     box-sizing: border-box
     margin: 0
 
