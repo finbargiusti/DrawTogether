@@ -1,7 +1,12 @@
 # TODO
 
 - [ ] Input box not clear on some devices
-- [*] Single dots not sending for some reason??
 - [ ] Some UI elements need light mode
-- [*] Make lobby state sharing work better (very messy at the minute)
 - [ ] Add basic drawing controls
+
+# IDEA
+
+Make collaborative drwaing platform
+Allow audio recoring
+Allow streaming
+Custom file format (mp4 + lines with timestamps)
