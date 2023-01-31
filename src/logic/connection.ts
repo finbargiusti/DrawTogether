@@ -18,6 +18,8 @@ export class Connection {
 
   framesSinceInception: FrameData[] = [];
 
+  chatsSinceInception: (MessageData<'chat'> & { from: string })[] = [];
+
   addNode(d: DataConnection) {
     const n = new Node(d, this.propogateMessage, this.updatePlayerList);
 
@@ -74,6 +76,7 @@ export class Connection {
   }
 
   sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
+    console.log(title, data);
     p.send(title, data);
   }
 
@@ -82,6 +85,7 @@ export class Connection {
     callback: (data: MessageData<MessageTitle>, from: string) => void;
   }[] = [];
 
+  // When message arrives, is parsed through here
   propogateMessage = <T extends MessageTitle>(
     title: T,
     data: MessageData<T>,
@@ -89,6 +93,7 @@ export class Connection {
   ) => {
     // This can only exist as lambda function since we need _this_ "this"
     // (as in the Connection object to be in context.)
+
     this.listeners
       .filter((l) => l.title == title)
       .forEach((l) => {
@@ -111,13 +116,21 @@ export class Connection {
       this.on('new-peer', (n) => {
         this.sendToAll('update-peer', n.net.peer);
         // catch-up peer for frames
-        // TODO: add for chats too
+        this.chatsSinceInception.forEach((cd) => {
+          this.sendToPeer(n, 'chat', cd);
+        });
         this.framesSinceInception.forEach((fd) =>
           this.sendToPeer(n, 'frame-update', fd)
         );
       });
       this.on('frame-update', (fd) => {
         this.framesSinceInception.push(fd);
+      });
+      this.on('chat', (cd, from) => {
+        this.chatsSinceInception.push({
+          ...cd,
+          from,
+        });
       });
     } else {
       this.on('update-peer', (id) => {

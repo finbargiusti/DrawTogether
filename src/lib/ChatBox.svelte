@@ -1,6 +1,6 @@
 <script lang="ts">
   import { afterUpdate } from 'svelte';
-  import { MessageQueue, type MessageData } from '../logic/message';
+  import type { MessageData } from '../logic/message';
   import { getConnection } from '../logic/state';
 
   const conn = getConnection();
@@ -17,17 +17,17 @@
     });
   });
 
-  function addMessage({ text, time }: MessageData<'chat'>, from: string) {
-    messages = [...messages, { text, from, time }];
-    if (time < messages[1].time) {
+  function addMessage(
+    { text, time, from: fromOverride }: MessageData<'chat'>,
+    from: string
+  ) {
+    messages = [...messages, { text, from: fromOverride ?? from, time }];
+    if (messages.length > 0 && time < messages[messages.length - 1].time) {
       messages = messages.sort((a, b) => b.time - a.time);
     }
   }
 
-  // is just one huge complication?
-  const chatQueue = new MessageQueue<'chat'>(addMessage);
-
-  conn.on('chat', chatQueue.add);
+  conn.on('chat', addMessage);
 
   let chatInput = '';
 
@@ -38,6 +38,15 @@
         time: new Date().getTime(),
       };
       addMessage(message, conn.self.id);
+
+      // log message from host for catch-up
+      if (conn.isHost) {
+        conn.chatsSinceInception.push({
+          ...message,
+          from: conn.self.id,
+        });
+      }
+
       conn.sendToAll('chat', message);
       chatInput = '';
     }

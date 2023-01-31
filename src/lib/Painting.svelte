@@ -188,8 +188,6 @@
       for (const name in cursors) {
         const c = cursors[name];
 
-        console.log($lineOpts);
-
         const { width, color } =
           name == 'you'
             ? $lineOpts

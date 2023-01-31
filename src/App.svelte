@@ -30,13 +30,16 @@
   <div class="container">
     <div class="logo" />
 
-    <p>Welcome to Drawtogether!</p>
+    <div class="options">
+      <div class="create">
+        <button on:click={createLobby}>Create Lobby</button>
+      </div>
+      <div class="join">
+        <input type="text" bind:value={idInput} placeholder="Lobby code" />
 
-    <button on:click={createLobby}>Create Lobby</button>
-
-    <input type="text" bind:value={idInput} />
-
-    <button on:click={joinLobby}>Join Lobby</button>
+        <button on:click={joinLobby}>Join Lobby</button>
+      </div>
+    </div>
   </div>
 {:else}
   <Game />
@@ -51,4 +54,29 @@
   justify-content: center
   flex-direction: column
 
+  .options
+    margin-top: 20px
+    display: grid
+    grid-template-areas: "create . join"
+    grid-template-rows: 1fr
+    grid-template-columns: 1fr 50px 1fr
+
+    .create, .join
+      display: flex
+      flex-direction: column
+      align-items: stretch
+      justify-content: flex-start
+
+    .create
+      grid-area: create
+
+    .join
+      grid-area: join
+
+      input 
+        box-sizing: border-box
+        padding: 12px 24px 12px 24px
+
+      button
+        margin-top: 12px
 </style>

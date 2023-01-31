@@ -89,5 +89,7 @@
 
   .content
     background-color: #434343
+    box-sizing: border-box
+    padding: 12px 24px 12px 24px
 
 </style>

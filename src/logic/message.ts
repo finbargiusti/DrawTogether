@@ -4,7 +4,7 @@ import type { Line } from './line';
 import type { Node } from './node';
 
 export type Message = {
-  chat: { text: string; time: number };
+  chat: { text: string; time: number; from?: string }; // from override when coming from host
   'new-peer': Node;
   'update-peer': string;
   'canvas-definition': CanvasOptions;
@@ -14,9 +14,9 @@ export type Message = {
 
 export type MessageTitle = keyof Message;
 
-export type MessageData<T extends keyof Message> = Message[T];
+export type MessageData<T extends MessageTitle> = Message[T];
 
-export type MessageObject<T extends keyof Message> = {
+export type MessageObject<T extends MessageTitle> = {
   title: T;
   data: MessageData<T>;
 };
