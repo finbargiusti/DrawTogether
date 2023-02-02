@@ -8,6 +8,7 @@
   import { onMount } from 'svelte';
   import Draggable from './Draggable.svelte';
   import BrushPicker from './BrushPicker.svelte';
+  import Recorder from './Recorder.svelte';
 
   let toolbox: HTMLDivElement;
 
@@ -43,6 +44,9 @@
   </Draggable>
   <Draggable titleName="Brush Picker">
     <BrushPicker />
+  </Draggable>
+  <Draggable titleName="Recorder">
+    <Recorder />
   </Draggable>
 </div>
 

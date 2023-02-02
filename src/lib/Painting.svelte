@@ -116,12 +116,15 @@
 
   let cursors: { [id: string]: { x: number; y: number } } = {};
 
+  // TODO: Implememnt equivalent touch events with some lib
+
   function mouseDown(ev: MouseEvent) {
+    // TODO: Use a universal pipeline for updating frames
+
     setDrawing(true);
 
     const pos = getMousePosition(ev);
 
-    //TODO: make these options a setting
     thisFrame = {
       id: genuuid(),
       line: {
@@ -130,13 +133,9 @@
       },
     };
 
-    addFrame(thisFrame);
-
-    conn.sendToAll('frame-update', thisFrame);
-
-    if (conn.isHost) {
-      conn.framesSinceInception.push({ ...thisFrame });
-    }
+    conn.sendToAll('frame-update', thisFrame, true);
+    //                                         ^ means we will propogate
+    //                                           to self as well
   }
 
   function updateCursor(pos: { x: number; y: number }, from: string) {
@@ -148,6 +147,8 @@
 
     updateCursor(pos, 'you');
 
+    // TODO: make this share the same self message propogation pattern as draws
+
     conn.sendToAll('cursor-move', pos);
 
     if (!$drawing) return;
@@ -156,13 +157,7 @@
 
     thisFrame = thisFrame;
 
-    frames = frames;
-
-    conn.sendToAll('frame-update', thisFrame);
-
-    if (conn.isHost) {
-      conn.framesSinceInception.push({ ...thisFrame });
-    }
+    conn.sendToAll('frame-update', thisFrame, true);
   }
 
   function mouseUp(ev: MouseEvent) {
@@ -171,8 +166,6 @@
     setDrawing(false);
 
     thisFrame = undefined;
-
-    frames = frames;
   }
 
   conn.on('cursor-move', (pos, from) => {

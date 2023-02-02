@@ -37,17 +37,9 @@
         text: chatInput,
         time: new Date().getTime(),
       };
-      addMessage(message, conn.self.id);
 
-      // log message from host for catch-up
-      if (conn.isHost) {
-        conn.chatsSinceInception.push({
-          ...message,
-          from: conn.self.id,
-        });
-      }
+      conn.sendToAll('chat', message, true);
 
-      conn.sendToAll('chat', message);
       chatInput = '';
     }
   };

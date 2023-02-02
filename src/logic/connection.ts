@@ -69,10 +69,17 @@ export class Connection {
     this.addNode(this.self.connect(id));
   }
 
-  sendToAll<T extends MessageTitle>(title: T, data: MessageData<T>) {
+  sendToAll<T extends MessageTitle>(
+    title: T,
+    data: MessageData<T>,
+    includeSelf?: true
+  ) {
     this.nodes.forEach((n) => {
       this.sendToPeer(n, title, data);
     });
+    if (includeSelf) {
+      this.propogateToSelf(title, data);
+    }
   }
 
   sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
@@ -99,6 +106,19 @@ export class Connection {
       .forEach((l) => {
         l.callback(data, from);
       });
+  };
+
+  /**
+   *
+   * Send server message to self, used for consitency between alien peer calls
+   * and self peer calls, to avoid code copying, and logging.
+   *
+   */
+  propogateToSelf = <T extends MessageTitle>(
+    title: T,
+    data: MessageData<T>
+  ) => {
+    this.propogateMessage(title, data, this.self.id);
   };
 
   on<T extends MessageTitle>(
