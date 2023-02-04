@@ -22,8 +22,6 @@ export type RecordingData = RecordingDataItem<RecordableMessageTitle>[];
 
 // dtr coding
 
-let packr = new Packr();
-
 function isObject(data: unknown): data is Object {
   return typeof data == 'object' && data !== null && !Array.isArray(data);
 }
@@ -127,6 +125,24 @@ function isValidData(data: unknown): data is RecordingData {
 
   return true;
 }
+
+// define structures of data we'd see
+let packr = new Packr({
+  structures: [
+    {
+      time: 0,
+      title: 'chat',
+      data: {},
+      from: '',
+    },
+    {
+      time: 0,
+      title: 'frame-update',
+      data: {},
+      from: '',
+    },
+  ],
+});
 
 export function compressRecording(data: RecordingData): Uint8Array {
   return deflate(packr.pack(data));
