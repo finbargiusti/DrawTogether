@@ -19,10 +19,33 @@ describe('end-to-end recording compression', () => {
         data: { text: 'Hello I am penis.,', time: 1234 },
       },
       {
-        time: 1,
-        title: 'chat',
+        time: 3,
+        title: 'frame-update',
         from: 'penis',
-        data: { text: 'Hello I am penis.,', time: 1234 },
+        data: {
+          id: 'asdfljh',
+          line: {
+            points: [
+              {
+                x: 1,
+                y: 2,
+              },
+              {
+                x: 1,
+                y: 2,
+              },
+              {
+                x: 1,
+                y: 2,
+              },
+              {
+                x: 1,
+                y: 2,
+              },
+            ],
+            opts: { width: 1, color: '#123' },
+          },
+        },
       },
     ];
 
