@@ -2,10 +2,11 @@
  * DTR (DrawTogether Recording)
  */
 
-import { Packr, unpack } from 'msgpackr';
-import type { MessageData, MessageObject, MessageTitle } from './message';
+import { encode, decode } from '@msgpack/msgpack';
+import type { MessageData } from './message';
 
 import { deflate, inflate } from 'pako';
+import type { CanvasOptions } from './canvas';
 
 export const RECORDABLE_MESSAGE_TITLES = ['frame-update', 'chat'] as const;
 
@@ -88,12 +89,29 @@ function isValidDataObject<T extends RecordableMessageTitle>(
   return true;
 }
 
+function isCanvasOptions(data: unknown): data is CanvasOptions {
+  if (!isObject(data)) return false;
+
+  if (!('height' in data) || !('width' in data) || !('bgColor' in data))
+    return false;
+
+  if (
+    typeof data.height !== 'number' ||
+    typeof data.width !== 'number' ||
+    typeof data.bgColor !== 'string'
+  )
+    return false;
+
+  return true;
+}
+
 /**
  * Returns true if data is valid `RecordingData`
  * @param data
  * @returns data is `RecordingData`
  */
-function isValidData(data: unknown): data is RecordingData {
+function isValidData(data: unknown): data is [CanvasOptions, ...RecordingData] {
+  // this signature is some wild typescript magic
   if (!Array.isArray(data)) {
     return false;
   }
@@ -126,34 +144,100 @@ function isValidData(data: unknown): data is RecordingData {
   return true;
 }
 
-// define structures of data we'd see
-let packr = new Packr({
-  structures: [
-    {
-      time: 0,
-      title: 'chat',
-      data: {},
-      from: '',
-    },
-    {
-      time: 0,
-      title: 'frame-update',
-      data: {},
-      from: '',
-    },
-  ],
-});
+type MinimisedData = {
+  1: [string, number, string, number, string]; // from, time, text, innerTime, innerFrom
+  2: [string, number, string, string, number, ...[number, number][]]; // from, time, id, opts.color (minus #), opts.width, points
+  /*  We do not need from in lines for now. */
+};
 
-export function compressRecording(data: RecordingData): Uint8Array {
-  return deflate(packr.pack(data));
+type MinimisedMessage<T extends 1 | 2> = [T, MinimisedData[T]];
+
+// this is fucked up
+function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
+  return data.map((i) => {
+    if (i.title == 'chat') {
+      const c = i as RecordingDataItem<'chat'>;
+      return [1, [c.from, c.time, c.data.text, c.data.time, c.data.from]];
+    }
+    const f = i as RecordingDataItem<'frame-update'>;
+    return [
+      2,
+      [
+        f.from,
+        f.time,
+        f.data.id,
+        f.data.line.opts.color.slice(1),
+        f.data.line.opts.width,
+        ...f.data.line.points.map(({ x, y }) => [x, y] as [number, number]),
+      ],
+    ];
+  });
 }
 
-export function deCompressRecording(data: Uint8Array) {
+// TODO: message quality verifier
+// ! This is a mess.
+function maximise(data: MinimisedMessage<1 | 2>[]): RecordingData {
+  return data.map((m) => {
+    if (m[0] == 1) {
+      const m1 = m[1] as MinimisedData[1];
+      const [from, time, text, innerTime, innerfrom] = m1;
+      return {
+        title: 'chat',
+        data: {
+          text,
+          time: innerTime,
+          from: innerfrom ?? undefined,
+        },
+        from,
+        time,
+      };
+    }
+    const m1 = m[1] as MinimisedData[2];
+    const [from, time, id, color, width, ...points] = m1;
+    return {
+      title: 'frame-update',
+      time,
+      from,
+      data: {
+        id,
+        line: {
+          opts: {
+            color: ('#' + color) as `#${string}`,
+            width,
+          },
+          points: points.map(([x, y]) => ({ x, y })),
+        },
+      },
+    };
+  });
+}
+
+export function compressRecording(
+  data: RecordingData,
+  opts: CanvasOptions
+): Uint8Array {
+  return deflate(encode([opts, ...minimise(data)]));
+}
+
+export function deCompressRecording(data: ArrayBuffer) {
   const inflated = inflate(data);
 
-  const unpacked_data = packr.unpack(inflated);
+  const unpacked_data = decode(inflated);
 
-  if (!isValidData(unpacked_data)) throw new Error('Corrupted data!');
+  if (!Array.isArray(unpacked_data)) {
+    throw new Error();
+  }
 
-  return unpacked_data;
+  const [opts, ...rest] = unpacked_data;
+
+  if (!isCanvasOptions(opts)) throw new Error();
+
+  const maximised = maximise(rest);
+
+  if (!isValidData(maximised)) throw new Error('Corrupted data!');
+
+  return {
+    opts,
+    data: maximised,
+  };
 }
