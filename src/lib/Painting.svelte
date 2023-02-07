@@ -25,20 +25,20 @@
   let innerWidth: number;
   let innerHeight: number;
 
+  conn.on('canvas-definition', (options) => {
+    opts = options;
+  });
+
   if (conn.isHost) {
     onMount(() => {
-      opts = {
+      conn.propogateToSelf('canvas-definition', {
         height: innerHeight,
         width: innerWidth,
         bgColor: '#ffffff',
-      };
+      });
       conn.on('new-peer', (n) => {
         n.send('canvas-definition', opts);
       });
-    });
-  } else {
-    conn.on('canvas-definition', (options) => {
-      opts = options;
     });
   }
   // Frame definitions
@@ -205,15 +205,13 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 
-<div
-  class="background"
-  style="--bg-color: {opts ? opts.bgColor : 'transparent'}"
->
+<div class="background">
   {#if opts}
     <canvas
       class="frame main"
       height={opts.height}
       width={opts.width}
+      style="background-color: {opts.bgColor}"
       bind:this={mainCanvas}
       on:mousemove={mouseMove}
       on:mouseup={mouseUp}
@@ -246,10 +244,7 @@
 
   :global(.frame)
     position: absolute
-    left: var(--offset-left)
-    top: var(--offset-top)
     transform-origin: top left
-    transform: scale(var(--canv-scale))
     background-color: transparent
     max-width: 100%
     max-height: 100%
@@ -259,5 +254,4 @@
 
     &.main
       pointer-events: all
-      background-color: var(--bg-color)
 </style>
