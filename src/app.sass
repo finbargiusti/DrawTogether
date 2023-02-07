@@ -17,6 +17,8 @@ body
   #app
     height: 100vh
 
+// styling globals
+
 .logo
   min-height: 100px
   width: 100%
@@ -33,8 +35,13 @@ p
   font-size: 24px
 
 button
-  background-color: rgb(46,204,64)
-  color: white
-  border-radius: 5px
-  padding: 12px 24px 12px 24px
-  border: 3px white solid
+
+  &.default
+    background-color: rgb(46,204,64)
+    color: white
+    border-radius: 5px
+    padding: 12px 24px 12px 24px
+    border: 3px white solid
+
+    @media (prefers-color-scheme: light)
+      border-color: rgb(46,204,64)
