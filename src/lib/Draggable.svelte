@@ -91,6 +91,7 @@
   .arrow
     position: absolute
     font-size: 24px
+    color: white // constant
     right: 8px
     top: 0px
     transition: transform 0.3s
@@ -101,6 +102,7 @@
 
   .title
     background-color: #33ee33
+    color: white // constant
     margin: 0
     padding: 8px 12px 8px 12px
     text-align: center
@@ -112,6 +114,10 @@
     .holder
       margin-top: 0px
       background-color: #434343
+
+      @media (prefers-color-scheme: light) 
+        background-color: #eee
+
       padding: 12px 24px 12px 24px
       transition: margin-top 0.5s
 
