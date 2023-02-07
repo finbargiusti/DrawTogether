@@ -1,11 +1,12 @@
 <script lang="ts">
+  import type { CanvasOptions } from '../logic/canvas';
   import {
     compressRecording,
     RECORDABLE_MESSAGE_TITLES,
     type RecordingData,
   } from '../logic/dtr';
   import { toMessageObject } from '../logic/message';
-  import { getConnection } from '../logic/state';
+  import { getConnection, lineOpts } from '../logic/state';
 
   // Write recording data here
 
@@ -13,8 +14,24 @@
 
   let recording: RecordingData = [];
 
+  let timeOnStart: number = 0;
+
+  let recordingEnabled = false;
+
+  let compressing = false;
+
+  let opts: CanvasOptions;
+
+  conn.on('canvas-definition', (d) => (opts = d));
+
+  $: {
+    if (recordingEnabled && recording.length == 0) {
+      timeOnStart = Date.now();
+    }
+  }
+
   function downloadRecording(data: Uint8Array) {
-    const b = new Blob([data]);
+    const b = new Blob([data], { type: 'octet/stream' });
     const url = window.URL.createObjectURL(b);
     const downloadLink = document.createElement('a');
     downloadLink.href = url;
@@ -28,19 +45,19 @@
       // ? Recording disabled with some length of recording saved.
       // REcording is disabled by default so we will assume that this was
       // intended to be saved.
-      downloadRecording(compressRecording(recording));
+      compressing = true;
+      downloadRecording(compressRecording(recording, opts));
+      compressing = false;
     }
   }
 
-  let recordingEnabled = false;
-
   RECORDABLE_MESSAGE_TITLES.forEach((t) =>
     conn.on(t, (d, from) => {
-      if (recordingEnabled) {
+      if (recordingEnabled && opts) {
         recording.push({
-          time: Date.now(),
+          time: Date.now() - timeOnStart,
           title: t,
-          data: d,
+          data: JSON.parse(JSON.stringify(d)), // this is INTENSE but necessary maybe
           from,
         });
       }
@@ -53,6 +70,10 @@
     {recordingEnabled ? 'Stop Recording' : 'Start Recording'}
   </label>
   <input type="checkbox" id="recording" bind:checked={recordingEnabled} />
+
+  {#if compressing}
+    <p>Compressing...</p>
+  {/if}
 </div>
 
 <!-- TODO: make prettier colors -->
