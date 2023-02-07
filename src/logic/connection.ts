@@ -83,7 +83,6 @@ export class Connection {
   }
 
   sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
-    console.log(title, data);
     p.send(title, data);
   }
 
