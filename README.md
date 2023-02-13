@@ -1,12 +1,7 @@
-# TODO
+<p align="center"><img src="https://i.imgur.com/jQk2c2V.png"></p>
 
-- [ ] Input box not clear on some devices
-- [ ] Some UI elements need light mode
-- [ ] Add basic drawing controls
+# Drawtogether
 
-# IDEA
+---
 
-Make collaborative drwaing platform
-Allow audio recoring
-Allow streaming
-Custom file format (mp4 + lines with timestamps)
+A site allowing you to draw together, stream your drawing and record you drawing!
