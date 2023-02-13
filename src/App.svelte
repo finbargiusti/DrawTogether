@@ -1,3 +1,10 @@
+<!--
+  Main entry point for DrawTogether
+  Compared to other files, this shit is a mess.
+
+  TODO: Clean this file up and improve routing.
+
+-->
 <script lang="ts">
   import Game from './Game.svelte';
   import Play from './lib/Play.svelte';
@@ -65,16 +72,16 @@
         </div>
       </div>
       <div class="draw {tab_option == 0 && 'visible'}">
-        <div class="create">
-          <button on:click={createLobby} class="default">Create Lobby</button>
-        </div>
-        <div class="div">
-          <p>— or —</p>
-        </div>
-        <div class="join">
-          <input type="text" bind:value={idInput} placeholder="Lobby code" />
+        <div class="itemwrap">
+          <div class="create">
+            <button on:click={createLobby} class="default">Create Lobby</button>
+          </div>
+          <div class="div" />
+          <div class="join">
+            <input type="text" bind:value={idInput} placeholder="Lobby code" />
 
-          <button on:click={joinLobby} class="default">Join Lobby</button>
+            <button on:click={joinLobby} class="default">Join Lobby</button>
+          </div>
         </div>
       </div>
       <div class="play {tab_option == 1 && 'visible'}">
@@ -116,7 +123,8 @@
   <!-- Game has started -->
   <Game />
 {:else}
-  <!--  Recording must be true... -->
+  <!-- Recording must be true... -->
+  <!-- Which means that we are trying to plyback a dtr recording-->
   <Play data={recording.data} opts={recording.opts} />
 {/if}
 
@@ -127,11 +135,11 @@
   display: grid
   grid-template-areas: "logo" "tabs"
   grid-template-columns: 1fr 
-  grid-template-rows: 1fr 9fr
+  grid-template-rows: 3fr 9fr
 
   .logo
     grid-area: logo
-    margin: 12px 0px 12px 0px
+    margin: 36px 0px 36px 0px
 
   .tabs
     grid-area: tabs
@@ -158,8 +166,14 @@
           background-color: #333
           cursor: pointer
 
+          @media (prefers-color-scheme: light)
+            background-color: #ddd
+
           &.active
             background-color: #444
+
+            @media (prefers-color-scheme: light)
+              background-color: #ccc
 
     .play
       display: none
@@ -184,34 +198,39 @@
       grid-area: content
       margin-top: 20px
       display: none
-      grid-template-areas: "create" "div" "join"
-      grid-template-columns: 1fr
-      grid-template-rows: 1fr 50px 1fr
+      padding-top: 24px
+      justify-content: center
+      align-items: start
 
       &.visible
         display: grid
 
+      .itemwrap
+        display: grid
+        grid-template-columns: 1fr
+        grid-template-rows: auto 16px 0px 16px auto 
+        grid-template-areas: "create" "." "div" "." "join"
 
-      .div
-        grid-area: div
-        p
-          text-align: center
-
-      .create, .join
-        display: flex
-        flex-direction: column
-        align-items: center
-        gap: 8px
-
-      .create
-        grid-area: create
-        justify-content: flex-end
-
-      .join
-        grid-area: join
-        justify-content: flex-start
-
-        input 
+        .div
+          grid-area: div
           box-sizing: border-box
-          padding: 12px 24px 12px 24px
+          border: 1px white dotted
+
+          @media (prefers-color-scheme: light)
+            border-color: #333
+
+        .create, .join
+          display: flex
+          flex-direction: column
+          gap: 8px
+
+        .create
+          grid-area: create
+
+        .join
+          grid-area: join
+
+          input 
+            box-sizing: border-box
+            padding: 12px 24px 12px 24px
 </style>
