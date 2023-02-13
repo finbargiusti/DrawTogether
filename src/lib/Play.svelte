@@ -18,6 +18,21 @@
 
   export let opts: CanvasOptions;
 
+  let messages: MessageData<'chat'>[] = [];
+
+  function addMessage(data: MessageData<'chat'>, from: string) {
+    data.from = data.from ?? from;
+
+    messages = [...messages, data];
+
+    const comp = JSON.stringify(data); // for comparison
+
+    setTimeout(() => {
+      // This is inefficient, but it shouldn't matter
+      messages = messages.filter((d) => JSON.stringify(d) !== comp);
+    }, 20000);
+  }
+
   let mainCanvas: HTMLCanvasElement;
 
   let frames: FrameData[] = [];
@@ -59,6 +74,7 @@
   async function handleFrame(d: RecordingDataItem<RecordableMessageTitle>) {
     switch (d.title) {
       case 'chat':
+        addMessage(d.data as MessageData<'chat'>, d.from);
         break;
       case 'frame-update':
         const data = d.data as MessageData<'frame-update'>;
@@ -93,6 +109,13 @@
   {#each frames as frameData}
     <Frame {frameData} {opts} />
   {/each}
+  <div class="chatbox">
+    {#each messages as m}
+      <p>
+        {m.from.slice(0, 5)}: {m.text}
+      </p>
+    {/each}
+  </div>
 </div>
 
 <style lang="sass">
@@ -118,4 +141,38 @@
     &.main
       pointer-events: all
       background-color: var(--bg-color)
+
+  @keyframes message 
+    0%
+      opacity: 0
+      max-height: 0px
+    
+    2%
+      opacity: 1
+      max-height: 200px
+
+    96%
+      opacity: 1
+
+    100%
+      opacity: 0
+  
+  .chatbox
+    overflow: hidden
+    position: absolute
+    bottom: 0px
+    left: 0px
+    width: 400px
+
+    p
+      box-sizing: border-box
+      padding: 6px 12px 6px 12px
+      font-size: 16px
+      background-color: #222222
+      animation: message 20s
+
+      &:nth-child(even)
+        background-color: #333333
+        
+
 </style>
