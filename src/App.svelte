@@ -42,64 +42,78 @@
   }
 
   let fileFallback: HTMLInputElement;
+
+  let tab_option = 0;
+
+  const setTab = (to: number) => () => {
+    tab_option = to;
+  };
 </script>
 
 {#if !loaded && !recording}
   <div class="container">
     <div class="logo" />
 
-    <div class="draw">
-      <div class="title">
-        <h2>Draw</h2>
+    <div class="tabs">
+      <div class="tabulator">
+        <div class="options-wrap">
+          <span class={tab_option == 0 && 'active'} on:click={setTab(0)}
+            >Draw</span
+          ><span class={tab_option == 1 && 'active'} on:click={setTab(1)}
+            >Play</span
+          >
+        </div>
       </div>
-      <div class="create">
-        <button on:click={createLobby} class="default">Create Lobby</button>
+      <div class="draw {tab_option == 0 && 'visible'}">
+        <div class="create">
+          <button on:click={createLobby} class="default">Create Lobby</button>
+        </div>
+        <div class="div">
+          <p>— or —</p>
+        </div>
+        <div class="join">
+          <input type="text" bind:value={idInput} placeholder="Lobby code" />
+
+          <button on:click={joinLobby} class="default">Join Lobby</button>
+        </div>
       </div>
-      <div class="div">
-        <p>— or —</p>
+      <div class="play {tab_option == 1 && 'visible'}">
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          class="drop-zone"
+          on:click={() => fileFallback.click()}
+          on:dragover={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+          }}
+          on:drop={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+
+            file.arrayBuffer().then(playRecording);
+          }}
+        />
+        <input
+          type="file"
+          id="file-fallback"
+          bind:this={fileFallback}
+          on:change={(e) => {
+            const target = e.target;
+
+            // @ts-ignore // this sucks
+            const f = target.files[0]; // assume just one file
+
+            f.arrayBuffer().then(playRecording);
+          }}
+          accept=".dtr"
+        />
       </div>
-      <div class="join">
-        <input type="text" bind:value={idInput} placeholder="Lobby code" />
-
-        <button on:click={joinLobby} class="default">Join Lobby</button>
-      </div>
-    </div>
-    <div class="play">
-      <div class="title">Play</div>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="drop-zone"
-        on:click={() => fileFallback.click()}
-        on:dragover={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-        }}
-        on:drop={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-
-          file.arrayBuffer().then(playRecording);
-        }}
-      />
-      <input
-        type="file"
-        id="file-fallback"
-        bind:this={fileFallback}
-        on:change={(e) => {
-          const target = e.target;
-
-          // @ts-ignore // this sucks
-          const f = target.files[0]; // assume just one file
-
-          f.arrayBuffer().then(playRecording);
-        }}
-        accept=".dtr"
-      />
     </div>
   </div>
 {:else if loaded}
+  <!-- Game has started -->
   <Game />
 {:else}
   <!--  Recording must be true... -->
@@ -111,63 +125,93 @@
   height: 100vh
   width: 100vw
   display: grid
-  grid-template-areas: "logo logo" "draw play"
-  grid-template-columns: 1fr 1fr
+  grid-template-areas: "logo" "tabs"
+  grid-template-columns: 1fr 
   grid-template-rows: 1fr 9fr
 
   .logo
     grid-area: logo
     margin: 12px 0px 12px 0px
 
-  .play
-    grid-area: play
-    display: flex
-    flex-direction: column
-    align-items: stretch
-    justify-content: center
-
-    #file-fallback
-      display: none
-
-    .drop-zone
-      height: 300px
-      margin: 12px 24px 12px 24px
-      border: 5px white dashed
-
-
-  .draw
-    margin-top: 20px
-    grid-area: draw
+  .tabs
+    grid-area: tabs
     display: grid
-    grid-template-areas: "title" "create" "div" "join"
     grid-template-columns: 1fr
-    grid-template-rows: auto 1fr 50px 1fr
+    grid-template-rows: auto 1fr
+    grid-template-areas: "tabulator" "content"
+    place-content: center
 
-    .title
-      grid-area: title
-      text-align: center
-      font-size: 24px
-
-    .div
-      grid-area: div
-      p
-        text-align: center
-
-    .create, .join
+    .tabulator
       display: flex
+      justify-content: center
+
+      .options-wrap
+        border-radius: 5px
+        overflow: hidden
+
+        span
+          box-sizing: border-box
+          user-select: none
+          padding: 8px 24px 8px 24px
+          display: inline-block
+          font-size: 16px
+          background-color: #333
+          cursor: pointer
+
+          &.active
+            background-color: #444
+
+    .play
+      display: none
+      grid-area: content
       flex-direction: column
-      align-items: center
-      gap: 8px
+      align-items: stretch
+      justify-content: center
 
-    .create
-      grid-area: create
-      justify-content: flex-end
+      &.visible
+        display: flex
 
-    .join
-      grid-area: join
-      justify-content: flex-start
+      #file-fallback
+        display: none
 
-      input 
-        box-sizing: border-box
-        padding: 12px 24px 12px 24px
+      .drop-zone
+        height: 300px
+        margin: 12px 24px 12px 24px
+        border: 5px white dashed
+
+
+    .draw
+      grid-area: content
+      margin-top: 20px
+      display: none
+      grid-template-areas: "create" "div" "join"
+      grid-template-columns: 1fr
+      grid-template-rows: 1fr 50px 1fr
+
+      &.visible
+        display: grid
+
+
+      .div
+        grid-area: div
+        p
+          text-align: center
+
+      .create, .join
+        display: flex
+        flex-direction: column
+        align-items: center
+        gap: 8px
+
+      .create
+        grid-area: create
+        justify-content: flex-end
+
+      .join
+        grid-area: join
+        justify-content: flex-start
+
+        input 
+          box-sizing: border-box
+          padding: 12px 24px 12px 24px
 </style>
