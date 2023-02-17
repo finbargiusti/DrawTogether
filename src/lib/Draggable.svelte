@@ -81,49 +81,54 @@
   </div>
 </div>
 
-<style lang="sass">
-.draggable
-  pointer-events: all
-  opacity: 1
-  transition: opacity 0.2s
-  position: relative
+<style lang="scss">
+.draggable {
+  pointer-events: all;
+  opacity: 1;
+  transition: opacity 0.2s;
+  position: relative;
 
-  .arrow
-    position: absolute
-    font-size: 24px
-    color: white // constant
-    right: 8px
-    top: 0px
-    transition: transform 0.3s
+  .arrow {
+    position: absolute;
+    font-size: 24px;
+    color: white; // constant
+    right: 8px;
+    top: 0px;
+    transition: transform 0.3s;
+  }
   
-  &.hidden
-    opacity: 0
-    pointer-events: none
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 
-  .title
-    background-color: #33ee33
-    color: white // constant
-    margin: 0
-    padding: 8px 12px 8px 12px
-    text-align: center
-    font-size: 14px
+  .title {
+    background-color: #33ee33;
+    color: white; // constant
+    margin: 0;
+    padding: 8px 12px 8px 12px;
+    text-align: center;
+    font-size: 14px;
+  }
 
-  .content
-    overflow: hidden
+  .content {
+    overflow: hidden;
 
-    .holder
-      margin-top: 0px
-      background-color: #434343
+    .holder {
+      margin-top: 0px;
+      background-color: #434343;
 
-      @media (prefers-color-scheme: light) 
-        background-color: #eee
+      @media (prefers-color-scheme: light)  {
+        background-color: #eee;
+      }
 
-      padding: 12px 24px 12px 24px
-      transition: margin-top 0.5s
+      padding: 12px 24px 12px 24px;
+      transition: margin-top 0.5s;
 
-      &.closed
-        margin-top: -100%
-
-
-
+      &.closed {
+        margin-top: -100%;
+      }
+    }
+  }
+}
 </style>

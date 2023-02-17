@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
   import Game from './Game.svelte';
-  import Play from './lib/Play.svelte';
+  import Play from './Play.svelte';
   import type { CanvasOptions } from './logic/canvas';
   import { Connection } from './logic/connection';
   import { deCompressRecording, type RecordingData } from './logic/dtr';
@@ -64,6 +64,7 @@
     <div class="tabs">
       <div class="tabulator">
         <div class="options-wrap">
+          <!-- CAN a11Y FUCK OFF-->
           <span class={tab_option == 0 && 'active'} on:click={setTab(0)}
             >Draw</span
           ><span class={tab_option == 1 && 'active'} on:click={setTab(1)}
@@ -128,109 +129,132 @@
   <Play data={recording.data} opts={recording.opts} />
 {/if}
 
-<style lang="sass">
-.container 
-  height: 100vh
-  width: 100vw
-  display: grid
-  grid-template-areas: "logo" "tabs"
-  grid-template-columns: 1fr 
-  grid-template-rows: 3fr 9fr
+<style lang="scss">
+.container  {
+  height: 100vh;
+  width: 100vw;
+  display: grid;
+  grid-template-areas: "logo" "tabs";
+  grid-template-columns: 1fr;
+  grid-template-rows: 3fr 9fr;
 
-  .logo
-    grid-area: logo
-    margin: 36px 0px 36px 0px
+  .logo {
+    grid-area: logo;
+    margin: 36px 0px 36px 0px;
+  }
 
-  .tabs
-    grid-area: tabs
-    display: grid
-    grid-template-columns: 1fr
-    grid-template-rows: auto 1fr
-    grid-template-areas: "tabulator" "content"
-    place-content: center
+  .tabs {
 
-    .tabulator
-      display: flex
-      justify-content: center
+    grid-area: tabs;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "tabulator" "content";
+    place-content: center;
 
-      .options-wrap
-        border-radius: 5px
-        overflow: hidden
+    .tabulator {
+      display: flex;
+      justify-content: center;
 
-        span
-          box-sizing: border-box
-          user-select: none
-          padding: 8px 24px 8px 24px
-          display: inline-block
-          font-size: 16px
-          background-color: #333
-          cursor: pointer
+      .options-wrap {
+        border-radius: 5px;
+        overflow: hidden;
 
-          @media (prefers-color-scheme: light)
-            background-color: #ddd
+        span {
+          box-sizing: border-box;
+          user-select: none;
+          padding: 8px 24px 8px 24px;
+          display: inline-block;
+          font-size: 16px;
+          background-color: #333;
+          cursor: pointer;
 
-          &.active
-            background-color: #444
+          @media (prefers-color-scheme: light) {
+            background-color: #ddd;
+          }
 
-            @media (prefers-color-scheme: light)
-              background-color: #ccc
+          &.active {
+            background-color: #444;
 
-    .play
-      display: none
-      grid-area: content
-      flex-direction: column
-      align-items: stretch
-      justify-content: center
+            @media (prefers-color-scheme: light) {
+              background-color: #ccc;
+            }
+          }
+        }
+      }
+    }
 
-      &.visible
-        display: flex
+    .play {
+      display: none;
+      grid-area: content;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
 
-      #file-fallback
-        display: none
+      &.visible {
+        display: flex;
+      }
 
-      .drop-zone
-        height: 300px
-        margin: 12px 24px 12px 24px
-        border: 5px white dashed
+      #file-fallback {
+        display: none;
+      }
+
+      .drop-zone {
+        height: 300px;
+        margin: 12px 24px 12px 24px;
+        border: 5px white dashed;
+      }
+    }
 
 
-    .draw
-      grid-area: content
-      margin-top: 20px
-      display: none
-      padding-top: 24px
-      justify-content: center
-      align-items: start
+    .draw{
+      grid-area: content;
+      margin-top: 20px;
+      display: none;
+      padding-top: 24px;
+      justify-content: center;
+      align-items: start;
 
-      &.visible
-        display: grid
+      &.visible {
+        display: grid;
+      }
 
-      .itemwrap
-        display: grid
-        grid-template-columns: 1fr
-        grid-template-rows: auto 16px 0px 16px auto 
-        grid-template-areas: "create" "." "div" "." "join"
+      .itemwrap {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 16px 0px 16px auto;
+        grid-template-areas: "create" "." "div" "." "join";
 
-        .div
-          grid-area: div
-          box-sizing: border-box
-          border: 1px white dotted
+        .div {
+          grid-area: div; // Divider
+          box-sizing: border-box;
+          border: 1px white dotted;
 
-          @media (prefers-color-scheme: light)
+          @media (prefers-color-scheme: light) {
             border-color: #333
+          }
+        }
 
-        .create, .join
-          display: flex
-          flex-direction: column
-          gap: 8px
+        .create, .join {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
 
-        .create
-          grid-area: create
+        .create {
+          grid-area: create;
+        }
 
-        .join
-          grid-area: join
+        .join {
+          grid-area: join;
 
-          input 
-            box-sizing: border-box
-            padding: 12px 24px 12px 24px
+          input {
+            box-sizing: border-box;
+            padding: 12px 24px 12px 24px;
+          }
+        }
+      }
+    }
+  }
+}
 </style>

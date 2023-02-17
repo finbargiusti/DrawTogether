@@ -3,16 +3,16 @@
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { CanvasOptions } from '../logic/canvas';
+  import type { CanvasOptions } from './logic/canvas';
   import type {
     RecordableMessageTitle,
     RecordingData,
     RecordingDataItem,
-  } from '../logic/dtr';
-  import { drawLine, type Line } from '../logic/line';
-  import type { MessageData } from '../logic/message';
-  import Frame from './Frame.svelte';
-  import type { FrameData } from './Painting.svelte';
+  } from './logic/dtr';
+  import { drawLine, type Line } from './logic/line';
+  import type { MessageData } from './logic/message';
+  import Frame from './lib/Frame.svelte';
+  import type { FrameData } from './lib/Painting.svelte';
 
   export let data: RecordingData;
 
