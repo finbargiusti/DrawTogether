@@ -102,7 +102,9 @@
 
             file.arrayBuffer().then(playRecording);
           }}
-        />
+        >
+          <p class="instruction">Drag dtr file here</p>
+        </div>
         <input
           type="file"
           id="file-fallback"
@@ -188,8 +190,9 @@
       display: none;
       grid-area: content;
       flex-direction: column;
-      align-items: stretch;
-      justify-content: center;
+      align-items: center;
+      justify-content: start;
+      margin-top: 20px;
 
       &.visible {
         display: flex;
@@ -200,9 +203,25 @@
       }
 
       .drop-zone {
-        height: 300px;
+        aspect-ratio: 2;
+        width: 95%;
+        max-width: 600px;
         margin: 12px 24px 12px 24px;
-        border: 5px white dashed;
+        border: 3px #aaa dashed;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+  
+        .instruction {
+          color: #888;
+          font-size: 18px;
+
+          @media (prefers-color-scheme: light) {
+            color: #444 ;
+          }
+        }
       }
     }
 
@@ -228,7 +247,7 @@
         .div {
           grid-area: div; // Divider
           box-sizing: border-box;
-          border: 1px white dotted;
+          border: 1px #ccc dotted;
 
           @media (prefers-color-scheme: light) {
             border-color: #333
