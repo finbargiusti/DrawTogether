@@ -1,9 +1,6 @@
 <script lang="ts">
   import Tools from './lib/Tools.svelte';
   import Painting from './lib/Painting.svelte';
-  import { getConnection } from './logic/state';
-
-  const conn = getConnection();
 </script>
 
 <div class="game">
