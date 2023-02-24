@@ -54,7 +54,9 @@
       <Recorder />
     </Draggable>
   </div>
-  <button id="toolbox-open {$drawing && 'drawing'}" on:click={() => open = !open}>⬇</button>
+  <button id="toolbox-open" class="{$drawing && 'drawing'}" on:click={() => open = !open}>
+    {!open ? "⬇" : "⬆"}
+  </button>
 </div>
 
 <style lang="scss">
@@ -83,10 +85,18 @@
   }
 
   #toolbox-open {
+
+    background-color: #333;
+    color: white;
+
     pointer-events: all;
     height: 40px;
     width: 100%;
     transition: opacity 0.4s;
+
+    &:hover {
+      background-color: #444;
+    }
 
     &.drawing {
       pointer-events: none;
