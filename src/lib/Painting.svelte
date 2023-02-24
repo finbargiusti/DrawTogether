@@ -231,27 +231,30 @@
   {/if}
 </div>
 
-<style lang="sass">
-.background
-  width: 100%
-  height: 100%
-  position: relative
-  overflow: hidden
-  transform: translateZ(0px)
-  display: flex
-  justify-content: center
-  align-items: center
+<style lang="scss">
+.background {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  :global(.frame)
-    position: absolute
-    transform-origin: top left
-    background-color: transparent
-    max-width: 100%
-    max-height: 100%
-    object-fit: contain
-    cursor: none
-    pointer-events: none
+  :global(.frame) {
+    position: absolute;
+    transform-origin: top left;
+    background-color: transparent;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    cursor: none;
+    pointer-events: none;
 
-    &.main
-      pointer-events: all
+    &.main {
+      pointer-events: all;
+    }
+  }
+};
 </style>

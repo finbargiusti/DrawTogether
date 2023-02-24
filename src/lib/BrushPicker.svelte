@@ -26,12 +26,15 @@
   </div>
 </div>
 
-<style lang="sass">
-.brush-options
-  div
-    display: flex
-    justify-content: space-between
+<style lang="scss">
+.brush-options {
+  div {
+    display: flex;
+    justify-content: space-between;
 
-    label
+    label {
       font-weight: bold
+    }
+  }
+}
 </style>

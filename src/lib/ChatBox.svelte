@@ -58,27 +58,32 @@
   on:keypress={handleKeypress}
 />
 
-<style lang="sass">
-.chats
-  width: 100%
-  list-style-type: none
-  margin: 0
-  padding: 0
-  max-height: 100px
-  overflow-y: scroll
-  li
-    padding: 4px 8px 4px 8px
-    box-sizing: border-box
-    margin: 0
+<style lang="scss">
+.chats { 
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  max-height: 100px;
+  overflow-y: scroll;
 
-    &:nth-child(odd)
-      background-color: #535353
+  li {
+    padding: 4px 8px 4px 8px;
+    box-sizing: border-box;
+    margin: 0;
 
-.input
-  width: 100%
-  color: white
-  padding: 4px 8px 4px 8px
-  box-sizing: border-box
-  background-color: #3e3e3e
-  border: none
+    &:nth-child(odd) {
+      background-color: #535353;
+    }
+  }
+}
+
+.input {
+  width: 100%;
+  color: white;
+  padding: 4px 8px 4px 8px;
+  box-sizing: border-box;
+  background-color: #3e3e3e;
+  border: none;
+}
 </style>

@@ -12,32 +12,43 @@
   {/each}
 </ul>
 
-<style lang="sass">
-.player-list
-  list-style-type: none
-  padding: 0
-  margin: 0
+<style lang="scss">
+.player-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
   
-  li
-    padding: 4px 8px 4px 8px
-    background-color: #434343
-    box-sizing: border-box
-    margin: 0
+  li {
+    padding: 4px 8px 4px 8px;
+    background-color: #434343;
+    box-sizing: border-box;
+    margin: 0;
 
-    &:first-child
-      font-weight: bold 
+    @media (prefers-color-scheme: light) {
+      background-color: #ececec;
+    }
 
-      &::after
-        content: " (you)"
+    &:first-child {
+      font-weight: bold ;
 
-    &:nth-child(odd)
-      background-color: #535353,
+      &::after {
+        content: " (you)";
+      }
+    }
 
-    &.active
-      color: lightgreen
+    &:nth-child(odd) {
+      background-color: #535353;
+    }
 
-    &.inactive
-      color: #ff4444
+    &.active {
+      color: lightgreen;
+    }
+
+    &.inactive {
+      color: #ff4444;
+    }
+  }
+}
 
 
 </style>

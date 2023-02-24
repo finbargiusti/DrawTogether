@@ -15,23 +15,24 @@
   </div>
 </div>
 
-<style lang="sass">
-.game
-  height: 100%
-  width: 100%
+<style lang="scss">
+.game {
+  height: 100%;
+  width: 100%;
 
-  .painting
-    height: 100%
-    width: 100%
-    position: relative
-    margin-top: 0
+  .painting {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    margin-top: 0;
+  }
 
-  .tools
-    position: absolute
-    width: 500px
-    height: 100%
-    top: 0px
-    pointer-events: none
-
-
+  .tools {
+    position: absolute;
+    width: 500px;
+    height: 100%;
+    top: 0px;
+    pointer-events: none;
+  }
+}
 </style>

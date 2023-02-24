@@ -43,7 +43,7 @@
   const MAX_FRAMES = 5;
 
   async function addFrame(f: FrameData) {
-    await frames.push(f);
+    frames.push(f);
     if (frames.length > MAX_FRAMES) {
       const old_frame = frames.shift();
 
@@ -118,61 +118,72 @@
   </div>
 </div>
 
-<style lang="sass">
-.background
-  width: 100%
-  height: 100%
-  position: relative
-  overflow: hidden
-  transform: translateZ(0px)
-  display: flex
-  justify-content: center
-  align-items: center
+<style lang="scss">
+.background {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  :global(.frame)
-    position: absolute
-    transform-origin: top left
-    background-color: transparent
-    max-width: 100%
-    max-height: 100%
-    object-fit: contain
-    pointer-events: none
+  :global(.frame) {
+    position: absolute;
+    transform-origin: top left;
+    background-color: transparent;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    pointer-events: none;
 
-    &.main
-      pointer-events: all
-      background-color: var(--bg-color)
+    &.main {
+      pointer-events: all;
+      background-color: var(--bg-color);
+    }
+  }
 
-  @keyframes message 
-    0%
-      opacity: 0
-      max-height: 0px
+  @keyframes message  {
+    0% {
+      opacity: 0;
+      max-height: 0px;
+    }
     
-    2%
-      opacity: 1
-      max-height: 200px
+    2% {
+      opacity: 1;
+      max-height: 200px;
+    }
 
-    96%
-      opacity: 1
+    96% {
+      opacity: 1;
+    }
 
-    100%
+    100% {
       opacity: 0
+    }
+  }
   
-  .chatbox
-    overflow: hidden
-    position: absolute
-    bottom: 0px
-    left: 0px
-    width: 400px
+  .chatbox {
+    overflow: hidden;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 400px;
 
-    p
-      box-sizing: border-box
-      padding: 6px 12px 6px 12px
-      font-size: 16px
-      background-color: #222222
-      animation: message 20s
+    p {
+      box-sizing: border-box;
+      padding: 6px 12px 6px 12px;
+      font-size: 16px;
+      background-color: #222222;
+      animation: message 20s;
 
-      &:nth-child(even)
+      &:nth-child(even) {
         background-color: #333333
+      }
+    }
+  }
+}
         
 
 </style>
