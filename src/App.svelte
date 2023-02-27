@@ -58,8 +58,15 @@
 </script>
 
 {#if !loaded && !recording}
+  <div class="blobs">
+    <div class="blob one" />
+    <div class="blob two" />
+    <div class="blur-screen" />
+  </div>
   <div class="container">
-    <div class="logo" />
+    <div class="logo-wrap" >
+      <div class="logo" />
+    </div>
 
     <div class="tabs">
       <div class="tabulator">
@@ -133,16 +140,28 @@
 
 <style lang="scss">
 .container  {
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   display: grid;
   grid-template-areas: "logo" "tabs";
   grid-template-columns: 1fr;
-  grid-template-rows: 3fr 9fr;
+  grid-template-rows: 1fr 1fr;
+  position: relative;
+  z-index: 5;
 
-  .logo {
+  .logo-wrap {
+    width: 100%;
     grid-area: logo;
-    margin: 36px 0px 36px 0px;
+    display: flex;
+    place-content: center;
+    position: relative;
+    align-items: stretch;
+
+
+    .logo {
+      width: 95%;
+      max-width: 600px;
+    }
   }
 
   .tabs {
@@ -274,6 +293,40 @@
         }
       }
     }
+  }
+}
+.blobs {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 1;
+
+  .blob {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    position: absolute;
+
+    &.one {
+    padding: 150px;
+    left: max(25px, calc(50% - 350px));
+    top: calc(40% - 100px);
+    background-color: #2ECC40;
+    }
+
+    &.two{
+    padding: 150px;
+    right: max(25px, calc(50% - 350px));
+    bottom: calc(30% - 100px);
+      background-color: rgb(83,15,97);
+    }
+  }
+
+  .blur-screen {
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(100px);
   }
 }
 </style>
