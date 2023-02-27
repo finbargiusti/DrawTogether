@@ -1,7 +1,6 @@
 import type { DataConnection } from 'peerjs';
 import {
   toMessageObject,
-  type Message,
   type MessageData,
   type MessageObject,
   type MessageTitle,
@@ -20,7 +19,11 @@ export class Node {
   net: DataConnection;
   onMessage: MessageListener<MessageTitle>;
   onStateChange: () => void;
+
+
   open = false;
+
+  marked = false; // marked for death
 
   /**
    * @param connection
@@ -47,11 +50,9 @@ export class Node {
       this.open = true;
       this.onStateChange();
     });
-    this.net.on('iceStateChanged', (state) => {
-      // TODO: peer connection dropping
-    });
     this.net.on('close', () => {
       this.open = false;
+      this.marked = true;
       this.onStateChange();
     });
     this.net.on('error', (e) => {

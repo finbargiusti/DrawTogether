@@ -11,11 +11,61 @@
   import type { CanvasOptions } from './logic/canvas';
   import { Connection } from './logic/connection';
   import { deCompressRecording, type RecordingData } from './logic/dtr';
-  import { setConnection } from './logic/state';
+  import { getConnection, setConnection } from './logic/state';
 
-  let loaded = false;
 
   let idInput: string = '';
+
+  type pageState = 'home' | 'drawing' | 'playback';
+
+  let state: pageState = 'home';
+
+  const setPageTitle = (st: pageState) => {
+    switch(st) {
+      case 'home':
+        document.title = "DrawTogether v0.0.5"
+        break;
+      case 'drawing':
+        document.title = "Lobby "  + getConnection().lobbyID;
+        break;
+      case 'playback':
+        document.title = "Playback"
+        break;
+    }
+  }
+
+  let pushPageState = (st: pageState) => {
+    history.pushState({st}, ""); 
+    state = st;
+    setPageTitle(state);
+  }
+
+  window.onpopstate = (e: PopStateEvent) => {
+
+    if (!e.state || !('state' in e.state)) {
+      // if equal to first state
+      state = 'home';
+      history.replaceState({state}, "")
+      return;
+    }
+
+    let stateObj = e.state as {state: pageState};
+
+
+    if (stateObj.state == "drawing" || (stateObj.state == "playback" && !recording)) {
+      // forced into illegal state
+      // we will disallow going back forward into a lobby or recording when none is there.
+
+      state = 'home';
+
+      history.replaceState({state}, "");
+      return;
+    }
+
+
+    state = stateObj.state;
+    setPageTitle(state);
+  }
 
   let createLobby = () => {
     const id = Math.random().toString(36).substring(2, 8);
@@ -24,7 +74,7 @@
 
     setConnection(c);
 
-    loaded = true;
+    pushPageState('drawing');
   };
 
   let joinLobby = () => {
@@ -32,7 +82,7 @@
 
     setConnection(c);
 
-    loaded = true;
+    pushPageState('drawing');
   };
 
   let recording: {
@@ -43,6 +93,7 @@
   function playRecording(d: ArrayBuffer) {
     try {
       recording = deCompressRecording(d);
+      pushPageState('playback');
     } catch (e) {
       console.error(e);
     }
@@ -57,7 +108,7 @@
   };
 </script>
 
-{#if !loaded && !recording}
+{#if state == "home"}
   <div class="blobs">
     <div class="blob one" />
     <div class="blob two" />
@@ -129,7 +180,7 @@
       </div>
     </div>
   </div>
-{:else if loaded}
+{:else if state == "drawing"}
   <!-- Game has started -->
   <Game />
 {:else}

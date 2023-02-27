@@ -163,6 +163,10 @@ export class Connection {
   playerlist = writable<{ id: string; active: boolean }[]>([]);
 
   updatePlayerList = () => {
+    
+    // kill all nodes marked for death
+    this.nodes = this.nodes.filter(n => !n.marked); 
+    
     const others = this.nodes.map((n) => ({
       id: n.net.peer,
       active: n.open,
