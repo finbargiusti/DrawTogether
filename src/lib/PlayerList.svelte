@@ -38,10 +38,16 @@
 
     &:nth-child(odd) {
       background-color: #535353;
+      @media (prefers-color-scheme: light) {
+        background-color: #e3e3e3;
+      }
     }
 
     &.active {
       color: lightgreen;
+      @media (prefers-color-scheme: light) {
+        color: darkgreen;
+      }
     }
 
     &.inactive {

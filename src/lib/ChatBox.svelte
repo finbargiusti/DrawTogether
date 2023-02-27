@@ -74,6 +74,9 @@
 
     &:nth-child(odd) {
       background-color: #535353;
+      @media (prefers-color-scheme: light) {
+        background-color: #e3e3e3;
+      }
     }
   }
 }
@@ -84,6 +87,9 @@
   padding: 4px 8px 4px 8px;
   box-sizing: border-box;
   background-color: #3e3e3e;
+      @media (prefers-color-scheme: light) {
+        background-color: #d3d3d3;
+      }
   border: none;
 }
 </style>
