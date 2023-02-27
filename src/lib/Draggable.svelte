@@ -66,12 +66,12 @@
     ? `position: absolute; left: ${pos.x}px; top: ${pos.y}px; height: ${size.y}px; width: ${size.x}px;`
     : ''}
 >
-  <span class="arrow" style="transform: rotate({open ? '0deg' : '180deg'})"
-    >⬆</span
-  >
   <!-- This wasn't going to be accessible anyways -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <p class="title" bind:this={title} on:click={() => (open = !open)}>
+  <span class="arrow" style="transform: rotate({open ? '0deg' : '180deg'})" on:click={() => (open = !open)}
+    >⬆</span
+  >
+  <p class="title" bind:this={title}>
     {titleName}
   </p>
   <div class="content">
@@ -87,6 +87,8 @@
   opacity: 1;
   transition: opacity 0.2s;
   position: relative;
+  border-radius: 10px;
+  overflow: hidden;
 
   .arrow {
     position: absolute;
@@ -95,6 +97,7 @@
     right: 8px;
     top: 0px;
     transition: transform 0.3s;
+    cursor: pointer;
   }
   
   &.hidden {
