@@ -54,7 +54,7 @@
       <Recorder />
     </Draggable>
   </div>
-  <button id="toolbox-open" class="{$drawing && 'drawing'}" on:click={() => open = !open}>
+  <button id="toolbox-open" class="{$drawing && 'drawing'} {!open && 'closed'}" on:click={() => open = !open}>
     {!open ? "⬇" : "⬆"}
   </button>
 </div>
@@ -94,8 +94,17 @@
     width: 100%;
     transition: opacity 0.4s;
 
+    &.closed {
+      transform: opacity 1s;
+      opacity: 0.1;
+    }
+
     &:hover {
       background-color: #444;
+
+      &.closed {
+        opacity: 1;
+      }
     }
 
     &.drawing {
