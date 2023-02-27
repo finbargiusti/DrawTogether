@@ -36,7 +36,7 @@
   });
 </script>
 
-<div class={'tools' + (active ? ' active' : '')} bind:this={toolbox}>
+<div class={'tools' + (active ? ' active' : '') + ($drawing ? ' drawing' : '')} bind:this={toolbox}>
   <div class="tool-wrap {!open && 'inactive'}">
     <Draggable titleName="Lobby ID">
       <LobbyId />
@@ -63,10 +63,13 @@
 .tools {
   grid-area: tools;
   transition: background-color 0.4s;
+  background-color: rgba(120, 120, 120, 0.2);
 
   .tool-wrap {
     overflow: hidden;
     margin-top: 0px; 
+    box-sizing: border-box;
+    padding: 8px 14px 8px 14px;
 
     max-height: calc(100vh - 50px);
 
@@ -74,11 +77,12 @@
     flex-direction: column;
     align-items: stretch;
     justify-content: stretch;
-    transition: max-height 0.4s;
+    transition: max-height 0.4s, padding 0.2s;
     gap: 8px;
     margin-bottom: 10px;
 
     &.inactive {
+      padding: 0px;
       max-height: 0px; 
       margin-bottom: 0px;
     }
@@ -114,7 +118,11 @@
   }
 
   &.active {
-    background-color: rgba(120, 120, 120, 0.3);
+    background-color: rgba(120, 120, 120, 0.8);
+  }
+
+  &.drawing {
+    background-color: transparent;
   }
 }
 </style>
