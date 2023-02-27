@@ -17,23 +17,20 @@
 
     title.addEventListener('reset', () => {
       tools.appendChild(container);
-      pos = size = undefined;
+      pos = width = undefined;
     });
 
     interact(title)
       .draggable({
         listeners: {
           start() {
-            if (size == undefined) {
+            if (width == undefined) {
               // on first drag
               let draggableRect = interact.getElementClientRect(container);
               let containerRect = interact.getElementClientRect(
                 container.parentElement
               );
-              size = {
-                x: containerRect.width,
-                y: draggableRect.height,
-              };
+              width = containerRect.width;
               pos = {
                 x: draggableRect.left,
                 y: draggableRect.top,
@@ -44,8 +41,8 @@
           move(event) {
             pos.x += event.dx;
             pos.y += event.dy;
-            pos.x = Math.max(Math.min(pos.x, window.innerWidth - size.x), 0);
-            pos.y = Math.max(Math.min(pos.y, window.innerHeight - size.y), 0);
+            pos.x = Math.max(Math.min(pos.x, window.innerWidth - width), 0);
+            pos.y = Math.max(Math.min(pos.y, window.innerHeight - interact.getElementClientRect(event.target).height), 0);
           },
         },
       })
@@ -54,7 +51,7 @@
       });
   });
 
-  let size: { x: number; y: number } | undefined = undefined;
+  let width: number | undefined = undefined;
 
   let pos: { x: number; y: number } | undefined = undefined;
 </script>
@@ -62,8 +59,8 @@
 <div
   class={`draggable ${$drawing ? 'hidden' : ''}`}
   bind:this={container}
-  style={pos && size
-    ? `position: absolute; left: ${pos.x}px; top: ${pos.y}px; height: ${size.y}px; width: ${size.x}px;`
+  style={pos && width
+    ? `position: absolute; left: ${pos.x}px; top: ${pos.y}px; width: ${width}px;`
     : ''}
 >
   <!-- This wasn't going to be accessible anyways -->
