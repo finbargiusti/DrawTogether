@@ -9,7 +9,8 @@
   import Game from './Game.svelte';
   import Play from './Play.svelte';
   import type { CanvasOptions } from './logic/canvas';
-  import { Connection } from './logic/connection';
+  import {
+    Connection } from './logic/connection';
   import { deCompressRecording, type RecordingData } from './logic/dtr';
   import { getConnection, setConnection } from './logic/state';
 

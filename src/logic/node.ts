@@ -20,7 +20,6 @@ export class Node {
   onMessage: MessageListener<MessageTitle>;
   onStateChange: () => void;
 
-
   open = false;
 
   marked = false; // marked for death
@@ -55,7 +54,7 @@ export class Node {
       this.marked = true;
       this.onStateChange();
     });
-    this.net.on('error', (e) => {
+    this.net.on('error', e => {
       console.error(e, e.stack);
     });
     this.net.on('data', (d: MessageObject<MessageTitle>) => {

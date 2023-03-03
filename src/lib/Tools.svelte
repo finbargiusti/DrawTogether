@@ -4,7 +4,7 @@
   import LobbyId from './LobbyId.svelte';
 
   import interact from 'interactjs';
-  import type { Interactable, DropEvent } from '@interactjs/types/index';
+  import type { DropEvent } from '@interactjs/types/index';
   import { onMount } from 'svelte';
   import Draggable from './Draggable.svelte';
   import BrushPicker from './BrushPicker.svelte';

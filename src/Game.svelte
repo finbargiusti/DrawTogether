@@ -4,7 +4,7 @@
 </script>
 
 <div class="game">
-  <div class="painting">
+<div class="painting">
     <Painting />
   </div>
   <div class="tools">

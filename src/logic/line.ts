@@ -23,7 +23,7 @@ export async function drawLine(ctx: CanvasRenderingContext2D, l: Line) {
   // this is a HUGE bonus to networking speeds
   // since we can predictably generate smooth lines
   // from shorter arrrays
-  const smoothed: [number, number][] = smooth(l.points.map((p) => [p.x, p.y]));
+  const smoothed: [number, number][] = smooth(l.points.map(p => [p.x, p.y]));
 
   if (smoothed.length < 3) {
     // Line is too short to properly render using quadraticCurveTo

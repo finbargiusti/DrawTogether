@@ -58,7 +58,7 @@ export class Connection {
     });
 
     // When we get a new peer
-    this.self.on('connection', (dc) => {
+    this.self.on('connection', dc => {
       this.addNode(dc);
     });
 
@@ -74,7 +74,7 @@ export class Connection {
     data: MessageData<T>,
     includeSelf?: true
   ) {
-    this.nodes.forEach((n) => {
+    this.nodes.forEach(n => {
       this.sendToPeer(n, title, data);
     });
     if (includeSelf) {
@@ -101,8 +101,8 @@ export class Connection {
     // (as in the Connection object to be in context.)
 
     this.listeners
-      .filter((l) => l.title == title)
-      .forEach((l) => {
+      .filter(l => l.title == title)
+      .forEach(l => {
         l.callback(data, from);
       });
   };
@@ -132,17 +132,17 @@ export class Connection {
 
   addDefaultMessageListeners() {
     if (this.isHost) {
-      this.on('new-peer', (n) => {
+      this.on('new-peer', n => {
         this.sendToAll('update-peer', n.net.peer);
         // catch-up peer for frames
-        this.chatsSinceInception.forEach((cd) => {
+        this.chatsSinceInception.forEach(cd => {
           this.sendToPeer(n, 'chat', cd);
         });
-        this.framesSinceInception.forEach((fd) =>
+        this.framesSinceInception.forEach(fd =>
           this.sendToPeer(n, 'frame-update', fd)
         );
       });
-      this.on('frame-update', (fd) => {
+      this.on('frame-update', fd => {
         this.framesSinceInception.push(fd);
       });
       this.on('chat', (cd, from) => {
@@ -152,7 +152,7 @@ export class Connection {
         });
       });
     } else {
-      this.on('update-peer', (id) => {
+      this.on('update-peer', id => {
         if (id != this.self.id) {
           this.connectTo(id);
         }
@@ -163,11 +163,10 @@ export class Connection {
   playerlist = writable<{ id: string; active: boolean }[]>([]);
 
   updatePlayerList = () => {
-    
     // kill all nodes marked for death
-    this.nodes = this.nodes.filter(n => !n.marked); 
-    
-    const others = this.nodes.map((n) => ({
+    this.nodes = this.nodes.filter(n => !n.marked);
+
+    const others = this.nodes.map(n => ({
       id: n.net.peer,
       active: n.open,
     }));

@@ -10,7 +10,7 @@ import type { CanvasOptions } from './canvas';
 
 export const RECORDABLE_MESSAGE_TITLES = ['frame-update', 'chat'] as const;
 
-export type RecordableMessageTitle = typeof RECORDABLE_MESSAGE_TITLES[number];
+export type RecordableMessageTitle = (typeof RECORDABLE_MESSAGE_TITLES)[number];
 
 export type RecordingDataItem<T extends RecordableMessageTitle> = {
   time: number;
@@ -63,7 +63,7 @@ function isValidDataObject<T extends RecordableMessageTitle>(
 
       // check validity of point array
       if (
-        data.line.points.some((v) => {
+        data.line.points.some(v => {
           if (!isObject(v)) return true;
 
           if (!('x' in v) || !('y' in v)) return true;
@@ -154,7 +154,7 @@ type MinimisedMessage<T extends 1 | 2> = [T, MinimisedData[T]];
 
 // this is fucked up
 function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
-  return data.map((i) => {
+  return data.map(i => {
     if (i.title == 'chat') {
       const c = i as RecordingDataItem<'chat'>;
       return [1, [c.from, c.time, c.data.text, c.data.time, c.data.from]];
@@ -177,7 +177,7 @@ function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
 // TODO: message quality verifier
 // ! This is a mess.
 function maximise(data: MinimisedMessage<1 | 2>[]): RecordingData {
-  return data.map((m) => {
+  return data.map(m => {
     if (m[0] == 1) {
       const m1 = m[1] as MinimisedData[1];
       const [from, time, text, innerTime, innerfrom] = m1;

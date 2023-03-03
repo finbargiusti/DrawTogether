@@ -3,7 +3,7 @@ export function hashName(name: string): string {
 
   let res = '';
 
-  charArray.forEach((ch) => {
+  charArray.forEach(ch => {
     res += ch.charAt(0) + 4 + ch.charAt(0) + 8;
   });
 
