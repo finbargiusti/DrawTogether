@@ -1,10 +1,3 @@
-<script lang="ts" context="module">
-  export type FrameData = {
-    id: string;
-    line: Line;
-  };
-</script>
-
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { CanvasOptions } from '../logic/canvas';
