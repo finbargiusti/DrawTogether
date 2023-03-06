@@ -2,12 +2,12 @@ import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
 import { writable } from 'svelte/store';
 import { hashName } from './hashname';
-import type { Message, MessageData, MessageTitle } from './message';
-import { Node, type MessageListener } from './node';
-import type { Line } from './line';
-import type { FrameData } from '../lib/Painting.svelte';
+import type { MessageData, MessageTitle } from './message';
+import { Node } from './node';
+import type { FrameData } from '../lib/Painting';
+import EventEmitter from 'eventemitter3'
 
-export class Connection {
+export class Connection extends EventEmitter<MessageTitle> {
   isHost: boolean;
   self: Peer;
   open = false;
@@ -21,18 +21,20 @@ export class Connection {
   chatsSinceInception: (MessageData<'chat'> & { from: string })[] = [];
 
   addNode(d: DataConnection) {
-    const n = new Node(d, this.propogateMessage, this.updatePlayerList);
+    const n = new Node(d, this.emit, this.updatePlayerList);
 
     this.nodes.push(n);
 
     this.updatePlayerList();
 
     n.onOpen(() => {
-      this.propogateMessage('new-peer', n, null);
+      this.emit('new-peer', n);
     });
   }
 
   constructor(id: string, host: boolean) {
+    super();
+
     this.lobbyID = id;
 
     this.self = new Peer(host ? hashName(id) : undefined);
@@ -78,56 +80,12 @@ export class Connection {
       this.sendToPeer(n, title, data);
     });
     if (includeSelf) {
-      this.propogateToSelf(title, data);
+      this.emit(title, data, this.self.id);
     }
   }
 
   sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
     p.send(title, data);
-  }
-
-  listeners: {
-    title: MessageTitle;
-    callback: (data: MessageData<MessageTitle>, from: string) => void;
-  }[] = [];
-
-  // When message arrives, is parsed through here
-  propogateMessage = <T extends MessageTitle>(
-    title: T,
-    data: MessageData<T>,
-    from: string
-  ) => {
-    // This can only exist as lambda function since we need _this_ "this"
-    // (as in the Connection object to be in context.)
-
-    this.listeners
-      .filter(l => l.title == title)
-      .forEach(l => {
-        l.callback(data, from);
-      });
-  };
-
-  /**
-   *
-   * Send server message to self, used for consitency between alien peer calls
-   * and self peer calls, to avoid code copying, and logging.
-   *
-   */
-  propogateToSelf = <T extends MessageTitle>(
-    title: T,
-    data: MessageData<T>
-  ) => {
-    this.propogateMessage(title, data, this.self.id);
-  };
-
-  on<T extends MessageTitle>(
-    title: T,
-    callback: (data: MessageData<T>, from: string) => void
-  ) {
-    this.listeners.push({
-      title,
-      callback,
-    });
   }
 
   addDefaultMessageListeners() {
