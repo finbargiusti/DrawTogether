@@ -16,7 +16,7 @@
 
   export const getBitMap = () => {
     return new Promise<ImageBitmap>((resolve, reject) => {
-      canvas.toBlob((blob) => {
+      canvas.toBlob(blob => {
         createImageBitmap(blob).then(resolve).catch(reject);
       });
     });
