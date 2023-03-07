@@ -10,9 +10,8 @@
     RecordingDataItem,
   } from './logic/dtr';
   import { drawLine, type Line } from './logic/line';
-  import type { MessageData } from './logic/message';
+  import type { MessageData, FrameData } from './logic/message';
   import Frame from './lib/Frame.svelte';
-  import type { FrameData } from './lib/Painting.svelte';
 
   export let data: RecordingData;
 
@@ -29,7 +28,7 @@
 
     setTimeout(() => {
       // This is inefficient, but it shouldn't matter
-      messages = messages.filter((d) => JSON.stringify(d) !== comp);
+      messages = messages.filter(d => JSON.stringify(d) !== comp);
     }, 20000);
   }
 
@@ -54,7 +53,7 @@
   }
 
   async function updateFrame(id: string, line: Line) {
-    const f = frames.find((v) => v.id == id);
+    const f = frames.find(v => v.id == id);
 
     if (!f) {
       await addFrame({
@@ -119,70 +118,69 @@
 </div>
 
 <style lang="scss">
-.background {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  :global(.frame) {
-    position: absolute;
-    transform-origin: top left;
-    background-color: transparent;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-
-    &.main {
-      pointer-events: all;
-      background-color: var(--bg-color);
-    }
-  }
-
-  @keyframes message  {
-    0% {
-      opacity: 0;
-      max-height: 0px;
-    }
-    
-    2% {
-      opacity: 1;
-      max-height: 200px;
-    }
-
-    96% {
-      opacity: 1;
-    }
-
-    100% {
-      opacity: 0
-    }
-  }
-  
-  .chatbox {
+  .background {
+    width: 100%;
+    height: 100%;
+    position: relative;
     overflow: hidden;
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    width: 400px;
+    transform: translateZ(0px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    p {
-      box-sizing: border-box;
-      padding: 6px 12px 6px 12px;
-      font-size: 16px;
-      background-color: #222222;
-      animation: message 20s;
+    :global(.frame) {
+      position: absolute;
+      transform-origin: top left;
+      background-color: transparent;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      pointer-events: none;
 
-      &:nth-child(even) {
-        background-color: #333333
+      &.main {
+        pointer-events: all;
+        background-color: var(--bg-color);
+      }
+    }
+
+    @keyframes message {
+      0% {
+        opacity: 0;
+        max-height: 0px;
+      }
+
+      2% {
+        opacity: 1;
+        max-height: 200px;
+      }
+
+      96% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .chatbox {
+      overflow: hidden;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      width: 400px;
+
+      p {
+        box-sizing: border-box;
+        padding: 6px 12px 6px 12px;
+        font-size: 16px;
+        background-color: #222222;
+        animation: message 20s;
+
+        &:nth-child(even) {
+          background-color: #333333;
+        }
       }
     }
   }
-}
-        
 </style>
