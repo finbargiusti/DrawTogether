@@ -3,12 +3,11 @@
 
   let color: `#${string}` = '#000000';
 
-  let size: number = 5;
+  let width: number = 5;
 
   $: {
-    setLineOpts((opts) => {
-      opts.color = color;
-      opts.width = size;
+    setLineOpts(opts => {
+      opts = { color, width };
 
       return opts;
     });
@@ -22,19 +21,19 @@
   </div>
   <div>
     <label for="size">Brush size</label>
-    <input id="size" type="range" bind:value={size} />
+    <input id="size" type="range" bind:value={width} />
   </div>
 </div>
 
 <style lang="scss">
-.brush-options {
-  div {
-    display: flex;
-    justify-content: space-between;
+  .brush-options {
+    div {
+      display: flex;
+      justify-content: space-between;
 
-    label {
-      font-weight: bold
+      label {
+        font-weight: bold;
+      }
     }
   }
-}
 </style>
