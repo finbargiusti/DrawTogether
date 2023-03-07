@@ -3,6 +3,11 @@ import type { CanvasOptions } from './canvas';
 import type { Line } from './line';
 import type { Node } from './node';
 
+export type FrameData = {
+  id: string;
+  line: Line;
+};
+
 export type Message = {
   chat: { text: string; time: number; from?: string }; // from override when coming from host
   'new-peer': Node;
