@@ -23,7 +23,7 @@ export type RecordingData = RecordingDataItem<RecordableMessageTitle>[];
 
 // dtr coding
 
-function isObject(data: unknown): data is Object {
+export function isObject(data: unknown): data is Object {
   return typeof data == 'object' && data !== null && !Array.isArray(data);
 }
 

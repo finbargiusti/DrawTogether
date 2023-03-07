@@ -5,8 +5,7 @@
     RECORDABLE_MESSAGE_TITLES,
     type RecordingData,
   } from '../logic/dtr';
-  import { toMessageObject } from '../logic/message';
-  import { getConnection, lineOpts } from '../logic/state';
+  import { getConnection } from '../logic/state';
 
   // Write recording data here
 
@@ -22,7 +21,7 @@
 
   let opts: CanvasOptions;
 
-  conn.on('canvas-definition', (d) => (opts = d));
+  conn.on('canvas-definition', d => (opts = d));
 
   $: {
     if (recordingEnabled && recording.length == 0) {
@@ -51,13 +50,15 @@
     }
   }
 
-  RECORDABLE_MESSAGE_TITLES.forEach((t) =>
+  // TODO: this NEEDS adjustment
+
+  RECORDABLE_MESSAGE_TITLES.forEach(t =>
     conn.on(t, (d, from) => {
       if (recordingEnabled && opts) {
         recording.push({
           time: Date.now() - timeOnStart,
           title: t,
-          data: JSON.parse(JSON.stringify(d)), // this is INTENSE but necessary maybe
+          data: structuredClone(d), // this is INTENSE but necessary maybe
           from,
         });
       }

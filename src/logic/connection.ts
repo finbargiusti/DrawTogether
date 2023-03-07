@@ -1,35 +1,58 @@
 import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
-import { writable } from 'svelte/store';
 import { hashName } from './hashname';
-import type { MessageData, MessageTitle } from './message';
-import { Node } from './node';
+import { type MessageData, MessageEmitter, toMessageObject, type SentMessageTitle, isMessageObject } from './message';
 import type { FrameData } from '../lib/Painting';
-import EventEmitter from 'eventemitter3'
 
-export class Connection extends EventEmitter<MessageTitle> {
+/**
+*
+ * Wrapper EventEmitter which can signal and send messages between peers.
+ *
+ */
+
+export class Connection extends MessageEmitter {
+
   isHost: boolean;
-  self: Peer;
+
+  peerConnection: Peer;
+
   open = false;
 
   lobbyID: string;
 
-  nodes: Node[] = [];
+  nodes: DataConnection[] = [];
 
   framesSinceInception: FrameData[] = [];
 
   chatsSinceInception: (MessageData<'chat'> & { from: string })[] = [];
 
   addNode(d: DataConnection) {
-    const n = new Node(d, this.emit, this.updatePlayerList);
+    this.nodes.push(d);
 
-    this.nodes.push(n);
+    // add all node listeners
 
-    this.updatePlayerList();
+    // These are all TOP-LEVEl and will be called before any added after addition to the array.
 
-    n.onOpen(() => {
-      this.emit('new-peer', n);
-    });
+    this.emit('new-peer', d);
+
+    d.on('close', () => {
+      // connection is voluntarily closed.
+      this.nodes = this.nodes.filter(dc => dc != d);
+    })
+
+    d.on('error', (err) => {
+      // TODO: handle connection error here
+    })
+
+    d.on("iceStateChanged", (ice) => {
+      console.log(`Connection state for ${d.peer}: ${ice.toString()}`);
+    })
+
+    d.on('data', (res: unknown) => {
+      if (!isMessageObject(res)) return; // nope out if bad data
+
+      this.emit(res.title, res.data, d.peer);
+    })
   }
 
   constructor(id: string, host: boolean) {
@@ -37,30 +60,27 @@ export class Connection extends EventEmitter<MessageTitle> {
 
     this.lobbyID = id;
 
-    this.self = new Peer(host ? hashName(id) : undefined);
+    this.peerConnection = new Peer(host ? hashName(id) : undefined);
 
     this.isHost = host;
 
     this.addListeners();
 
     if (!host) {
-      this.self.on('open', () => {
+      this.peerConnection.on('open', () => {
         this.connectTo(hashName(id));
       });
     }
-
-    this.updatePlayerList();
   }
 
   addListeners() {
     // When our peer opens
-    this.self.on('open', () => {
+    this.peerConnection.on('open', () => {
       this.open = true;
-      this.updatePlayerList();
     });
 
     // When we get a new peer
-    this.self.on('connection', dc => {
+    this.peerConnection.on('connection', dc => {
       this.addNode(dc);
     });
 
@@ -68,10 +88,10 @@ export class Connection extends EventEmitter<MessageTitle> {
   }
 
   connectTo(id: string) {
-    this.addNode(this.self.connect(id));
+    this.addNode(this.peerConnection.connect(id));
   }
 
-  sendToAll<T extends MessageTitle>(
+  sendToAll<T extends SentMessageTitle>(
     title: T,
     data: MessageData<T>,
     includeSelf?: true
@@ -80,24 +100,25 @@ export class Connection extends EventEmitter<MessageTitle> {
       this.sendToPeer(n, title, data);
     });
     if (includeSelf) {
-      this.emit(title, data, this.self.id);
+      this.emit(title, data, this.peerConnection.id);
     }
   }
 
-  sendToPeer<T extends MessageTitle>(p: Node, title: T, data: MessageData<T>) {
-    p.send(title, data);
+  sendToPeer<T extends SentMessageTitle>(dc: DataConnection, title: T, data: MessageData<T>) {
+    console.log(title);
+    dc.send(toMessageObject(title, data));
   }
 
   addDefaultMessageListeners() {
     if (this.isHost) {
-      this.on('new-peer', n => {
-        this.sendToAll('update-peer', n.net.peer);
+      this.on('new-peer', dc => {
+        this.sendToAll('update-peer', dc.peer);
         // catch-up peer for frames
         this.chatsSinceInception.forEach(cd => {
-          this.sendToPeer(n, 'chat', cd);
+          this.sendToPeer(dc, 'chat', cd);
         });
         this.framesSinceInception.forEach(fd =>
-          this.sendToPeer(n, 'frame-update', fd)
+          this.sendToPeer(dc, 'frame-update', fd)
         );
       });
       this.on('frame-update', fd => {
@@ -111,26 +132,10 @@ export class Connection extends EventEmitter<MessageTitle> {
       });
     } else {
       this.on('update-peer', id => {
-        if (id != this.self.id) {
+        if (id != this.peerConnection.id) {
           this.connectTo(id);
         }
       });
     }
   }
-
-  playerlist = writable<{ id: string; active: boolean }[]>([]);
-
-  updatePlayerList = () => {
-    // kill all nodes marked for death
-    this.nodes = this.nodes.filter(n => !n.marked);
-
-    const others = this.nodes.map(n => ({
-      id: n.net.peer,
-      active: n.open,
-    }));
-
-    const list = [{ id: this.self.id, active: this.self.open }, ...others];
-
-    this.playerlist.set(list);
-  };
 }

@@ -5,7 +5,7 @@
   import { drawing, getConnection, lineOpts, setDrawing } from '../logic/state';
   import Frame from './Frame.svelte';
   import { v1 as genuuid } from 'uuid';
-  import { MessageQueue } from '../logic/message';
+  import type { FrameData } from './Painting';
 
   let opts: CanvasOptions;
 
@@ -18,19 +18,22 @@
   let innerWidth: number;
   let innerHeight: number;
 
-  conn.on('canvas-definition', (options) => {
+  conn.on('canvas-definition', options => {
     opts = options;
   });
 
   if (conn.isHost) {
     onMount(() => {
-      conn.propogateToSelf('canvas-definition', {
+      conn.emit('canvas-definition', {
         height: innerHeight,
         width: innerWidth,
         bgColor: '#ffffff',
       });
-      conn.on('new-peer', (n) => {
-        n.send('canvas-definition', opts);
+      conn.on('new-peer', n => {
+        // n will be closed at first
+        n.on('open', () => {
+          conn.sendToPeer(n, 'canvas-definition', opts);
+        });
       });
     });
   }
@@ -56,7 +59,7 @@
   let thisFrame: FrameData;
 
   async function addFrame(f: FrameData) {
-    await frames.push(f);
+    frames.push(f);
     if (frames.length > MAX_FRAMES) {
       const old_frame = frames.shift();
 
@@ -67,7 +70,7 @@
   }
 
   async function updateFrame(id: string, line: Line) {
-    const f = frames.find((v) => v.id == id);
+    const f = frames.find(v => v.id == id);
 
     if (!f) {
       await addFrame({
@@ -84,13 +87,9 @@
     return;
   }
 
-  const frameUpdateQueue = new MessageQueue<'frame-update'>(
-    async ({ id, line }) => updateFrame(id, line)
-  );
-
-  $: if (mainCanvas != undefined) frameUpdateQueue.ready(); // let the queue know we're ready to receive the messages
-
-  conn.on('frame-update', frameUpdateQueue.add);
+  conn.on('frame-update', fu => {
+    updateFrame(fu.id, fu.line);
+  });
 
   let mainCanvas: HTMLCanvasElement;
   let mouseCanvas: HTMLCanvasElement;
@@ -153,7 +152,7 @@
     conn.sendToAll('frame-update', thisFrame, true);
   }
 
-  function mouseUp(ev: MouseEvent) {
+  function mouseUp() {
     if (!$drawing) return;
 
     setDrawing(false);
@@ -225,29 +224,29 @@
 </div>
 
 <style lang="scss">
-.background {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  .background {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  :global(.frame) {
-    position: absolute;
-    transform-origin: top left;
-    background-color: transparent;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    cursor: none;
-    pointer-events: none;
+    :global(.frame) {
+      position: absolute;
+      transform-origin: top left;
+      background-color: transparent;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      cursor: none;
+      pointer-events: none;
 
-    &.main {
-      pointer-events: all;
+      &.main {
+        pointer-events: all;
+      }
     }
   }
-};
 </style>
