@@ -3,9 +3,9 @@
   import type { CanvasOptions } from '../logic/canvas';
   import { drawLine, type Line } from '../logic/line';
   import { drawing, getConnection, lineOpts, setDrawing } from '../logic/state';
+  import type { FrameData } from '../logic/message';
   import Frame from './Frame.svelte';
   import { v1 as genuuid } from 'uuid';
-  import type { FrameData } from './Painting';
 
   let opts: CanvasOptions;
 
@@ -218,7 +218,6 @@
     />
     {#each frames as frameData}
       <Frame {frameData} {opts} />
-      <!-- Add this in need of reference to frame component: bind:this={frameComponents[frameData.id]}-->
     {/each}
   {/if}
 </div>
