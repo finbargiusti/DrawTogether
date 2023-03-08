@@ -1,16 +1,22 @@
 import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
 import { hashName } from './hashname';
-import { type MessageData, MessageEmitter, toMessageObject, type SentMessageTitle, isMessageObject } from './message';
-import type { FrameData } from '../lib/Painting';
+import { type MessageData, toMessageObject, type SentMessageTitle, type MessageTitle, isMessageObject, type FrameData } from './message';
+import EventEmitter from 'events';
+
+
+// interface for typescript disallowing wrong data input
+export interface Connection {
+  on<T extends MessageTitle>(title: T, listener: (data: MessageData<T>, from?: string) => void): this
+  emit<T extends MessageTitle>(title: T, data: MessageData<T>, from?: string): boolean;
+}
 
 /**
 *
  * Wrapper EventEmitter which can signal and send messages between peers.
  *
  */
-
-export class Connection extends MessageEmitter {
+export class Connection extends EventEmitter {
 
   isHost: boolean;
 

@@ -1,4 +1,3 @@
-import EventEmitter from 'events'
 import type { CanvasOptions } from './canvas';
 import { isObject } from './dtr';
 import type { DataConnection } from 'peerjs';
@@ -69,11 +68,4 @@ export function isMessageObject(
   // haven't encountered any error with peerjs so this shouldn't be a problem.
 
   return true;
-}
-
-// type safety overrides
-// TODO: this could be better
-export class MessageEmitter extends EventEmitter {
-  override on = <T extends MessageTitle>(title: T, listener: (data: MessageData<T>, from?: string) => void): this => super.on(title, listener);
-  override emit = <T extends MessageTitle>(title: T, data: MessageData<T>, from?: string): boolean => super.emit(title, data, from);
 }
