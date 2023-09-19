@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import type { CanvasOptions } from '../logic/canvas';
   import { drawLine, type Line } from '../logic/line';
-  import { drawing, getConnection, lineOpts, setDrawing } from '../logic/state';
+  import { drawing, getConnection, lineOpts, setDrawing, canvas, frames } from '../logic/state';
   import type { FrameData } from '../logic/message';
   import Frame from './Frame.svelte';
   import { v1 as genuuid } from 'uuid';
@@ -51,26 +51,24 @@
    the host will provide a line-array so that new peers can catch-up.
   */
 
-  let frames: FrameData[] = [];
-
   /* If we need component reference, this is how it's done */
   // let frameComponents: { [id: string]: Frame } = {};
 
   let thisFrame: FrameData;
 
   async function addFrame(f: FrameData) {
-    frames.push(f);
-    if (frames.length > MAX_FRAMES) {
-      const old_frame = frames.shift();
+    $frames.push(f);
+    if ($frames.length > MAX_FRAMES) {
+      const old_frame = $frames.shift();
 
-      await drawLine(mainCanvas.getContext('2d'), old_frame.line);
+      await drawLine($canvas.getContext('2d'), old_frame.line);
     }
-    frames = frames;
+    $frames = $frames;
     return;
   }
 
   async function updateFrame(id: string, line: Line) {
-    const f = frames.find(v => v.id == id);
+    const f = $frames.find(v => v.id == id);
 
     if (!f) {
       await addFrame({
@@ -82,7 +80,7 @@
 
     f.line = line;
 
-    frames = frames;
+    $frames = $frames;
 
     return;
   }
@@ -91,11 +89,10 @@
     updateFrame(fu.id, fu.line);
   });
 
-  let mainCanvas: HTMLCanvasElement;
   let mouseCanvas: HTMLCanvasElement;
 
   function getMousePosition(ev: MouseEvent) {
-    const r = mainCanvas.getBoundingClientRect();
+    const r = $canvas.getBoundingClientRect();
     // get relative position
 
     const scale = r.width / opts.width;
@@ -204,7 +201,7 @@
       height={opts.height}
       width={opts.width}
       style="background-color: {opts.bgColor}"
-      bind:this={mainCanvas}
+      bind:this={$canvas}
       on:mousemove={mouseMove}
       on:mouseup={mouseUp}
       on:mousedown={mouseDown}
@@ -216,7 +213,7 @@
       width={opts.width}
       bind:this={mouseCanvas}
     />
-    {#each frames as frameData}
+    {#each $frames as frameData}
       <Frame {frameData} {opts} />
     {/each}
   {/if}

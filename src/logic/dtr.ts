@@ -2,24 +2,27 @@
  * DTR (DrawTogether Recording)
  */
 
-import { encode, decode } from '@msgpack/msgpack';
-import type { MessageData } from './message';
+import {decode, encode} from '@msgpack/msgpack';
 
-import { deflate, inflate } from 'pako';
-import type { CanvasOptions } from './canvas';
+import type {MessageData} from './message';
+
+import {deflate, inflate} from 'pako';
+import type {CanvasOptions} from './canvas';
 
 export const RECORDABLE_MESSAGE_TITLES = ['frame-update', 'chat'] as const;
 
 export type RecordableMessageTitle = (typeof RECORDABLE_MESSAGE_TITLES)[number];
 
-export type RecordingDataItem<T extends RecordableMessageTitle> = {
-  time: number;
-  title: T;
-  data: MessageData<T>;
-  from: string;
+export type RecordingFrameItem<T extends RecordableMessageTitle> = {
+  time: number; title: T; data: MessageData<T>; from: string;
 };
 
-export type RecordingData = RecordingDataItem<RecordableMessageTitle>[];
+export type RecordingBackdrop = string;
+
+export type RecordingFrames = RecordingFrameItem<RecordableMessageTitle>[];
+
+export type RecordingData =
+    [RecordingBackdrop, CanvasOptions, ...RecordingFrames];
 
 // dtr coding
 
@@ -31,16 +34,43 @@ function isValidMessageTitle(data: string): data is RecordableMessageTitle {
   return data == 'chat' || data == 'frame-update';
 }
 
+export class Recording {
+  bg: RecordingBackdrop;
+  opts: CanvasOptions;
+  startTime: number;
+
+  frames = []
+
+  constructor(bg: RecordingBackdrop, opts: CanvasOptions) {
+    if (!bg) throw new Error('bg is required');
+    if (!opts) throw new Error('opts is required');
+    this.bg = bg;
+    this.opts = opts;
+    this.startTime = Date.now();
+  }
+
+  isEmpty(): boolean {
+    return this.frames.length === 0;
+  }
+
+  addFrame(frame: Omit<RecordingFrameItem<RecordableMessageTitle>, 'time'>):
+      void {
+    this.frames.push({time: Date.now() - this.startTime, ...frame});
+  }
+
+  getRecordingData(): any[] {
+    return [this.bg, this.opts, ...minimise(this.frames)];
+  }
+}
+
 /**
  * Returns true if the data passed is a valid MessageData
  * @param title
  * @param data
  * @returns data is `MessageData<title>`
  */
-function isValidDataObject<T extends RecordableMessageTitle>(
-  title: T,
-  data: unknown
-): data is MessageData<T> {
+function isValidFrameObject<T extends RecordableMessageTitle>(
+    title: T, data: unknown): data is MessageData<T> {
   if (!isObject(data)) return false;
 
   switch (title) {
@@ -62,15 +92,13 @@ function isValidDataObject<T extends RecordableMessageTitle>(
       if (!Array.isArray(data.line.points)) return false;
 
       // check validity of point array
-      if (
-        data.line.points.some(v => {
-          if (!isObject(v)) return true;
+      if (data.line.points.some(v => {
+            if (!isObject(v)) return true;
 
-          if (!('x' in v) || !('y' in v)) return true;
+            if (!('x' in v) || !('y' in v)) return true;
 
-          if (typeof v.x !== 'number' || typeof v.y !== 'number') return true;
-        })
-      )
+            if (typeof v.x !== 'number' || typeof v.y !== 'number') return true;
+          }))
         return false;
 
       if (!isObject(data.line.opts)) return false;
@@ -78,10 +106,8 @@ function isValidDataObject<T extends RecordableMessageTitle>(
       if (!('width' in data.line.opts) || !('color' in data.line.opts))
         return false;
 
-      if (
-        typeof data.line.opts.width !== 'number' ||
-        typeof data.line.opts.color !== 'string'
-      )
+      if (typeof data.line.opts.width !== 'number' ||
+          typeof data.line.opts.color !== 'string')
         return false;
 
       break;
@@ -95,11 +121,8 @@ function isCanvasOptions(data: unknown): data is CanvasOptions {
   if (!('height' in data) || !('width' in data) || !('bgColor' in data))
     return false;
 
-  if (
-    typeof data.height !== 'number' ||
-    typeof data.width !== 'number' ||
-    typeof data.bgColor !== 'string'
-  )
+  if (typeof data.height !== 'number' || typeof data.width !== 'number' ||
+      typeof data.bgColor !== 'string')
     return false;
 
   return true;
@@ -110,7 +133,7 @@ function isCanvasOptions(data: unknown): data is CanvasOptions {
  * @param data
  * @returns data is `RecordingData`
  */
-function isValidData(data: unknown): data is [CanvasOptions, ...RecordingData] {
+function isValidFrameData(data: unknown): data is RecordingFrames {
   // this signature is some wild typescript magic
   if (!Array.isArray(data)) {
     return false;
@@ -122,12 +145,8 @@ function isValidData(data: unknown): data is [CanvasOptions, ...RecordingData] {
     if (!isObject(obj)) return false;
 
     // check if object has correct properties
-    if (
-      !('time' in obj) ||
-      !('title' in obj) ||
-      !('data' in obj) ||
-      !('from' in obj)
-    )
+    if (!('time' in obj) || !('title' in obj) || !('data' in obj) ||
+        !('from' in obj))
       return false;
 
     // check proprties are of the right type
@@ -138,28 +157,33 @@ function isValidData(data: unknown): data is [CanvasOptions, ...RecordingData] {
 
     if (!isValidMessageTitle(obj.title)) return false;
 
-    if (!isValidDataObject(obj.title, obj.data)) return false;
+    if (!isValidFrameObject(obj.title, obj.data)) return false;
   }
 
   return true;
 }
 
 type MinimisedData = {
-  1: [string, number, string, number, string]; // from, time, text, innerTime, innerFrom
-  2: [string, number, string, string, number, ...[number, number][]]; // from, time, id, opts.color (minus #), opts.width, points
+  1:
+      [
+        string, number, string, number, string
+      ];  // from, time, text, innerTime, innerFrom
+  2: [
+    string, number, string, string, number, ...[number, number][]
+  ];  // from, time, id, opts.color (minus #), opts.width, points
   /*  We do not need from in lines for now. */
 };
 
-type MinimisedMessage<T extends 1 | 2> = [T, MinimisedData[T]];
+type MinimisedMessage<T extends 1|2> = [T, MinimisedData[T]];
 
 // this is fucked up
-function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
+function minimise(data: RecordingFrames): MinimisedMessage<1|2>[] {
   return data.map(i => {
     if (i.title == 'chat') {
-      const c = i as RecordingDataItem<'chat'>;
+      const c = i as RecordingFrameItem<'chat'>;
       return [1, [c.from, c.time, c.data.text, c.data.time, c.data.from]];
     }
-    const f = i as RecordingDataItem<'frame-update'>;
+    const f = i as RecordingFrameItem<'frame-update'>;
     return [
       2,
       [
@@ -168,7 +192,7 @@ function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
         f.data.id,
         f.data.line.opts.color.slice(1),
         f.data.line.opts.width,
-        ...f.data.line.points.map(({ x, y }) => [x, y] as [number, number]),
+        ...f.data.line.points.map(({x, y}) => [x, y] as [number, number]),
       ],
     ];
   });
@@ -176,7 +200,7 @@ function minimise(data: RecordingData): MinimisedMessage<1 | 2>[] {
 
 // TODO: message quality verifier
 // ! This is a mess.
-function maximise(data: MinimisedMessage<1 | 2>[]): RecordingData {
+function maximise(data: MinimisedMessage<1|2>[]): RecordingFrames {
   return data.map(m => {
     if (m[0] == 1) {
       const m1 = m[1] as MinimisedData[1];
@@ -205,21 +229,18 @@ function maximise(data: MinimisedMessage<1 | 2>[]): RecordingData {
             color: ('#' + color) as `#${string}`,
             width,
           },
-          points: points.map(([x, y]) => ({ x, y })),
+          points: points.map(([x, y]) => ({x, y})),
         },
       },
     };
   });
 }
 
-export function compressRecording(
-  data: RecordingData,
-  opts: CanvasOptions
-): Uint8Array {
-  return deflate(encode([opts, ...minimise(data)]));
+export function compressRecording(r: Recording): Uint8Array {
+  return deflate(encode(r.getRecordingData()));
 }
 
-export function deCompressRecording(data: ArrayBuffer) {
+export function deCompressRecording(data: ArrayBuffer): RecordingData {
   const inflated = inflate(data);
 
   const unpacked_data = decode(inflated);
@@ -228,16 +249,15 @@ export function deCompressRecording(data: ArrayBuffer) {
     throw new Error();
   }
 
-  const [opts, ...rest] = unpacked_data;
+  console.log(unpacked_data);
+
+  const [bg, opts, ...rest] = unpacked_data;
 
   if (!isCanvasOptions(opts)) throw new Error();
 
   const maximised = maximise(rest);
 
-  if (!isValidData(maximised)) throw new Error('Corrupted data!');
+  if (!isValidFrameData(maximised)) throw new Error('Corrupted data!');
 
-  return {
-    opts,
-    data: maximised,
-  };
+  return [bg, opts, ...maximised];
 }

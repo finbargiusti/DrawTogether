@@ -7,15 +7,15 @@
   import type {
     RecordableMessageTitle,
     RecordingData,
-    RecordingDataItem,
+    RecordingFrames
   } from './logic/dtr';
   import { drawLine, type Line } from './logic/line';
   import type { MessageData, FrameData } from './logic/message';
   import Frame from './lib/Frame.svelte';
 
-  export let data: RecordingData;
+  export let recording: RecordingData;
 
-  export let opts: CanvasOptions;
+  let [bg, opts, ...data] = recording;
 
   let messages: MessageData<'chat'>[] = [];
 
@@ -70,7 +70,7 @@
     return;
   }
 
-  async function handleFrame(d: RecordingDataItem<RecordableMessageTitle>) {
+  async function handleFrame(d: RecordingFrames[number]) {
     switch (d.title) {
       case 'chat':
         addMessage(d.data as MessageData<'chat'>, d.from);
@@ -94,7 +94,18 @@
   }
 
   // TODO: fix this VERY naive approach
-  onMount(renderFrame);
+  onMount(() => {
+
+    const background = new Image();
+
+    background.onload = () => {
+      mainCanvas.getContext('2d').drawImage(background, 0, 0);
+    };
+
+    background.src = bg;
+
+    renderFrame()
+  });
 </script>
 
 <div class="background">

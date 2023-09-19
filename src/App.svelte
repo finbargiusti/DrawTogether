@@ -84,10 +84,7 @@
     pushPageState('drawing');
   };
 
-  let recording: {
-    opts: CanvasOptions;
-    data: RecordingData;
-  } = undefined;
+  let recording: RecordingData = undefined;
 
   function playRecording(d: ArrayBuffer) {
     try {
@@ -185,7 +182,7 @@
 {:else}
   <!-- Recording must be true... -->
   <!-- Which means that we are trying to plyback a dtr recording-->
-  <Play data={recording.data} opts={recording.opts} />
+  <Play {recording} />
 {/if}
 
 <style lang="scss">
@@ -375,6 +372,7 @@
       width: 100%;
       height: 100%;
       backdrop-filter: blur(100px);
+      -webkit-backdrop-filter: blur(100px);
     }
   }
 </style>

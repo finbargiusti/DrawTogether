@@ -1,6 +1,7 @@
-import { writable } from 'svelte/store';
-import type { Connection } from './connection';
-import type { LineOpts } from './line';
+import {writable} from 'svelte/store';
+import type {Connection} from './connection';
+import type {LineOpts} from './line';
+import type {FrameData} from './message';
 
 let connection: Connection;
 
@@ -29,3 +30,8 @@ export let lineOpts = writable<LineOpts>({
 export function setLineOpts(callback: (arg1: LineOpts) => LineOpts) {
   lineOpts.update(callback);
 }
+
+// evil global state
+export let canvas = writable<HTMLCanvasElement>();
+
+export let frames = writable<FrameData[]>([]);

@@ -3,17 +3,15 @@
   import {
     compressRecording,
     RECORDABLE_MESSAGE_TITLES,
-    type RecordingData,
+    Recording,
   } from '../logic/dtr';
-  import { getConnection } from '../logic/state';
+  import { getConnection, canvas, frames } from '../logic/state';
 
   // Write recording data here
 
   const conn = getConnection();
 
-  let recording: RecordingData = [];
-
-  let timeOnStart: number = 0;
+  let recording: Recording = null;
 
   let recordingEnabled = false;
 
@@ -24,8 +22,17 @@
   conn.on('canvas-definition', d => (opts = d));
 
   $: {
-    if (recordingEnabled && recording.length == 0) {
-      timeOnStart = Date.now();
+    if (recordingEnabled && !recording) {
+      recording = new Recording($canvas.toDataURL(), opts);
+      $frames.forEach(
+        fd => {
+          recording.addFrame({
+            title: 'frame-update',
+            data: fd,
+            from: 'bg'
+          });
+        }
+      )
     }
   }
 
@@ -40,23 +47,21 @@
   }
 
   $: {
-    if (!recordingEnabled && recording.length > 0) {
+    if (!recordingEnabled && recording && !recording.isEmpty()) {
       // ? Recording disabled with some length of recording saved.
       // REcording is disabled by default so we will assume that this was
       // intended to be saved.
       compressing = true;
-      downloadRecording(compressRecording(recording, opts));
+      downloadRecording(compressRecording(recording));
       compressing = false;
+      recording = null;
     }
   }
-
-  // TODO: this NEEDS adjustment
 
   RECORDABLE_MESSAGE_TITLES.forEach(t =>
     conn.on(t, (d, from) => {
       if (recordingEnabled && opts) {
-        recording.push({
-          time: Date.now() - timeOnStart,
+        recording.addFrame({
           title: t,
           data: structuredClone(d), // this is INTENSE but necessary maybe
           from,
