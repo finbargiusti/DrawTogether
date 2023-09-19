@@ -1,5 +1,5 @@
 import {writable} from 'svelte/store';
-import type {Connection} from './connection';
+import type {Connection, MessageEmitter} from './connection';
 import type {LineOpts} from './line';
 import type {FrameData} from './message';
 
@@ -14,6 +14,22 @@ export function getConnection() {
     throw new Error('Connection not set! Should never happen');
   }
   return connection;
+}
+
+let emitter: MessageEmitter;
+
+export function setEmitter(e: MessageEmitter) {
+  emitter = e;
+}
+
+export function getEmitter(): MessageEmitter {
+  if (!emitter) {
+    if (!connection) {
+      throw new Error('Connection not set! Should never happen');
+    }
+    return connection;
+  }
+  return emitter;
 }
 
 export let drawing = writable<boolean>(false);

@@ -1,23 +1,26 @@
 import Peer from 'peerjs';
-import type { DataConnection } from 'peerjs';
-import { hashName } from './hashname';
-import { type MessageData, toMessageObject, type SentMessageTitle, type MessageTitle, isMessageObject, type FrameData } from './message';
+import type {DataConnection} from 'peerjs';
+import {hashName} from './hashname';
+import {type MessageData, toMessageObject, type SentMessageTitle, type MessageTitle, isMessageObject, type FrameData} from './message';
 import EventEmitter from 'events';
 
 
 // interface for typescript disallowing wrong data input
-export interface Connection {
-  on<T extends MessageTitle>(title: T, listener: (data: MessageData<T>, from?: string) => void): this
-  emit<T extends MessageTitle>(title: T, data: MessageData<T>, from?: string): boolean;
+export interface MessageEmitter {
+  on<T extends MessageTitle>(
+      title: T, listener: (data: MessageData<T>, from?: string) => void): this;
+  emit<T extends MessageTitle>(title: T, data: MessageData<T>, from?: string):
+      boolean;
 }
 
+export class MessageEmitter extends EventEmitter {}
+
 /**
-*
+ *
  * Wrapper EventEmitter which can signal and send messages between peers.
  *
  */
-export class Connection extends EventEmitter {
-
+export class Connection extends MessageEmitter {
   isHost: boolean;
 
   peerConnection: Peer;
@@ -30,14 +33,15 @@ export class Connection extends EventEmitter {
 
   framesSinceInception: FrameData[] = [];
 
-  chatsSinceInception: (MessageData<'chat'> & { from: string })[] = [];
+  chatsSinceInception: (MessageData<'chat'>&{from: string})[] = [];
 
   addNode(d: DataConnection) {
     this.nodes.push(d);
 
     // add all node listeners
 
-    // These are all TOP-LEVEl and will be called before any added after addition to the array.
+    // These are all TOP-LEVEl and will be called before any added after
+    // addition to the array.
 
     this.emit('new-peer', d);
 
@@ -46,16 +50,18 @@ export class Connection extends EventEmitter {
       this.nodes = this.nodes.filter(dc => dc != d);
     })
 
-    d.on('error', (err) => {
-      // TODO: handle connection error here
-    })
+    d.on(
+        'error',
+        (err) => {
+            // TODO: handle connection error here
+        })
 
-    d.on("iceStateChanged", (ice) => {
+    d.on('iceStateChanged', (ice) => {
       console.log(`Connection state for ${d.peer}: ${ice.toString()}`);
     })
 
     d.on('data', (res: unknown) => {
-      if (!isMessageObject(res)) return; // nope out if bad data
+      if (!isMessageObject(res)) return;  // nope out if bad data
 
       this.emit(res.title, res.data, d.peer);
     })
@@ -98,10 +104,7 @@ export class Connection extends EventEmitter {
   }
 
   sendToAll<T extends SentMessageTitle>(
-    title: T,
-    data: MessageData<T>,
-    includeSelf?: true
-  ) {
+      title: T, data: MessageData<T>, includeSelf?: true) {
     this.nodes.forEach(n => {
       this.sendToPeer(n, title, data);
     });
@@ -110,7 +113,8 @@ export class Connection extends EventEmitter {
     }
   }
 
-  sendToPeer<T extends SentMessageTitle>(dc: DataConnection, title: T, data: MessageData<T>) {
+  sendToPeer<T extends SentMessageTitle>(
+      dc: DataConnection, title: T, data: MessageData<T>) {
     console.log(title);
     dc.send(toMessageObject(title, data));
   }
@@ -123,9 +127,8 @@ export class Connection extends EventEmitter {
         this.chatsSinceInception.forEach(cd => {
           this.sendToPeer(dc, 'chat', cd);
         });
-        this.framesSinceInception.forEach(fd =>
-          this.sendToPeer(dc, 'frame-update', fd)
-        );
+        this.framesSinceInception.forEach(
+            fd => this.sendToPeer(dc, 'frame-update', fd));
       });
       this.on('frame-update', fd => {
         this.framesSinceInception.push(fd);

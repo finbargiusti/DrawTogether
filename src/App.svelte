@@ -8,10 +8,9 @@
 <script lang="ts">
   import Game from './Game.svelte';
   import Play from './Play.svelte';
-  import type { CanvasOptions } from './logic/canvas';
-  import { Connection } from './logic/connection';
+  import { Connection, MessageEmitter } from './logic/connection';
   import { deCompressRecording, type RecordingData } from './logic/dtr';
-  import { getConnection, setConnection } from './logic/state';
+  import { getConnection, setConnection, setEmitter } from './logic/state';
 
   let idInput: string = '';
 
@@ -89,6 +88,7 @@
   function playRecording(d: ArrayBuffer) {
     try {
       recording = deCompressRecording(d);
+      setEmitter(new MessageEmitter());
       pushPageState('playback');
     } catch (e) {
       console.error(e);

@@ -9,7 +9,8 @@ import type {MessageData} from './message';
 import {deflate, inflate} from 'pako';
 import type {CanvasOptions} from './canvas';
 
-export const RECORDABLE_MESSAGE_TITLES = ['frame-update', 'chat'] as const;
+export const RECORDABLE_MESSAGE_TITLES =
+    ['frame-update', 'chat', 'cursor-move'] as const;
 
 export type RecordableMessageTitle = (typeof RECORDABLE_MESSAGE_TITLES)[number];
 
@@ -31,7 +32,7 @@ export function isObject(data: unknown): data is Object {
 }
 
 function isValidMessageTitle(data: string): data is RecordableMessageTitle {
-  return data == 'chat' || data == 'frame-update';
+  return data == 'chat' || data == 'frame-update' || data == 'cursor-move';
 }
 
 export class Recording {
@@ -73,6 +74,8 @@ function isValidFrameObject<T extends RecordableMessageTitle>(
     title: T, data: unknown): data is MessageData<T> {
   if (!isObject(data)) return false;
 
+  if (!isValidMessageTitle(title)) return false;
+
   switch (title) {
     case 'chat':
       if (!('text' in data) || !('time' in data)) return false;
@@ -109,6 +112,12 @@ function isValidFrameObject<T extends RecordableMessageTitle>(
       if (typeof data.line.opts.width !== 'number' ||
           typeof data.line.opts.color !== 'string')
         return false;
+
+
+      break;
+
+    case 'cursor-move':
+      if (!('pos' in data) || !('opts' in data)) return false;
 
       break;
   }
@@ -171,36 +180,46 @@ type MinimisedData = {
   2: [
     string, number, string, string, number, ...[number, number][]
   ];  // from, time, id, opts.color (minus #), opts.width, points
+  3: [string, number, number, number, string, number]
   /*  We do not need from in lines for now. */
 };
 
-type MinimisedMessage<T extends 1|2> = [T, MinimisedData[T]];
+type MinimisedMessage<T extends 1|2|3> = [T, MinimisedData[T]];
 
-// this is fucked up
-function minimise(data: RecordingFrames): MinimisedMessage<1|2>[] {
+function minimise(data: RecordingFrames): MinimisedMessage<1|2|3>[] {
   return data.map(i => {
     if (i.title == 'chat') {
       const c = i as RecordingFrameItem<'chat'>;
       return [1, [c.from, c.time, c.data.text, c.data.time, c.data.from]];
     }
-    const f = i as RecordingFrameItem<'frame-update'>;
+    if (i.title == 'frame-update') {
+      const f = i as RecordingFrameItem<'frame-update'>;
+      return [
+        2,
+        [
+          f.from,
+          f.time,
+          f.data.id,
+          f.data.line.opts.color.slice(1),
+          f.data.line.opts.width,
+          ...f.data.line.points.map(({x, y}) => [x, y] as [number, number]),
+        ],
+      ];
+    }
+    const m = i as RecordingFrameItem<'cursor-move'>;
     return [
-      2,
+      3,
       [
-        f.from,
-        f.time,
-        f.data.id,
-        f.data.line.opts.color.slice(1),
-        f.data.line.opts.width,
-        ...f.data.line.points.map(({x, y}) => [x, y] as [number, number]),
+        m.from, m.time, m.data.pos.x, m.data.pos.y, m.data.opts.color,
+        m.data.opts.width
       ],
-    ];
+    ]
   });
 }
 
 // TODO: message quality verifier
 // ! This is a mess.
-function maximise(data: MinimisedMessage<1|2>[]): RecordingFrames {
+function maximise(data: MinimisedMessage<1|2|3>[]): RecordingFrames {
   return data.map(m => {
     if (m[0] == 1) {
       const m1 = m[1] as MinimisedData[1];
@@ -216,20 +235,36 @@ function maximise(data: MinimisedMessage<1|2>[]): RecordingFrames {
         time,
       };
     }
-    const m1 = m[1] as MinimisedData[2];
-    const [from, time, id, color, width, ...points] = m1;
+    if (m[0] == 2) {
+      const m1 = m[1] as MinimisedData[2];
+      const [from, time, id, color, width, ...points] = m1;
+      return {
+        title: 'frame-update',
+        time,
+        from,
+        data: {
+          id,
+          line: {
+            opts: {
+              color: ('#' + color) as `#${string}`,
+              width,
+            },
+            points: points.map(([x, y]) => ({x, y})),
+          },
+        },
+      };
+    }
+    const m1 = m[1] as MinimisedData[3];
+    const [from, time, x, y, opts, width] = m1;
     return {
-      title: 'frame-update',
+      title: 'cursor-move',
       time,
       from,
       data: {
-        id,
-        line: {
-          opts: {
-            color: ('#' + color) as `#${string}`,
-            width,
-          },
-          points: points.map(([x, y]) => ({x, y})),
+        pos: {x, y},
+        opts: {
+          color: ('#' + opts) as `#${string}`,
+          width,
         },
       },
     };

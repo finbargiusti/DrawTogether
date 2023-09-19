@@ -1,11 +1,15 @@
 import type {CanvasOptions} from './canvas';
 import {isObject} from './dtr';
 import type {DataConnection} from 'peerjs';
-import type {Line} from './line';
+import type {Line, LineOpts} from './line';
 
 export type FrameData = {
   id: string; line: Line;
 };
+
+export type CursorMoveMessage = {
+  pos: {x: number; y: number}; opts: LineOpts;
+}
 
 export type Message = {
   chat: {
@@ -15,7 +19,7 @@ export type Message = {
   'new-peer': DataConnection;
   'update-peer': string;
   'canvas-definition': CanvasOptions;
-  'cursor-move': {x: number; y: number};
+  'cursor-move': CursorMoveMessage;
   'frame-update': FrameData;
 };
 
