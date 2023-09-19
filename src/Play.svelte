@@ -1,13 +1,10 @@
-<!--
-  This is the file to be used for playing both recordings, and live streams.
--->
 <script lang="ts">
   
   import { onMount } from 'svelte';
   import type {
     RecordingData,
   } from './logic/dtr';
-  import {getEmitter } from './logic/state';
+  import { getEmitter } from './logic/state';
   import type { MessageData } from './logic/message';
   import FrameView from './lib/FrameView.svelte';
   import CursorView from './lib/CursorView.svelte';
@@ -37,17 +34,31 @@
 
   let index = 0;
 
-  function renderFrame() {
-    const thisFrame = data[index];
-    msg.emit(thisFrame.title, thisFrame.data, thisFrame.from);
-    if (index + 1 < data.length) {
-      index++;
-      setTimeout(renderFrame, data[index].time - thisFrame.time);
+  let playing = true;
+
+  function continuePlayback() {
+    if (!playing || index > data.length) return;
+    msg.emit(data[index].title, data[index].data, data[index].from);
+    index++;
+    setTimeout(
+      () => {
+        requestAnimationFrame(continuePlayback);
+      }, data[index].time - data[index - 1].time
+    )
+  }
+
+  function togglePlaying() {
+    playing = !playing;
+    if (playing) {
+      requestAnimationFrame(continuePlayback);
     }
   }
 
-  // TODO: fix this VERY naive approach
-  onMount(() => {
+  function reset() {
+    index = 0;
+    playing = false;
+
+    clear();
 
     const background = new Image();
 
@@ -57,12 +68,19 @@
 
     background.src = bg;
 
-    renderFrame()
+    requestAnimationFrame(continuePlayback);
+  }
+
+  // TODO: fix this VERY naive approach
+  onMount(() => {
+    reset();
   });
+
+  let clear: () => void;
 </script>
 
 
-<FrameView {opts} bind:canvas>
+<FrameView {opts} bind:canvas bind:clear>
   <CursorView {opts} />
   <div class="chatbox">
     {#each messages as m}
@@ -70,6 +88,20 @@
         {m.from.slice(0, 5)}: {m.text}
       </p>
     {/each}
+  </div>
+  <div class="controls">
+    <button on:click={togglePlaying}>
+      {#if playing}
+        Pause
+      {:else}
+        Play
+      {/if}
+    </button>
+    {#if index != 0}
+      <button on:click={reset}>
+          Restart
+      </button>
+    {/if}
   </div>
 </FrameView>
 
@@ -111,6 +143,26 @@
       &:nth-child(even) {
         background-color: #333333;
       }
+    }
+  }
+
+  .controls {
+    overflow: hidden;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+
+    button {
+      background-color: #222;
+      color: #eee;
+      font-size: px;
+      padding: 0px 48px 0px 48px;
     }
   }
 </style>
