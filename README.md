@@ -4,7 +4,7 @@
 
 ---
 
-A site allowing you to draw together, stream your drawing and record you drawing!
+A site allowing you to draw together, stream your drawing and record your drawing!
 
 ## Development
 
