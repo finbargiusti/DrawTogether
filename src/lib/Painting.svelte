@@ -32,9 +32,11 @@
         true
       );
       conn.on('new-peer', n => {
+        conn.sendToAll('update-peer', n.peer);
         // n will be closed at first
         n.on('open', () => {
           conn.sendToPeer(n, 'canvas-definition', opts);
+          conn.catchUp(n);
         });
       });
     });

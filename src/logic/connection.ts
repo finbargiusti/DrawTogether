@@ -9,6 +9,8 @@ import EventEmitter from 'events';
 export interface MessageEmitter {
   on<T extends MessageTitle>(
       title: T, listener: (data: MessageData<T>, from?: string) => void): this;
+  once<T extends MessageTitle>(
+      title: T, listener: (data: MessageData<T>, from?: string) => void): this;
   emit<T extends MessageTitle>(title: T, data: MessageData<T>, from?: string):
       boolean;
 }
@@ -99,6 +101,9 @@ export class Connection extends MessageEmitter {
     this.addDefaultMessageListeners();
   }
 
+  /**
+  * Connect to a peer.
+  */
   connectTo(id: string) {
     this.addNode(this.peerConnection.connect(id));
   }
@@ -115,21 +120,22 @@ export class Connection extends MessageEmitter {
 
   sendToPeer<T extends SentMessageTitle>(
       dc: DataConnection, title: T, data: MessageData<T>) {
-    console.log(title);
     dc.send(toMessageObject(title, data));
+  }
+
+  /**
+  * Send all frames and chats since inception to a given peer.
+  */
+  catchUp(dc: DataConnection) {
+    this.chatsSinceInception.forEach(cd => {
+      this.sendToPeer(dc, 'chat', cd);
+    });
+    this.framesSinceInception.forEach(
+        fd => this.sendToPeer(dc, 'frame-update', fd));
   }
 
   addDefaultMessageListeners() {
     if (this.isHost) {
-      this.on('new-peer', dc => {
-        this.sendToAll('update-peer', dc.peer);
-        // catch-up peer for frames
-        this.chatsSinceInception.forEach(cd => {
-          this.sendToPeer(dc, 'chat', cd);
-        });
-        this.framesSinceInception.forEach(
-            fd => this.sendToPeer(dc, 'frame-update', fd));
-      });
       this.on('frame-update', fd => {
         this.framesSinceInception.push(fd);
       });
