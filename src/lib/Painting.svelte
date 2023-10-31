@@ -95,11 +95,29 @@
 
     frame = undefined;
   }
+
+  let zooming = false;
+
+  const SCROLL_FACTOR = 0.05;
+
+  function scroll(ev: WheelEvent) {
+    if (ev.altKey && !zooming) {
+      requestAnimationFrame(() => {
+        zooming = true;
+        const scroll = ev.deltaY * SCROLL_FACTOR;
+
+        scale = Math.max(0.01, scale + scroll);
+        zooming = false;
+      });
+    } 
+  }
+
+  let scale = 0.9;
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 
-<FrameView {opts} bind:canvas={$canvas}>
+<FrameView {opts} bind:canvas={$canvas} {scale}>
   <CursorView {opts} />
   {#if opts}
     <canvas
@@ -110,6 +128,7 @@
       on:mousedown={mouseDown}
       on:mousemove={mouseMove}
       on:mouseup={mouseUp}
+      on:wheel={scroll}
     />
   {/if}
 </FrameView>

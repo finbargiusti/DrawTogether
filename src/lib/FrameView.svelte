@@ -9,11 +9,12 @@
 
   export let canvas: HTMLCanvasElement = undefined;
   export let opts: CanvasOptions;
+  export let scale: number = 1;
 
   export const clear = () => {
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     frames = [];
-  }
+  };
 
   let msg = getEmitter();
 
@@ -48,13 +49,13 @@
     return;
   }
 
+
   msg.on('frame-update', fu => {
     updateFrame(fu.id, fu.line);
   });
-
 </script>
 
-<div class="background">
+<div class="background" style="--scale:{scale}">
   {#if opts}
     <canvas
       bind:this={canvas}
@@ -76,7 +77,7 @@
     width: 100%;
     height: 100%;
     position: relative;
-    overflow: hidden;
+    overflow: scroll;
     transform: translateZ(0px);
     display: flex;
     justify-content: center;
@@ -84,14 +85,14 @@
 
     :global(.frame) {
       position: absolute;
-      transform-origin: top left;
+      transform-origin: middle;
       background-color: transparent;
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
       pointer-events: none;
       cursor: none;
-
+      transform: scale(var(--scale));
     }
     :global(.frame.allow-touch) {
       pointer-events: all;
