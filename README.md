@@ -5,3 +5,26 @@
 ---
 
 A site allowing you to draw together, stream your drawing and record you drawing!
+
+## Development
+
+To develop DrawTogether, you need to have bun installed (tested with bun v1.0.6)
+
+Then, you can install the dependencies:
+
+```
+bun install
+```
+
+To run the development server:
+
+```
+bun run dev
+```
+
+And finally to build to static files:
+
+```
+bun run build
+```
+
