@@ -24,22 +24,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+      - name: Seup bun
+        uses: oven-sh/setup-bun@v1
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Install dependencies
-        run: yarn install
+        run: bun install
       - name: Build with vite
-        run: yarn run build --base=/DrawTogether/
+        run: bun run build --base=/DrawTogether/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
