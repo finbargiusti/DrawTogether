@@ -2,11 +2,11 @@
   import type { CanvasOptions } from '../logic/canvas';
   import { drawLine, type Line } from '../logic/line';
 
-  import type { FrameData } from './Painting.svelte';
+  import type {FrameData} from '../logic/message';
 
   export let frameData: FrameData;
 
-  let line;
+  let line: FrameData['line'];
 
   $: line = frameData.line;
 
